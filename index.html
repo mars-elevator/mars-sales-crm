@@ -8,6 +8,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="MARS CRM"/>
+<script>
+(function(){
+  // Supabase recovery redirects carry an access token in the URL fragment.
+  // Redirect before application code runs and avoid logging or persisting it.
+  var h=window.location.hash||'';
+  var q=window.location.search||'';
+  if(/(?:^|[&#?])type=recovery(?:&|$)/.test(h)||/(?:^|[?&])code=/.test(q)&&/(?:^|[&#?])type=recovery(?:&|$)/.test(h)){
+    window.location.replace('./recovery.html'+q+h);
+  }
+})();
+</script>
 <script>document.documentElement.classList.add('mars-locked');</script>
 <style>
 html.mars-locked body > :not(#marsSecurityOverlay){visibility:hidden!important;pointer-events:none!important}
@@ -1642,8 +1653,13 @@ function marsCloudSessionKey(){
 }
 function resolveCloudLoginEmail(username){
   const u=String(username||'').trim().toLocaleLowerCase('tr');
-  try{const aliases=JSON.parse(localStorage.getItem('mars_crm_private_cloud_usernames')||'{}'); if(aliases[u])return aliases[u];}catch(e){}
-  if(u==='marsyds'){try{const aliases=JSON.parse(localStorage.getItem('mars_crm_private_cloud_usernames')||'{}');return aliases.dtokkusoglu||aliases.marsyds||'';}catch(e){return '';}}
+  // Login identity is a public identifier, never a password or admin/service-role secret.
+  // MARSYDS must work on a fresh browser even before the private company JSON is imported.
+  if(u==='marsyds') return 'dtokkusoglu@gmail.com';
+  try{
+    const aliases=JSON.parse(localStorage.getItem('mars_crm_private_cloud_usernames')||'{}');
+    if(aliases[u]) return aliases[u];
+  }catch(e){}
   return u.includes('@') ? u : '';
 }
 function setCloudAuthMessage(msg,isError=false){
@@ -6152,6 +6168,7 @@ function forceInitialDataLoad(){
 })();
 </script>
 
+<!-- CRM v82: MARSYDS is always resolvable without private customer data. -->
 <div id="marsSecurityOverlay" role="dialog" aria-modal="true" aria-labelledby="marsSecurityTitle">
   <form id="marsSecurityCard" autocomplete="on">
     <div id="marsSecurityIcon" aria-hidden="true">🔒</div>
@@ -6229,7 +6246,7 @@ function forceInitialDataLoad(){
    }
    const email=typeof resolveCloudLoginEmail==='function'?resolveCloudLoginEmail('MARSYDS'):'';
    if(!email){
-     msg.textContent='Bu cihazda MARSYDS bulut hesabı tanımlı değil. İlk kurulum için özel veri dosyası gereklidir.';
+     msg.textContent='Giriş hesabı bulunamadı. Uygulama sürümünü yenileyin.';
      return;
    }
    if(!password){msg.textContent='Şifrenizi girin.';return;}

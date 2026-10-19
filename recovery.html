@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><title>MARS CRM — Şifre Belirle</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:linear-gradient(140deg,#0d3b31,#122d37 65%,#0a2025);color:#153b31;font:16px system-ui,-apple-system,'Segoe UI',sans-serif;display:grid;place-items:center;padding:18px}
+.card{background:white;padding:26px;width:min(440px,100%);border-radius:20px;box-shadow:0 22px 65px #0005}
+h1{font-size:24px;margin:0 0 12px}p{line-height:1.5;color:#4d6862}label{font-weight:700;font-size:14px;display:block;margin:16px 0 6px}input{width:100%;border:1px solid #afc7c0;border-radius:11px;min-height:48px;font-size:16px;padding:12px}button{width:100%;margin-top:18px;min-height:48px;color:white;background:#0e6a53;border:0;border-radius:11px;font-size:16px;font-weight:750;cursor:pointer}button:disabled{opacity:.6}#message{min-height:2em;margin-top:12px;font-size:14px}a{color:#0e6a53;font-weight:700}
+</style></head><body><main class="card"><h1>🔐 MARS CRM — Yeni Şifre</h1>
+<p>Yalnızca Supabase'den gelen güvenli şifre yenileme bağlantısıyla yeni şifre oluşturabilirsiniz.</p>
+<form id="form" hidden><label for="password">Yeni şifre</label><input id="password" type="password" autocomplete="new-password" minlength="12" required>
+<label for="password2">Yeni şifre (tekrar)</label><input id="password2" type="password" autocomplete="new-password" minlength="12" required>
+<button id="submit" type="submit">Yeni Şifreyi Kaydet</button></form><div id="message" role="status" aria-live="polite">Bağlantı kontrol ediliyor…</div>
+<p><a href="./index.html">CRM giriş sayfası</a></p></main>
+<script>
+(function(){
+'use strict';
+const BASE='https://qipddmoioujuigyvoebq.supabase.co';
+const KEY='sb_publishable_fJWFCs14jgA5LH13lEsEGQ_u_e_PPm3';
+const msg=document.getElementById('message'),form=document.getElementById('form');
+const hash=new URLSearchParams(location.hash.slice(1));
+const query=new URLSearchParams(location.search);
+const token=hash.get('access_token');
+const refresh=hash.get('refresh_token');
+const kind=hash.get('type');
+const code=query.get('code');
+// Remove recovery credentials from browser history immediately.
+history.replaceState(null,'',location.pathname);
+function notice(t,error){msg.textContent=t;msg.style.color=error?'#ad2626':'#0d6a53'}
+async function request(path,body,authorization){
+ const res=await fetch(BASE+path,{method:'POST',headers:{'apikey':KEY,'Content-Type':'application/json',...(authorization?{'Authorization':'Bearer '+authorization}:{})},body:JSON.stringify(body)});
+ const json=await res.json().catch(()=>({}));
+ if(!res.ok)throw new Error(json.msg||json.message||json.error_description||'Sunucu hatası');return json;
+}
+async function init(){
+ try{
+  let bearer=token;
+  if(!bearer&&code){
+   // PKCE exchange requires the original code verifier in this browser's local storage;
+   // this app currently uses implicit recovery links, so explain rather than guessing.
+   throw new Error('Bağlantı kodu kullanılıyor. Yeni şifre bağlantısını bu telefonda tekrar açın veya destek isteyin.');
+  }
+  if(!bearer||kind!=='recovery')throw new Error('Geçerli şifre yenileme bağlantısı bulunamadı. Supabase üzerinden yeni bağlantı isteyin.');
+  const check=await fetch(BASE+'/auth/v1/user',{headers:{'apikey':KEY,'Authorization':'Bearer '+bearer}});
+  if(!check.ok)throw new Error('Bağlantının süresi dolmuş veya bağlantı daha önce kullanılmış. Yeni bağlantı isteyin.');
+  const data=await check.json();
+  if(String(data.email||'').toLowerCase()!=='dtokkusoglu@gmail.com')throw new Error('Bu bağlantı yetkili MARS CRM hesabına ait değil.');
+  form.hidden=false;notice('Bağlantı doğrulandı. Yeni şifrenizi oluşturabilirsiniz.');
+  form.addEventListener('submit',async(e)=>{
+   e.preventDefault();const p=document.getElementById('password').value,p2=document.getElementById('password2').value;
+   if(p!==p2)return notice('Şifreler aynı değil.',true);
+   if(p.length<12)return notice('En az 12 karakter kullanın.',true);
+   const btn=document.getElementById('submit');btn.disabled=true;notice('Şifre kaydediliyor…');
+   try{
+    const res=await fetch(BASE+'/auth/v1/user',{method:'PUT',headers:{'apikey':KEY,'Content-Type':'application/json','Authorization':'Bearer '+bearer},body:JSON.stringify({password:p})});
+    const json=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(json.msg||json.message||json.error_description||'Şifre güncellenemedi.');
+    form.hidden=true;document.getElementById('password').value='';document.getElementById('password2').value='';
+    notice('Şifreniz güncellendi. Artık MARSYDS kullanıcı adı ve yeni şifrenizle giriş yapabilirsiniz.');
+   }catch(err){notice(err.message||'Şifre güncellenemedi.',true)}finally{btn.disabled=false}
+  });
+ }catch(err){notice(err.message||'Bağlantı doğrulanamadı.',true)}
+}
+init();
+})();
+</script></body></html>
