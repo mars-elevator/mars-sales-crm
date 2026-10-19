@@ -6157,14 +6157,14 @@ function forceInitialDataLoad(){
     <div id="marsSecurityIcon" aria-hidden="true">🔒</div>
     <h2 id="marsSecurityTitle">MARS CRM — Güvenli Giriş</h2>
     <p id="marsSecuritySubtitle">Müşteri bilgileri, seyahat arşivi, raporlar ve harcamalara erişmek için giriş yapın.</p>
-    <label for="marsSecurityUsername">Kullanıcı adı veya e-posta</label>
-    <input id="marsSecurityUsername" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="marsSecurityUsername">Kullanıcı adı</label>
+    <input id="marsSecurityUsername" name="username" autocomplete="username" autocapitalize="characters" spellcheck="false" maxlength="32" required>
     <label for="marsSecurityPassword">Şifre</label>
     <input id="marsSecurityPassword" name="password" type="password" autocomplete="current-password" required>
     <button type="submit" id="marsSecurityLoginBtn">Giriş Yap</button>
     <button type="button" id="marsSecurityCancel">Vazgeç ve geri dön</button>
     <p id="marsSecurityMessage" role="alert" aria-live="polite"></p>
-    <p style="font-size:12px;color:#6f817a;line-height:1.45;margin:10px 0 0">Şifre bu web sitesinin kodunda saklanmaz. Giriş, mevcut Supabase hesabınızla doğrulanır.</p>
+    <p style="font-size:12px;color:#6f817a;line-height:1.45;margin:10px 0 0">Yalnızca yetkili MARSYDS kullanıcısı giriş yapabilir. Şifre GitHub kodunda saklanmaz; Supabase tarafından doğrulanır.</p>
   </form>
 </div>
 <script>
@@ -6193,7 +6193,7 @@ function forceInitialDataLoad(){
    pendingAction=fn||null;
    msg.textContent='';
    pass.value='';
-   user.value=localStorage.getItem('mars_cloud_username')||'MARSYDS';
+   user.value='';
    cancel.style.display=(mode==='protected')?'inline-block':'none';
    title.textContent=(mode==='protected')?'Özel Alan — Kimlik Doğrulama':'MARS CRM — Güvenli Giriş';
    subtitle.textContent=(mode==='protected')?'Seyahat raporları ve harcamaları açmadan önce şifrenizi tekrar girin.':'Müşteri bilgileri, seyahat arşivi, raporlar ve harcamalara erişmek için giriş yapın.';
@@ -6220,10 +6220,19 @@ function forceInitialDataLoad(){
  cancel.addEventListener('click',()=>{if(mode==='protected'){clearPrompt();}});
  form.addEventListener('submit',async (e)=>{
    e.preventDefault();
-   const username=user.value.trim();
+   const username=user.value.trim().toLocaleUpperCase('tr');
    const password=pass.value;
-   const email=typeof resolveCloudLoginEmail==='function'?resolveCloudLoginEmail(username):(username.includes('@')?username:'');
-   if(!email || !password){msg.textContent='Kullanıcı adı/e-posta ve şifrenizi girin.';return;}
+   if(username!=='MARSYDS'){
+     msg.textContent='Tanımlı kullanıcı adıyla giriş yapın.';
+     pass.value='';
+     return;
+   }
+   const email=typeof resolveCloudLoginEmail==='function'?resolveCloudLoginEmail('MARSYDS'):'';
+   if(!email){
+     msg.textContent='Bu cihazda MARSYDS bulut hesabı tanımlı değil. İlk kurulum için özel veri dosyası gereklidir.';
+     return;
+   }
+   if(!password){msg.textContent='Şifrenizi girin.';return;}
    btn.disabled=true;btn.textContent='Doğrulanıyor...';msg.textContent='';
    try{
      const response=await cloudFetch('/auth/v1/token?grant_type=password',{
@@ -6231,6 +6240,9 @@ function forceInitialDataLoad(){
        body:JSON.stringify({email,password})
      });
      if(!response || !response.access_token || !response.user?.id)throw Error('Giriş doğrulanamadı.');
+     if(String(response.user.email||'').trim().toLowerCase()!==String(email).trim().toLowerCase()){
+       throw Error('Bu kullanıcı hesabı MARSYDS yetkilisi olarak tanımlı değil.');
+     }
      const boundOwner=localStorage.getItem('mars_crm_locked_owner_uid_v1');
      if(boundOwner && boundOwner!==response.user.id)throw Error('Bu cihazdaki CRM verileri farklı bir hesaba aittir.');
      if(!boundOwner)localStorage.setItem('mars_crm_locked_owner_uid_v1',response.user.id);
