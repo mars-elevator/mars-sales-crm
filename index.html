@@ -8,7 +8,25 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="MARS CRM"/>
-<link rel="manifest" href="manifest.webmanifest"/>
+<script>document.documentElement.classList.add('mars-locked');</script>
+<style>
+html.mars-locked body > :not(#marsSecurityOverlay){visibility:hidden!important;pointer-events:none!important}
+#marsSecurityOverlay{position:fixed;inset:0;z-index:2147483000;background:linear-gradient(140deg,#0d3b31,#122d37 65%,#0a2025);color:#163029;display:flex;align-items:center;justify-content:center;padding:max(14px,env(safe-area-inset-top)) 16px max(14px,env(safe-area-inset-bottom));overflow-y:auto}
+#marsSecurityOverlay[hidden]{display:none!important}
+#marsSecurityCard{width:min(420px,100%);border-radius:20px;padding:25px 22px;background:white;box-shadow:0 24px 80px #0005}
+#marsSecurityCard label{font-size:13px;font-weight:700;display:block;margin:14px 0 5px}
+#marsSecurityCard input{width:100%;min-height:46px;border:1px solid #b8c8c5;border-radius:11px;padding:11px 13px;color:#163029;font-size:16px;background:#fff}
+#marsSecurityCard input:focus{outline:2px solid #1b9274;outline-offset:1px}
+#marsSecurityLoginBtn{background:#0e6a53;color:#fff;font-weight:800;width:100%;font-size:16px;border:0;border-radius:11px;min-height:48px;margin-top:18px;cursor:pointer}
+#marsSecurityLoginBtn[disabled]{opacity:.65;cursor:wait}
+#marsSecurityMessage{min-height:21px;margin:12px 0 0;font-size:13px;color:#bd342b}
+#marsSecurityTitle{color:#143c32;margin:0 0 7px;font-size:24px}
+#marsSecuritySubtitle{color:#51635d;margin:0 0 14px;font-size:14px;line-height:1.45}
+#marsSecurityCancel{display:none;background:transparent;border:0;color:#48665d;text-decoration:underline;font-size:14px;margin-top:12px;cursor:pointer}
+#marsSecurityIcon{font-size:29px;margin-bottom:9px}
+#marsLockBtn{background:#fff1;border:1px solid #ffffff80;color:white;border-radius:8px;font-weight:700;padding:10px;font-size:13px;cursor:pointer}
+@media(max-width:600px){#marsSecurityCard{padding:23px 19px}#marsLockBtn{font-size:12px;min-height:39px}}
+</style><link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
 <title>MARS Balkan Sales CRM</title>
 <style>
@@ -236,6 +254,91 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 </script>
 <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style id="mars80Theme">
+:root{--m80ink:#102f33;--m80green:#0b6a5b;--m80line:#e3e9ea;--m80bg:#f4f7f8;--m80muted:#73828b}
+/* Same graphite background across side and header; no blue-sidebar/green-header mismatch */
+.crmSideNav{background:#102c32!important;box-shadow:2px 0 16px #102c3214}
+header{background:#102c32!important;box-shadow:none!important}
+.sideItem.active,.sideGroup.open{background:#1b625b!important}
+.btn:not(.secondary):not(.danger){background:#0b6a5b}
+#mars80Mobile{display:none}
+@media(max-width:760px){
+ html,body{background:var(--m80bg)!important;overflow-x:hidden!important}
+ body{padding-bottom:calc(80px + env(safe-area-inset-bottom))!important}
+ body>header{display:none!important}
+ #mobileNavToggle{display:none!important}
+ main{padding:0!important;max-width:100%!important}
+ main>.cards,main>.crmFilters,main>.tableWrap,main>#cloudStatus,main>p.small{display:none!important}
+ #mars80Mobile{display:block;color:#182d35;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+ .m80Hero{background:#102c32;color:#fff;padding:calc(20px + env(safe-area-inset-top)) 18px 25px;min-height:143px}
+ .m80TopLine{display:flex;align-items:center;gap:13px}
+ .m80Square{width:39px;height:40px;display:inline-flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;background:#ffffff10;border:1px solid #ffffff35;border-radius:11px;color:white;font-size:20px;cursor:pointer}
+ .m80Square sup{position:absolute;font-size:11px;right:6px;top:0}
+ .m80TopActions{display:flex;gap:6px;margin-left:auto}
+ .m80HeroBrand{min-width:0;flex:1}
+ .m80HeroBrand strong{font-size:18px;letter-spacing:1.6px;display:block;white-space:nowrap}
+ .m80HeroBrand small{font-size:9px;letter-spacing:1px}
+ .m80HeroBrand span{display:block;font-size:13px;margin-top:3px;color:#d7e6e5}
+ .m80Hero p{font-size:11px;opacity:.8;margin:13px 0 0}
+ .m80Body{padding:13px 12px 24px;display:grid;gap:12px}
+ .m80Cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .m80Stat{display:flex;align-items:center;gap:8px;min-height:89px;text-align:left;background:#fff;border:1px solid var(--m80line);border-radius:15px;padding:10px 9px;box-shadow:0 2px 8px #1c3f4b08;color:inherit;cursor:pointer;min-width:0}
+ .m80StatIcon{display:grid;place-items:center;flex-shrink:0;width:34px;height:36px;background:#e5f2ed;border-radius:11px;color:#0b6a5b;font-size:23px;font-weight:700}
+ .m80Stat:nth-child(2) .m80StatIcon{background:#eaf0f8;color:#285b88}
+ .m80Stat:nth-child(4) .m80StatIcon{background:#f7f1e7;color:#8d6534}
+ .m80StatCopy{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.25}
+ .m80StatCopy>span{font-size:10px;color:#6f818a;font-weight:700}
+ .m80StatCopy b{font-size:16px;font-weight:800;color:#142e35;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+ #m80Country{font-size:13px;line-height:1.24;overflow-wrap:normal;word-break:normal} #m80Hotel{font-size:12px;line-height:1.22}
+ .m80Arrow{color:#9caaae;font-size:21px}
+ .m80QuickActions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+ .m80QuickActions button{border:0;border-radius:12px;padding:12px 13px;min-height:47px;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer}
+ .m80Primary{background:var(--m80green);color:#fff}
+ .m80SubAction{background:#fff;color:#254349;border:1px solid var(--m80line)!important}
+ .m80Panel{background:#fff;border:1px solid var(--m80line);border-radius:16px;padding:13px 12px;box-shadow:0 2px 10px #122a3105;min-width:0}
+ .m80PanelHead{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:25px;margin-bottom:11px}
+ .m80PanelHead h2{font-size:15px;font-weight:800;letter-spacing:-.25px;margin:0;color:#193239}
+ .m80PanelHead span{display:block;font-size:11px;color:#7b8a8f;margin-top:3px}
+ .m80TextButton{border:0;background:transparent;color:#0d6a58;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer;padding:6px 2px}
+ .m80Schedule{display:grid;gap:0}
+ .m80ScheduleItem{display:flex;align-items:center;gap:12px;border:0;border-top:1px solid #eff2f3;width:100%;background:white;padding:12px 2px;text-align:left;cursor:pointer}
+ .m80ScheduleItem:first-child{border-top:0}
+ .m80Time{font-weight:800;color:#31505b;font-size:12px;min-width:45px;font-variant-numeric:tabular-nums}
+ .m80ScheduleItem .m80ItemContent{flex:1;min-width:0}
+ .m80ItemContent strong{display:block;color:#1a3339;font-size:13px}
+ .m80ItemContent small{font-size:11px;color:#70838c}
+ .m80ItemTag{border-radius:20px;background:#eaf6f0;color:#147b60;font-size:10px;font-weight:700;padding:5px 7px}
+ .m80Empty{background:#f7f9fa;color:#667c83;border-radius:10px;padding:14px;font-size:12px;line-height:1.45}
+ .m80SearchWrap{display:flex;align-items:center;gap:9px;border:1px solid #d9e3e6;border-radius:11px;background:#fbfcfd;padding:0 10px}
+ .m80SearchWrap span{font-size:25px;color:#627d8b;line-height:1}
+ #m80Search{height:43px;border:0!important;outline:0!important;background:transparent!important;font-size:16px;width:100%;min-width:0;box-shadow:none!important;color:#243b46}
+ .m80SelectRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+ .m80SelectRow select{min-width:0;width:100%;height:41px;background:#fff;border:1px solid #d9e3e6;border-radius:10px;padding:7px;color:#27434b;font-size:12px}
+ .m80Tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #e3eaec;margin:13px -12px 0}
+ .m80Tab{background:#fff;border:0;border-bottom:2px solid transparent;color:#72828a;font-weight:800;padding:10px;font-size:12px;cursor:pointer}
+ .m80Tab.active{color:#105f53;border-bottom-color:#105f53}
+ .m80DirectoryHint{font-size:11px;color:#7b8991;margin:11px 0 6px}
+ .m80FirmList{display:grid;gap:6px}
+ .m80Firm{background:#fff;border:1px solid #ecf0f2;border-radius:11px;padding:11px 10px;display:flex;align-items:center;gap:10px;text-align:left;width:100%;cursor:pointer;min-height:67px}
+ .m80FirmIcon{width:35px;height:36px;display:grid;place-items:center;background:#eaf1f4;border-radius:9px;color:#2e5365;font-size:20px}
+ .m80FirmText{flex:1;min-width:0}.m80FirmText b{display:block;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.m80FirmText small{font-size:11px;color:#697e87;display:block;margin-top:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+ .m80FirmPot{font-size:11px;font-weight:800;border-radius:7px;padding:6px;background:#e7f7ed;color:#107254}
+ .m80FirmPot.b{background:#fff1da;color:#916b2b}.m80FirmPot.c{background:#f0f3f5;color:#687982}
+ .m80FirmChevron{font-size:19px;color:#80949e}
+ .m80HotelRow{padding:10px 3px;border-top:1px solid #edf0f2;display:flex;align-items:center;gap:8px}
+ .m80HotelRow:first-child{border-top:0}
+ .m80HotelText{flex:1;min-width:0;font-size:12px;color:#243d43}.m80HotelText span{display:block;font-size:10px;color:#73838a;margin-top:4px}
+ .m80HotelRow button{background:#f0f5f2;border:0;border-radius:7px;padding:8px 10px;font-size:11px;color:#0d6757;font-weight:700}
+ .m80SectionTag{font-size:10px!important;color:#73838a}.m80Hint{font-size:12px;color:#7c8b91;line-height:1.5}
+ .m80BottomBar{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#fff;border-top:1px solid #e6ecee;padding:7px 3px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,1fr);box-shadow:0 -3px 15px #122e3310}
+ .m80BottomBar button{display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:0;color:#647989;font-size:10px;font-weight:700;padding:2px 0;cursor:pointer}.m80BottomBar button span{font-size:24px;line-height:1}.m80BottomBar button.active{color:#0c6a58}
+ .m80SheetBackdrop:not([hidden]){display:block!important;position:fixed;inset:0;z-index:10050;background:#0c1c2480}
+ .m80Sheet:not([hidden]){display:block!important;position:fixed;bottom:0;left:0;right:0;z-index:10051;background:#fff;border-radius:22px 22px 0 0;padding:18px 15px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px #0002;max-height:86dvh;overflow-y:auto}
+ .m80SheetHeader{display:flex;align-items:start;justify-content:space-between;gap:12px}.m80SheetHeader h2{font-size:17px;margin:0;color:#18353c}.m80SheetHeader p{font-size:12px;color:#73838a;margin:4px 0 0}.m80SheetClose{border:0;background:#edf1f2;border-radius:10px;width:34px;height:34px;font-size:25px}
+ .m80SheetActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0}.m80SheetActions button{min-height:44px;border:1px solid #dae4e6;background:#fff;color:#0c554e;border-radius:9px;font-size:12px;font-weight:750}
+ .m80CompanyPhotos h3{margin:12px 0;font-size:14px}.m80Photos{display:flex;gap:8px;overflow-x:auto;padding:6px 0;font-size:12px;color:#81939a}.m80Photos img{height:78px;width:78px;object-fit:cover;border-radius:10px;border:1px solid #dfe7e7}
+}
+</style>
 </head>
 <body>
 
@@ -339,15 +442,51 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     <button class="sideItem dangerText" type="button" onclick="resetData()">İlk Listeyi Geri Yükle</button>
   </div>
 
+  <div style="padding:12px"><button class="sideItem" type="button" onclick="marsScreenLock()" style="width:100%;color:#fff;font-weight:800">🔒 Ekranı Kilitle</button></div>
   <div class="sideBottom">
     <button class="sideItem installAppBtn" id="installAppBtn" type="button">📱 Telefona Kur</button>
     <div class="sideStatus ok"><span class="statusDot"></span><span>Mobil + Masaüstü</span></div>
     <div class="sideStatus" id="sideCloudStatus"><span class="statusDot"></span><span>Bulut: Bağlı değil</span></div>
   </div>
 </aside>
-<header><div class="top"><div><div class="brand">MARS ELEVATOR — Balkan Sales CRM</div><div class="sub">Firma portföyü • satış takibi • ziyaret ve teklif yönetimi • güncel müşteri ana listesi</div></div><div><button class="btn" onclick="openAdd()">+ Firma Ekle</button></div></div></header>
+<header><div class="top"><div><div class="brand">MARS ELEVATOR — Balkan Sales CRM</div><div class="sub">Firma portföyü • satış takibi • ziyaret ve teklif yönetimi • güncel müşteri ana listesi</div></div><div><button type="button" id="marsLockBtn" onclick="marsScreenLock()">🔒 Kilitle</button> <button class="btn" onclick="openAdd()">+ Firma Ekle</button></div></div></header>
 <main>
 <span id="cloudStatus" class="cloudStatus warn" style="display:none">Bulut: Bağlı değil</span>
+
+<section id="mars80Mobile" aria-label="MARS CRM mobil ana sayfa">
+  <div class="m80Hero">
+    <div class="m80TopLine"><button class="m80Square" type="button" onclick="mars80OpenMenu()" aria-label="Menüyü aç">☰</button>
+    <div class="m80HeroBrand"><strong>MARS <small>ELEVATOR</small></strong><span>Balkan Sales CRM</span></div>
+    <div class="m80TopActions"><button class="m80Square" type="button" onclick="mars80AddReceipt()" title="Hızlı fiş ekle" aria-label="Fiş ekle">▤<sup>+</sup></button><button class="m80Square" type="button" onclick="marsScreenLock()" aria-label="Kilitle">♙</button></div></div>
+    <p>Seyahat, müşteri ve ziyaret yönetimi</p>
+  </div>
+  <div class="m80Body">
+    <div class="m80Cards" id="mars80Summary">
+      <button type="button" class="m80Stat" onclick="mars80ChooseCountry()"><span class="m80StatIcon">◎</span><span class="m80StatCopy"><span>Hedef Ülke</span><b id="m80Country">—</b></span><span class="m80Arrow">›</span></button>
+      <button type="button" class="m80Stat" onclick="mars80TodayList()"><span class="m80StatIcon">▦</span><span class="m80StatCopy"><span>Randevu · Bugün</span><b id="m80Appointments">0</b></span><span class="m80Arrow">›</span></button>
+      <button type="button" class="m80Stat" onclick="mars80ShowPotential()"><span class="m80StatIcon">◫</span><span class="m80StatCopy"><span>Potansiyeller · A+/A</span><b id="m80Potential">0</b></span><span class="m80Arrow">›</span></button>
+      <button type="button" class="m80Stat" onclick="mars80EditHotel()"><span class="m80StatIcon">⌂</span><span class="m80StatCopy"><span>Bu Seyahatin Oteli</span><b id="m80Hotel">Henüz seçilmedi</b></span><span class="m80Arrow">›</span></button>
+    </div>
+    <div class="m80QuickActions"><button type="button" class="m80Primary" onclick="mars80AddReceipt()">▤ <b>Fiş Ekle</b><span>›</span></button><button type="button" class="m80SubAction" onclick="mars80TodayList()">▦ <b>Bugünün Firmaları</b></button></div>
+    <section class="m80Panel m80DirectoryPanel" aria-labelledby="m80DirectoryHead"><div class="m80PanelHead"><h2 id="m80DirectoryHead">Firma Ara</h2><button class="m80TextButton" onclick="mars80ToggleAllFirms()" id="m80SwitchAll">Tüm Firmalar</button></div>
+      <div class="m80SearchWrap"><span aria-hidden="true">⌕</span><input type="search" id="m80Search" placeholder="Firma, şehir, e-posta ara..." autocomplete="off" oninput="mars80Refresh()"/></div>
+      <div class="m80SelectRow"><select id="m80FilterCountry" aria-label="Ülke seçimi" onchange="mars80CountryChanged(this.value)"><option value="">Tüm Ülkeler</option></select><select id="m80FilterPotential" aria-label="Potansiyel filtresi" onchange="mars80Refresh()"><option value="">Potansiyeller</option><option value="high">A+ / A</option><option value="A+">A+</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+      <div class="m80Tabs"><button id="m80TabFirms" type="button" class="m80Tab active" onclick="mars80TodayList()">Firma Listesi</button><button type="button" class="m80Tab" onclick="mars80OpenArchive()">Seyahat Arşivi</button></div><p id="m80DirectoryHint" class="m80DirectoryHint"></p>
+      <div id="m80FirmList" class="m80FirmList"></div>
+    </section>
+    <section class="m80Panel m80SchedulePanel" aria-labelledby="m80PlanHeading"><div class="m80PanelHead"><div><h2 id="m80PlanHeading">Bugünün Planı</h2><span id="m80PlanSubtitle">Plan seçiliyor…</span></div><button type="button" class="m80TextButton" onclick="mars80OpenTripPlan()">Planı Aç ›</button></div><div id="m80Schedule" class="m80Schedule"></div></section>
+    <section class="m80Panel m80HotelHistory"><div class="m80PanelHead"><h2>Önceki Konaklamalar</h2><span class="m80SectionTag">Hedef ülke</span></div><div id="m80Hotels">Bu ülkeye ait otel kaydı yok.</div></section>
+    <section class="m80Panel m80PhotoInfo"><div class="m80PanelHead"><h2>Firma Fotoğrafları</h2></div><div class="m80Hint">Fotoğraf eklemek için yukarıdan bir firma seç. Çekilen fotoğraflar o firmanın kaydında saklanır.</div></section>
+  </div>
+  <nav class="m80BottomBar" aria-label="Mobil gezinme"><button onclick="mars80Home()" class="active" type="button"><span>⌂</span>Ana Sayfa</button><button onclick="mars80TodayList()" type="button"><span>▤</span>Firmalar</button><button onclick="mars80AddReceipt()" type="button"><span>▧</span>Fiş Ekle</button><button onclick="mars80OpenArchive()" type="button"><span>▱</span>Arşiv</button><button onclick="mars80OpenMenu()" type="button"><span>☰</span>Diğer</button></nav>
+</section>
+<div class="m80SheetBackdrop" id="m80SheetBackdrop" hidden onclick="mars80CloseSheet()"></div>
+<div class="m80Sheet" id="m80CompanySheet" role="dialog" aria-modal="true" aria-label="Firma işlemleri" hidden>
+  <div class="m80SheetHeader"><div><h2 id="m80SheetTitle">Firma</h2><p id="m80SheetSub"></p></div><button type="button" onclick="mars80CloseSheet()" aria-label="Kapat" class="m80SheetClose">×</button></div>
+  <div class="m80SheetActions"><button type="button" onclick="mars80OpenCard()">Firma Kartı</button><button type="button" onclick="mars80VisitNote()">Ziyaret Notu</button><button type="button" onclick="mars80Maps()">Google Maps</button><button type="button" onclick="mars80VerifyLocation()">📍 Konum Doğrula</button><button type="button" onclick="mars80SelectPhoto()">📷 Fotoğraf Ekle</button></div>
+  <div class="m80CompanyPhotos"><h3>Firma Fotoğrafları</h3><div id="m80Photos" class="m80Photos">Henüz fotoğraf yok.</div></div>
+  <input type="file" accept="image/*" capture="environment" id="m80PhotoInput" onchange="mars80SavePhoto(this.files)" hidden>
+</div>
 
 <div class="cards">
 <div class="card"><b id="kTotal">0</b><span>Toplam Firma</span></div>
@@ -638,7 +777,7 @@ function migrateHistoricalVisits(){
 migrateHistoricalVisits();
 
 
-function save(){ localStorage.setItem('mars_crm_companies', JSON.stringify(companies)); }
+function save(){ localStorage.setItem('mars_crm_companies', JSON.stringify(companies)); if(typeof window.mars80Refresh==='function')setTimeout(window.mars80Refresh,0); }
 function esc(s){ return String(s ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function badgePotential(p){let c=p==='A+'||p==='A'?'pA':p==='B'?'pB':'pC'; return p?`<span class="badge ${c}">${esc(p)}</span>`:''}
 function populateFilters(){
@@ -826,9 +965,9 @@ function saveActivity(){
     renderActivityHistory(x);
   }
 }
-activityBack.addEventListener('click',e=>{if(e.target===activityBack)closeActivity()});
+document.addEventListener('DOMContentLoaded',()=>{const el=document.getElementById('activityBack');el?.addEventListener('click',e=>{if(e.target===el)closeActivity()});});
 
-modalBack.addEventListener('click',e=>{if(e.target===modalBack)closeModal()});
+document.addEventListener('DOMContentLoaded',()=>{const el=document.getElementById('modalBack');el?.addEventListener('click',e=>{if(e.target===el)closeModal()});});
 
 window.reportSelected = window.reportSelected || new Set();
 
@@ -1504,6 +1643,7 @@ function marsCloudSessionKey(){
 function resolveCloudLoginEmail(username){
   const u=String(username||'').trim().toLocaleLowerCase('tr');
   try{const aliases=JSON.parse(localStorage.getItem('mars_crm_private_cloud_usernames')||'{}'); if(aliases[u])return aliases[u];}catch(e){}
+  if(u==='marsyds'){try{const aliases=JSON.parse(localStorage.getItem('mars_crm_private_cloud_usernames')||'{}');return aliases.dtokkusoglu||aliases.marsyds||'';}catch(e){return '';}}
   return u.includes('@') ? u : '';
 }
 function setCloudAuthMessage(msg,isError=false){
@@ -1590,7 +1730,7 @@ function initCloudClient(){
   const s=getCloudSession();
   window.marsCloudUser=s?.user||null;
   updateCloudStatus();
-  if(window.marsCloudUser){
+  if(window.marsCloudUser && window.marsSecurityUnlocked){
     setTimeout(()=>syncArchiveFromCloud().catch(e=>console.warn(e)),0);
   }
   return true;
@@ -1660,7 +1800,6 @@ async function cloudSignIn(){
 
     setCloudAuthMessage('Giriş başarılı. Arşiv senkronize ediliyor...');
     try{
-      await migrateLocalArchiveToCloud();
       await syncArchiveFromCloud();
       setCloudAuthMessage('Giriş başarılı.');
     }catch(syncErr){
@@ -1957,6 +2096,7 @@ function readTripArchive(){
 function writeTripArchive(rows){
   try{
     localStorage.setItem(tripArchiveMetaKey(),JSON.stringify(rows||[]));
+    if(typeof window.mars80Refresh==='function')setTimeout(window.mars80Refresh,0);
   }catch(e){
     console.warn('Seyahat arşivi kaydedilemedi',e);
   }
@@ -2524,6 +2664,11 @@ async function exportTripReceiptsPdf(tripId){
     return;
   }
 
+  // iOS Safari allows popups only directly inside the user tap, before any await.
+  // Prefer an in-app preview on iOS to avoid popup blockers entirely.
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  let win=null;
+  if(!isIOS){ try{ win=window.open('','_blank'); }catch(e){} }
   const prepared=[];
   for(const row of rows){
     try{
@@ -2543,11 +2688,6 @@ async function exportTripReceiptsPdf(tripId){
 
   const tripLabel=[rec?.country||'', rec?.from?formatTRDate(rec.from):'', rec?.to && rec?.to!==rec?.from?formatTRDate(rec.to):'']
     .filter(Boolean).join(' · ');
-  const win=window.open('','_blank');
-  if(!win){
-    alert('PDF penceresi açılamadı. Tarayıcı açılır pencereyi engelliyor olabilir.');
-    return;
-  }
 
   const receiptCards=prepared.map((item,idx)=>{
     const x=item.row||{};
@@ -2641,9 +2781,33 @@ async function exportTripReceiptsPdf(tripId){
   <\/script>
   </body></html>`;
 
-  win.document.open();
-  win.document.write(doc);
-  win.document.close();
+  if(win && !win.closed){
+    try{
+      win.document.open();
+      win.document.write(doc);
+      win.document.close();
+      return;
+    }catch(e){ try{win.close()}catch(_){} }
+  }
+  // iPhone / blocked popups: embed the printable document in the current page.
+  // The print action is a SECOND explicit tap, so Safari permits it.
+  let layer=document.getElementById('marsReceiptPrintLayer');
+  if(!layer){
+    layer=document.createElement('div');
+    layer.id='marsReceiptPrintLayer';
+    layer.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#f7f8fa;display:flex;flex-direction:column;';
+    layer.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#0d3b31;color:#fff;flex-shrink:0"><strong style="flex:1">Fiş PDF Önizleme</strong><button type="button" id="marsReceiptPrintBtn" style="padding:12px 16px;border:0;border-radius:9px;font-weight:bold;background:white;color:#0d3b31">PDF / Yazdır</button><button type="button" id="marsReceiptPrintClose" style="padding:12px;border:1px solid white;border-radius:9px;background:transparent;color:white">Kapat</button></div><iframe title="Fiş PDF Önizleme" id="marsReceiptPrintFrame" style="width:100%;flex:1;border:0;background:white"></iframe>';
+    document.body.appendChild(layer);
+    layer.querySelector('#marsReceiptPrintClose').addEventListener('click',()=>layer.remove());
+    layer.querySelector('#marsReceiptPrintBtn').addEventListener('click',()=>{
+      const frame=layer.querySelector('#marsReceiptPrintFrame');
+      try{frame.contentWindow.focus();frame.contentWindow.print();}
+      catch(e){alert('Yazdır menüsü açılamadı. Safari üzerinden Paylaş → Yazdır seçeneğini kullanın.');}
+    });
+  }
+  layer.style.display='flex';
+  const frame=layer.querySelector('#marsReceiptPrintFrame');
+  frame.srcdoc=doc.replace(/<script>\s*window.onload=function\(\)\{[\s\S]*?<\/script>/i,'');
 }
 function closeReceiptViewer(){
   const modal=document.getElementById('receiptViewerBack');
@@ -5886,7 +6050,7 @@ function forceInitialDataLoad(){
 
 
 <script>
-/* v76 mobile navigation + install */
+/* v79 protected mobile navigation + install */
 (function(){
   const side=document.getElementById('crmSideNav');
   const btn=document.getElementById('mobileNavToggle');
@@ -5956,7 +6120,7 @@ function forceInitialDataLoad(){
    const msg=document.getElementById('privateSetupMsg');
    try{
      const obj=JSON.parse(await file.text());
-     if(obj.format!=='mars-crm-mobile-private-v77'||!Array.isArray(obj.companies)||!obj.companies.length)throw Error('Bu dosya MARS CRM özel veri yedeği değil.');
+     if(!['mars-crm-mobile-private-v77','mars-crm-mobile-private-v78'].includes(obj.format)||!Array.isArray(obj.companies)||!obj.companies.length)throw Error('Bu dosya MARS CRM özel veri yedeği değil.');
      const previous=JSON.parse(localStorage.getItem('mars_crm_companies')||'[]');
      if(Array.isArray(previous)&&previous.length){
        if(!confirm('Telefondaki '+previous.length+' firma yeni yedekle değiştirilecek. Önce yedek aldığınızdan emin misiniz?'))return;
@@ -5975,7 +6139,7 @@ function forceInitialDataLoad(){
    }catch(e){if(msg)msg.textContent='Veri yüklenemedi: '+(e.message||e);alert('Müşteri verisi yüklenemedi: '+(e.message||e));}
  }
  window.marsPrivateExport=function(){
-   const obj={format:'mars-crm-mobile-private-v77',companies:JSON.parse(localStorage.getItem('mars_crm_companies')||'[]'),historicalVisits:JSON.parse(localStorage.getItem('mars_crm_private_history')||'[]'),tripSeed:JSON.parse(localStorage.getItem('mars_crm_private_tripseed')||'[]'),historicalAliases:JSON.parse(localStorage.getItem('mars_crm_private_aliases')||'{}'),cloudLoginAliases:JSON.parse(localStorage.getItem('mars_crm_private_cloud_usernames')||'{}'),originalXlsxTemplateB64:localStorage.getItem('mars_crm_private_xlsx_template')||'',travelers:JSON.parse(localStorage.getItem('mars_crm_private_travelers')||'[]'),savedAt:new Date().toISOString()};
+   const obj={format:'mars-crm-mobile-private-v78',companies:JSON.parse(localStorage.getItem('mars_crm_companies')||'[]'),historicalVisits:JSON.parse(localStorage.getItem('mars_crm_private_history')||'[]'),tripSeed:JSON.parse(localStorage.getItem('mars_crm_private_tripseed')||'[]'),historicalAliases:JSON.parse(localStorage.getItem('mars_crm_private_aliases')||'{}'),cloudLoginAliases:JSON.parse(localStorage.getItem('mars_crm_private_cloud_usernames')||'{}'),originalXlsxTemplateB64:localStorage.getItem('mars_crm_private_xlsx_template')||'',travelers:JSON.parse(localStorage.getItem('mars_crm_private_travelers')||'[]'),savedAt:new Date().toISOString()};
    const blob=new Blob([JSON.stringify(obj)],{type:'application/json'});
    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='MARS_CRM_OZEL_YEDEK_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
  };
@@ -5985,6 +6149,244 @@ function forceInitialDataLoad(){
    const panel=document.getElementById('privateSetupPanel');if(panel&&!hasData)panel.style.display='flex';
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
+<div id="marsSecurityOverlay" role="dialog" aria-modal="true" aria-labelledby="marsSecurityTitle">
+  <form id="marsSecurityCard" autocomplete="on">
+    <div id="marsSecurityIcon" aria-hidden="true">🔒</div>
+    <h2 id="marsSecurityTitle">MARS CRM — Güvenli Giriş</h2>
+    <p id="marsSecuritySubtitle">Müşteri bilgileri, seyahat arşivi, raporlar ve harcamalara erişmek için giriş yapın.</p>
+    <label for="marsSecurityUsername">Kullanıcı adı veya e-posta</label>
+    <input id="marsSecurityUsername" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="marsSecurityPassword">Şifre</label>
+    <input id="marsSecurityPassword" name="password" type="password" autocomplete="current-password" required>
+    <button type="submit" id="marsSecurityLoginBtn">Giriş Yap</button>
+    <button type="button" id="marsSecurityCancel">Vazgeç ve geri dön</button>
+    <p id="marsSecurityMessage" role="alert" aria-live="polite"></p>
+    <p style="font-size:12px;color:#6f817a;line-height:1.45;margin:10px 0 0">Şifre bu web sitesinin kodunda saklanmaz. Giriş, mevcut Supabase hesabınızla doğrulanır.</p>
+  </form>
+</div>
+<script>
+/* v79 secure screen lock — existing Supabase Auth, no hardcoded customer password */
+(function(){
+ 'use strict';
+ const ROOT=document.documentElement;
+ const IDLE_MS=15*60*1000;
+ const PROTECTED_MS=10*60*1000;
+ const overlay=document.getElementById('marsSecurityOverlay');
+ const form=document.getElementById('marsSecurityCard');
+ const user=document.getElementById('marsSecurityUsername');
+ const pass=document.getElementById('marsSecurityPassword');
+ const msg=document.getElementById('marsSecurityMessage');
+ const btn=document.getElementById('marsSecurityLoginBtn');
+ const title=document.getElementById('marsSecurityTitle');
+ const subtitle=document.getElementById('marsSecuritySubtitle');
+ const cancel=document.getElementById('marsSecurityCancel');
+ let mode='startup';
+ let pendingAction=null;
+ let privilegedUntil=0;
+ let lastInteraction=Date.now();
+ window.marsSecurityUnlocked=false;
+ function showPrompt(nextMode,fn){
+   mode=nextMode;
+   pendingAction=fn||null;
+   msg.textContent='';
+   pass.value='';
+   user.value=localStorage.getItem('mars_cloud_username')||'MARSYDS';
+   cancel.style.display=(mode==='protected')?'inline-block':'none';
+   title.textContent=(mode==='protected')?'Özel Alan — Kimlik Doğrulama':'MARS CRM — Güvenli Giriş';
+   subtitle.textContent=(mode==='protected')?'Seyahat raporları ve harcamaları açmadan önce şifrenizi tekrar girin.':'Müşteri bilgileri, seyahat arşivi, raporlar ve harcamalara erişmek için giriş yapın.';
+   ROOT.classList.toggle('mars-locked',mode!=='protected');
+   overlay.hidden=false;
+   requestAnimationFrame(()=>{(user.value?pass:user).focus();});
+ }
+ function clearPrompt(){ overlay.hidden=true;pass.value='';pendingAction=null;lastInteraction=Date.now(); }
+ function finishUnlock(){
+   window.marsSecurityUnlocked=true;
+   ROOT.classList.remove('mars-locked');
+   clearPrompt();
+ }
+ window.marsScreenLock=function(){
+   window.marsSecurityUnlocked=false;
+   privilegedUntil=0;
+   showPrompt('startup',null);
+ };
+ window.marsSecureAction=function(fn){
+   if(!window.marsSecurityUnlocked){showPrompt('startup',null);return;}
+   if(Date.now() < privilegedUntil){lastInteraction=Date.now();fn();return;}
+   showPrompt('protected',fn);
+ };
+ cancel.addEventListener('click',()=>{if(mode==='protected'){clearPrompt();}});
+ form.addEventListener('submit',async (e)=>{
+   e.preventDefault();
+   const username=user.value.trim();
+   const password=pass.value;
+   const email=typeof resolveCloudLoginEmail==='function'?resolveCloudLoginEmail(username):(username.includes('@')?username:'');
+   if(!email || !password){msg.textContent='Kullanıcı adı/e-posta ve şifrenizi girin.';return;}
+   btn.disabled=true;btn.textContent='Doğrulanıyor...';msg.textContent='';
+   try{
+     const response=await cloudFetch('/auth/v1/token?grant_type=password',{
+       method:'POST',headers:cloudHeaders(null,{'Content-Type':'application/json'}),
+       body:JSON.stringify({email,password})
+     });
+     if(!response || !response.access_token || !response.user?.id)throw Error('Giriş doğrulanamadı.');
+     const boundOwner=localStorage.getItem('mars_crm_locked_owner_uid_v1');
+     if(boundOwner && boundOwner!==response.user.id)throw Error('Bu cihazdaki CRM verileri farklı bir hesaba aittir.');
+     if(!boundOwner)localStorage.setItem('mars_crm_locked_owner_uid_v1',response.user.id);
+     saveCloudSession({access_token:response.access_token,refresh_token:response.refresh_token,expires_at:Date.now()+Number(response.expires_in||3600)*1000,user:response.user});
+     window.marsCloudUser=response.user;
+     localStorage.setItem('mars_cloud_username',username);
+     updateCloudStatus();
+     const action=pendingAction;
+     const wasProtected=(mode==='protected');
+     finishUnlock();
+     if(wasProtected)privilegedUntil=Date.now()+PROTECTED_MS;
+     if(!wasProtected && typeof syncArchiveFromCloud==='function'){
+       // Read cloud archive after login. Never overwrite cloud with stale phone seed.
+       syncArchiveFromCloud().catch(err=>console.warn('Seyahat bulut eşitlemesi başarısız:',err));
+     }
+     if(action){try{action()}catch(err){console.error(err);alert('Özel ekran açılamadı.');}}
+   }catch(err){
+     msg.textContent=(err?.status===400||err?.status===401)?'Kullanıcı adı veya şifre hatalı.':String(err?.message||err);
+     pass.value='';pass.focus();
+   }finally{btn.disabled=false;btn.textContent='Giriş Yap';}
+ });
+ function wrapSensitiveFunctions(){
+   for(const name of ['openReport','openTravelArchive','openExpenseManager','openReceiptModal','marsOpenReceiptStandalone']){
+     const raw=window[name];
+     if(typeof raw!=='function'||raw.__marsProtected)continue;
+     const wrapped=function(...args){return window.marsSecureAction(()=>raw.apply(this,args));};
+     wrapped.__marsProtected=true;
+     window[name]=wrapped;
+   }
+ }
+ // Bind wrappers after all original CRM modules have been declared.
+ wrapSensitiveFunctions();
+ document.addEventListener('click',()=>{if(window.marsSecurityUnlocked)lastInteraction=Date.now();},{capture:true});
+ document.addEventListener('keydown',()=>{if(window.marsSecurityUnlocked)lastInteraction=Date.now();},{capture:true});
+ document.addEventListener('touchstart',()=>{if(window.marsSecurityUnlocked)lastInteraction=Date.now();},{capture:true,passive:true});
+ setInterval(()=>{if(window.marsSecurityUnlocked&&Date.now()-lastInteraction>IDLE_MS)window.marsScreenLock();},30000);
+ let hiddenAt=null;
+ document.addEventListener('visibilitychange',()=>{
+   if(document.hidden)hiddenAt=Date.now();
+   else if(hiddenAt && window.marsSecurityUnlocked && Date.now()-hiddenAt>90*1000){window.marsScreenLock();hiddenAt=null;}
+ });
+ showPrompt('startup',null);
+})();
+</script>
+<script id="mars80Logic">
+/* v80 country-aware mobile shell — uses actual local/Supabase trip records; never embeds customer data */
+(function(){
+'use strict';
+const mob={country:'',all:false,companyId:'',previewURLs:[]};
+const $=id=>document.getElementById(id);
+const today=()=>{const n=new Date();return new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,10)};
+const safe=v=>typeof esc==='function'?esc(v):String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function tripRecords(){try{return typeof readTripArchive==='function'?readTripArchive():[]}catch(e){return []}}
+function allCompanies(){try{return Array.isArray(companies)?companies:[]}catch(e){return []}}
+function norm(s){return String(s||'').toLocaleUpperCase('tr').replace(/[İI]/g,'I').replace(/[ŞS]/g,'S').replace(/Ğ/g,'G').replace(/Ü/g,'U').replace(/Ö/g,'O').replace(/Ç/g,'C')}
+function context(){
+ const day=today(), all=tripRecords().filter(x=>x&&x.country);
+ const ordered=all.sort((a,b)=>String(b.from||'').localeCompare(String(a.from||'')));
+ const active=ordered.find(x=>String(x.from||'')<=day && String(x.to||x.from||'')>=day);
+ const upcoming=ordered.filter(x=>String(x.from||'')>day).sort((a,b)=>String(a.from).localeCompare(String(b.from)))[0];
+ const rec=ordered.find(x=>x.country===mob.country&&(String(x.from||'')<=day&&String(x.to||x.from||'')>=day))||ordered.find(x=>x.country===mob.country)||active||upcoming||ordered[0]||null;
+ const country=mob.country||active?.country||upcoming?.country||rec?.country||'';
+ const sameCountry=ordered.filter(x=>x.country===country);
+ const activeRec=sameCountry.find(x=>String(x.from||'')<=day&&String(x.to||x.from||'')>=day)||sameCountry.find(x=>String(x.from||'')>day)||sameCountry[0]||null;
+ const fromArchive=(activeRec?.schedule||[]).filter(x=>x.date===day).map(x=>({companyId:x.companyId,company:x.company,city:x.city,time:x.time||''}));
+ const fromPlans=(window.tripPlans||[]).filter(p=>p.date===day).map(p=>{const c=allCompanies().find(x=>x.id===p.companyId);return c&&(!country||c.country===country)?{companyId:c.id,company:c.company,city:c.city,time:p.time||''}:null}).filter(Boolean);
+ const seen=new Set();const schedule=(fromArchive.concat(fromPlans)).filter(x=>{if(!x.companyId&&!x.company)return false;const key=x.companyId||norm(x.company);if(seen.has(key))return false;seen.add(key);return true}).sort((a,b)=>String(a.time||'99').localeCompare(String(b.time||'99')));
+ return {country,day,rec:activeRec,schedule};
+}
+function countryOptions(country){
+ const input=$('m80FilterCountry');if(!input)return;
+ const countries=[...new Set(allCompanies().map(x=>x.country).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr'));
+ const html='<option value="">Tüm Ülkeler</option>'+countries.map(c=>'<option value="'+safe(c)+'">'+safe(c)+'</option>').join('');
+ if(input.dataset.options!==html){input.innerHTML=html;input.dataset.options=html;}
+ if(country&&!input.value&&countries.includes(country))input.value=country;
+}
+function renderSchedule(c){
+ const box=$('m80Schedule');if(!box)return;
+ $('m80PlanSubtitle').textContent=new Intl.DateTimeFormat('tr-TR',{day:'numeric',month:'long',year:'numeric'}).format(new Date(c.day+'T12:00:00'))+(c.country?' • '+c.country:'');
+ box.innerHTML=c.schedule.length?c.schedule.map(p=>{
+  const comp=allCompanies().find(x=>x.id===p.companyId)||allCompanies().find(x=>norm(x.company)===norm(p.company));
+  const label=comp?.company||p.company||'Firma';const id=comp?.id||'';
+  return '<button class="m80ScheduleItem" type="button" '+(id?'onclick="mars80OpenCompany(\''+id+'\')"':'')+'><span class="m80Time">'+safe(p.time||'—')+'</span><span class="m80ItemContent"><strong>'+safe(label)+'</strong><small>'+safe(comp?.city||p.city||c.country)+'</small></span><span class="m80ItemTag">Ziyaret</span><span class="m80FirmChevron">›</span></button>';
+ }).join(''):'<div class="m80Empty">Bugün için kayıtlı randevu bulunmuyor. Önce Seyahat Planı ekranından firmaları ve tarihlerini belirleyebilirsin.</div>';
+}
+function renderDirectory(c){
+ const q=String($('m80Search')?.value||'').toLocaleLowerCase('tr');
+ const country=$('m80FilterCountry')?.value||c.country||'';
+ const pot=$('m80FilterPotential')?.value||'';
+ const planned=new Set(c.schedule.map(x=>x.companyId).filter(Boolean));
+ let list=allCompanies().filter(x=>(!country||x.country===country)&&(!pot||(pot==='high'?['A+','A'].includes(x.potential):x.potential===pot))&&(!q||[x.company,x.city,x.email,x.phone].join(' ').toLocaleLowerCase('tr').includes(q))&&(mob.all||planned.has(x.id)));
+ const rank={'A+':0,A:1,B:2,C:3};list.sort((a,b)=>mob.all?(rank[a.potential]??9)-(rank[b.potential]??9)||a.company.localeCompare(b.company,'tr'):((c.schedule.find(x=>x.companyId===a.id)?.time||'').localeCompare(c.schedule.find(x=>x.companyId===b.id)?.time||'')));
+ $('m80SwitchAll').textContent=mob.all?'Bugünün Firmaları':'Tüm Firmalar';
+ $('m80DirectoryHint').textContent=mob.all?list.length+' firma listeleniyor':c.schedule.length?'Bugünkü planda '+c.schedule.length+' firma • '+list.length+' eşleşme':'Bugün için planlı firma yok. Tüm Firmalar ile listeye ulaşabilirsin.';
+ $('m80FirmList').innerHTML=list.length?list.map(x=>'<button class="m80Firm" type="button" onclick="mars80OpenCompany(\''+safe(x.id)+'\')"><span class="m80FirmIcon">▥</span><span class="m80FirmText"><b>'+safe(x.company)+'</b><small>'+(mob.all?'':safe(c.schedule.find(p=>p.companyId===x.id)?.time||'')+' · ')+safe(x.country)+' · '+safe(x.city)+'</small></span>'+(x.potential?'<span class="m80FirmPot '+(['B','C'].includes(x.potential)?x.potential.toLowerCase():'')+'">'+safe(x.potential)+'</span>':'')+'<span class="m80FirmChevron">›</span></button>').join(''):'<div class="m80Empty">Seçili filtrelerde firma bulunamadı.</div>';
+}
+function renderHotels(c){
+ const rows=tripRecords().filter(x=>x.country===c.country&&x.hotelName).sort((a,b)=>String(b.from||'').localeCompare(String(a.from||'')));
+ const hotels=new Map();for(const t of rows){const k=norm(t.hotelName);if(!hotels.has(k))hotels.set(k,t);}
+ const box=$('m80Hotels');if(!box)return;
+ box.innerHTML=hotels.size?[...hotels.values()].slice(0,4).map(t=>'<div class="m80HotelRow"><span class="m80HotelText"><b>'+safe(t.hotelName)+'</b><span>'+safe(t.hotelNote||t.from||'')+'</span></span><button type="button" onclick="mars80HotelMaps(\''+encodeURIComponent(t.hotelName)+'\',\''+encodeURIComponent(t.country)+'\')">Google Maps ↗</button></div>').join(''):'<div class="m80Empty">'+(c.country?c.country+' için':'Bu seyahat için')+' daha önce kaydedilmiş otel bulunmuyor.</div>';
+}
+function refresh(){if(!document.getElementById('mars80Mobile'))return;const c=context();
+ $('m80Country').textContent=c.country||'Seyahat seçilmedi';$('m80Appointments').textContent=c.schedule.length;
+ $('m80Potential').textContent=allCompanies().filter(x=>x.country===c.country&&['A+','A'].includes(x.potential)).length;
+ $('m80Hotel').textContent=c.rec?.hotelName||'Otel seçilmedi';countryOptions(c.country);
+ renderSchedule(c);renderDirectory(c);renderHotels(c);
+}
+window.mars80Refresh=refresh;
+window.mars80OpenMenu=()=>$('mobileNavToggle')?.click();
+window.mars80Home=()=>{window.scrollTo({top:0,behavior:'smooth'});};
+window.mars80ChooseCountry=()=>{$('m80FilterCountry')?.focus();$('m80FilterCountry')?.scrollIntoView({behavior:'smooth',block:'center'});};
+window.mars80CountryChanged=function(s){mob.country=s;mob.all=true;refresh();};
+window.mars80TodayList=function(){mob.all=false;refresh();$('m80DirectoryHead')?.scrollIntoView({behavior:'smooth',block:'start'});};
+window.mars80ToggleAllFirms=function(){mob.all=!mob.all;refresh();};
+window.mars80ShowPotential=function(){mob.all=true;$('m80FilterPotential').value='high';refresh();$('m80DirectoryHead')?.scrollIntoView({behavior:'smooth'});};
+window.mars80OpenArchive=()=>typeof openTravelArchive==='function'&&openTravelArchive();
+window.mars80OpenTripPlan=()=>typeof openReport==='function'&&openReport();
+window.mars80AddReceipt=function(){
+ const c=context();let rec=c.rec;
+ if(!rec || !(String(rec.from||'')<=c.day&&String(rec.to||rec.from||'')>=c.day)){
+   const candidates=tripRecords().sort((a,b)=>String(b.from||'').localeCompare(String(a.from||''))).slice(0,10);
+   if(!candidates.length){alert('Henüz seyahat kaydı yok. Önce seyahat planı oluşturmalısın.');return;}
+   const lines=candidates.map((r,i)=>(i+1)+') '+r.country+' — '+r.from+' / '+(r.to||r.from));
+   const answer=prompt('Fişi hangi seyahate eklemek istiyorsun? Numara seç:\n'+lines.join('\n'),'1');
+   if(answer===null)return;
+   const index=Number(answer)-1;if(!Number.isInteger(index)||index<0||index>=candidates.length){alert('Geçerli bir seyahat numarası seç.');return;}
+   rec=candidates[index];
+ }
+ if(typeof window.openReceiptModal==='function')window.openReceiptModal(rec.id);else alert('Fiş modülü kullanılamıyor.');
+};
+window.mars80EditHotel=function(){const c=context();if(!c.rec?.id){alert('Önce seyahat planını oluştur.');return;}const name=prompt('Bu seyahat için otelin adı:',c.rec.hotelName||'');if(name===null)return;const clean=name.trim();if(!clean)return;const rows=tripRecords();const item=rows.find(r=>r.id===c.rec.id);if(item){item.hotelName=clean;item.updatedAt=new Date().toISOString();writeTripArchive(rows);refresh();}};
+window.mars80HotelMaps=function(encodedName,encodedCountry){const q=decodeURIComponent(encodedName)+' '+decodeURIComponent(encodedCountry);window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q),'_blank','noopener');};
+function selected(){return allCompanies().find(x=>x.id===mob.companyId)}
+window.mars80OpenCompany=function(id){const c=allCompanies().find(x=>x.id===id);if(!c)return;mob.companyId=id;$('m80SheetTitle').textContent=c.company;$('m80SheetSub').textContent=[c.city,c.country].filter(Boolean).join(' · ');$('m80CompanySheet').hidden=false;$('m80SheetBackdrop').hidden=false;loadPhotos();};
+window.mars80CloseSheet=function(){ $('m80CompanySheet').hidden=true;$('m80SheetBackdrop').hidden=true;mob.previewURLs.forEach(x=>URL.revokeObjectURL(x));mob.previewURLs=[];};
+window.mars80OpenCard=function(){const c=selected();if(!c)return;mars80CloseSheet();openEdit(c.id);};
+window.mars80VisitNote=function(){const c=selected();if(!c)return;mars80CloseSheet();openActivity(c.id);};
+window.mars80Maps=function(){const c=selected();if(!c)return;openMaps(c.id);};
+window.mars80VerifyLocation=function(){const c=selected();if(!c)return;if(!navigator.geolocation){alert('Bu cihaz konum servisini desteklemiyor.');return;}navigator.geolocation.getCurrentPosition(p=>{const lat=p.coords.latitude,lng=p.coords.longitude,acc=Math.round(p.coords.accuracy||0);
+  const url='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(lat+','+lng);
+  const ok=confirm('Mevcut konum: '+lat.toFixed(6)+', '+lng.toFixed(6)+'\nYaklaşık GPS doğruluğu: '+acc+' metre.\n\nBu noktada firma adresini bizzat teyit ettiniz mi? EVET derseniz konum kaydedilir.');
+  if(ok){c.verifiedLat=lat;c.verifiedLng=lng;c.addressVerified=true;c.addressSource='Telefon GPS • Kullanıcı teyidi';c.addressChecked=today();c.addressConfidence=acc<=50?'GPS / kullanıcı teyidi':'GPS doğruluğu '+acc+' m / kullanıcı teyidi';save();alert('Konum firma kaydına işlendi. Google Maps bağlantısı açılacak.');window.open(url,'_blank','noopener');}
+ },e=>alert('Konum alınamadı: '+e.message),{enableHighAccuracy:true,timeout:16000,maximumAge:0});};
+const oldOpenMaps=window.openMaps;
+window.openMaps=function(id){const c=allCompanies().find(x=>x.id===id);if(c?.addressVerified&&Number.isFinite(c.verifiedLat)&&Number.isFinite(c.verifiedLng)){window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(c.verifiedLat+','+c.verifiedLng),'_blank','noopener');return;}return oldOpenMaps(id);};
+window.mars80SelectPhoto=()=> $('m80PhotoInput')?.click();
+// Private photos remain only on this phone's IndexedDB until a future authenticated media-sync integration is configured.
+function photoDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open('mars_crm_mobile_media_v80',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('photos'))req.result.createObjectStore('photos',{keyPath:'id'});};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
+async function photoEntries(companyId){const db=await photoDb();return new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>{db.close();resolve((req.result||[]).filter(x=>x.companyId===companyId).sort((a,b)=>b.date.localeCompare(a.date)));};req.onerror=()=>{db.close();reject(req.error);};});}
+async function loadPhotos(){const id=mob.companyId;if(!id)return;const box=$('m80Photos');if(!box)return;mob.previewURLs.forEach(x=>URL.revokeObjectURL(x));mob.previewURLs=[];try{const list=await photoEntries(id);if(mob.companyId!==id)return;box.innerHTML='';if(!list.length){box.textContent='Bu firma için fotoğraf bulunmuyor.';return;}for(const item of list){const u=URL.createObjectURL(item.blob);mob.previewURLs.push(u);const a=document.createElement('a');a.href=u;a.target='_blank';a.rel='noopener';const img=new Image();img.src=u;img.alt='Firma fotoğrafı';a.appendChild(img);box.appendChild(a);}}catch(e){box.textContent='Fotoğraflar okunamadı.';}}
+window.mars80SavePhoto=async function(files){const file=files?.[0],id=mob.companyId;if(!file||!id)return;try{const data=await new Promise((resolve,reject)=>{const im=new Image();const obj=URL.createObjectURL(file);im.onload=()=>{try{const canvas=document.createElement('canvas');const scale=Math.min(1,1280/Math.max(im.width,im.height));canvas.width=Math.max(1,Math.round(im.width*scale));canvas.height=Math.max(1,Math.round(im.height*scale));canvas.getContext('2d').drawImage(im,0,0,canvas.width,canvas.height);canvas.toBlob(b=>b?resolve(b):reject(Error('Görsel dönüştürülemedi.')),'image/jpeg',.77);}finally{URL.revokeObjectURL(obj);}};im.onerror=()=>{URL.revokeObjectURL(obj);reject(Error('Görsel okunamadı.'));};im.src=obj;});const db=await photoDb();await new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put({id:'photo-'+Date.now()+'-'+Math.random().toString(16).slice(2),companyId:id,date:new Date().toISOString(),blob:data});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();if($('m80PhotoInput'))$('m80PhotoInput').value='';await loadPhotos();}catch(e){alert('Fotoğraf kaydedilemedi: '+e.message);}};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh,{once:true});else refresh();
+// Synchronization callbacks may finish later; refresh without interrupting text input.
+window.addEventListener('focus',()=>setTimeout(refresh,350));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(refresh,500);});
 })();
 </script>
 </body>
