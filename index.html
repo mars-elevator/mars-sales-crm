@@ -348,6 +348,16 @@ header{background:#102c32!important;box-shadow:none!important}
  .m80SheetHeader{display:flex;align-items:start;justify-content:space-between;gap:12px}.m80SheetHeader h2{font-size:17px;margin:0;color:#18353c}.m80SheetHeader p{font-size:12px;color:#73838a;margin:4px 0 0}.m80SheetClose{border:0;background:#edf1f2;border-radius:10px;width:34px;height:34px;font-size:25px}
  .m80SheetActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0}.m80SheetActions button{min-height:44px;border:1px solid #dae4e6;background:#fff;color:#0c554e;border-radius:9px;font-size:12px;font-weight:750}
  .m80CompanyPhotos h3{margin:12px 0;font-size:14px}.m80Photos{display:flex;gap:8px;overflow-x:auto;padding:6px 0;font-size:12px;color:#81939a}.m80Photos img{height:78px;width:78px;object-fit:cover;border-radius:10px;border:1px solid #dfe7e7}
+ .m80PickerBackdrop:not([hidden]){display:block!important;position:fixed;inset:0;z-index:10056;background:#09192282;backdrop-filter:blur(2px)}
+ .m80PickerSheet:not([hidden]){display:block!important;position:fixed;left:12px;right:12px;bottom:12px;z-index:10057;background:#fff;border-radius:22px;padding:16px 14px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 34px #00000026;max-height:78dvh;overflow-y:auto}
+ .m80PickerHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}.m80PickerHead h2{margin:0;font-size:26px;color:#17353d}.m80PickerHead p{margin:6px 0 0;font-size:12px;color:#6f838b;line-height:1.45}
+ .m80PickerClose{border:0;background:#eef2f3;color:#47606b;border-radius:12px;width:40px;height:40px;font-size:29px;line-height:1;flex:0 0 auto}
+ .m80PickerInfo{background:#edf6f4;border:1px solid #d3e6e1;border-radius:12px;padding:10px 12px;font-size:12px;color:#29534c;line-height:1.45;margin-bottom:12px}
+ .m80PickerList{display:grid;gap:10px}.m80ReceiptChoice{background:#fff;border:1px solid #d9e5e8;border-radius:15px;padding:13px 12px;text-align:left;display:grid;gap:10px;box-shadow:0 3px 10px #0f2b3308}.m80ReceiptChoice.is-active{border-color:#88c5b7;background:#f4fbf8}
+ .m80ReceiptChoiceTop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.m80ReceiptChoiceTop strong{font-size:18px;color:#17353d;display:block}.m80ReceiptChoiceRange{font-size:12px;color:#6d8088;margin-top:4px}.m80ReceiptChoiceBadge{background:#e8f6f1;color:#136856;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:800;white-space:nowrap}
+ .m80ReceiptChoiceMeta{display:flex;flex-wrap:wrap;gap:7px}.m80ReceiptChoiceMeta span{background:#f5f8fa;border-radius:999px;padding:6px 9px;font-size:11px;color:#4f6672}.m80ReceiptChoiceAction{width:100%;min-height:44px;border:0;border-radius:11px;background:#176c60;color:#fff;font-size:14px;font-weight:800}
+ .m80PickerFooter{margin-top:12px}.m80PickerCancel{width:100%;min-height:44px;border:1px solid #dbe4e7;background:#fff;color:#30535b;border-radius:11px;font-size:14px;font-weight:800}
+ .m80PickerEmpty{padding:18px 12px;text-align:center;border:1px dashed #d1dde0;border-radius:14px;color:#6e8088;font-size:13px;background:#fafcfd}
 }
 </style>
 <style>/* MARS v85 professional sidebar */@media(min-width:761px){.crmSideNav{background:#152b37!important;border-right:1px solid #264351!important;box-shadow:3px 0 18px rgba(21,43,55,.09)!important}.crmSideNav .sideGroup{color:#d9e4e9!important;border-radius:10px!important;margin:3px 0!important}.crmSideNav .sideItem{color:#d3e1e6!important;border-radius:9px!important;font-size:13px!important}.crmSideNav .sideItem:hover,.crmSideNav .sideGroup:hover{background:#254551!important;color:#fff!important}.crmSideNav .sideItem.active,.crmSideNav .sideGroup.open{background:#22584f!important;color:#fff!important}.crmSideNav .sideSubmenu{border-left:1px solid #44636c!important;margin-left:15px!important;padding-left:3px!important}.crmSideNav .sideStatus{background:#213b48!important;border-color:#3b5763!important}header{background:#fff!important;color:#243846!important;border-bottom:1px solid #e3eaf0!important}.brand{color:#223847!important}}#mars85SyncStatus{position:fixed;bottom:14px;right:14px;z-index:900;border:1px solid #bedad7;background:#f8fffc;color:#285348;border-radius:12px;padding:9px 12px;font:600 12px system-ui,sans-serif;max-width:290px;box-shadow:0 3px 16px #14292c17}#mars85SyncStatus[hidden]{display:none!important}</style><style id="marsV90ApprovedDesign">
@@ -392,7 +402,21 @@ button.btn:not(.secondary),.m80Primary{background:#196d61!important;border-radiu
 @media(min-width:761px){body.m904Home .cards,body.m904Home .crmFilters,body.m904Home .tableWrap,body.m904Home main>.small{display:none!important}body.m904Home .m904Dashboard{display:block!important}}
 .m904Dashboard{display:none;max-width:1320px;margin:0 auto 24px;color:#173043}.m904Kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:2px 0 16px}.m904Kpi,.m904Box{border:1px solid #e1e8ed;background:#fff;border-radius:16px;box-shadow:0 3px 14px #102d390a}.m904Kpi{padding:18px}.m904Kpi b{font-size:29px;display:block;color:#132c3f}.m904Kpi span{font-size:12px;color:#70849a}.m904Box{padding:18px;margin-bottom:14px}.m904Box h2{font-size:18px;margin:0 0 15px;color:#132d40}.m904Search{width:100%;padding:15px;border:1px solid #dce5eb;border-radius:10px;font-size:15px}.m904Filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.m904Filters select,.m904Filters button,.m904Actions button{background:#edf4f1;color:#174939;border:0;border-radius:9px;padding:10px 12px;cursor:pointer;font-weight:650}.m904Table{width:100%;min-width:0}.m904Table th,.m904Table td{padding:12px 9px;font-size:13px}.m904Table th{position:static}.m904Table tr{cursor:pointer}.m904LowGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.m904Actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.m904Actions button:first-child{background:#216f61;color:white}.m904Feed{display:flex;flex-direction:column;gap:10px}.m904Feed button{border:0;background:#f5f8fa;border-radius:9px;padding:11px;text-align:left;color:#28475a;cursor:pointer}.m904Muted{color:#7990a0;font-size:13px}.m904MobileOnly{display:none}
 @media(max-width:760px){body.m904Home #mars80Mobile{display:none!important}body.m904Home main>.cards,body.m904Home main>.crmFilters,body.m904Home main>.tableWrap,body.m904Home main>.small{display:none!important}body.m904Home .m904Dashboard{display:block!important;margin:0 0 76px}.m904Kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.m904Kpi{padding:14px}.m904Kpi b{font-size:25px}.m904Box{padding:14px;margin-bottom:10px}.m904LowGrid{grid-template-columns:1fr}.m904DesktopOnly{display:none}.m904MobileOnly{display:block}.m904Table td:nth-child(3),.m904Table th:nth-child(3){display:none}body.m904Home main{padding:12px!important}body.m904Home .m80BottomBar{display:grid!important}}
-</style></head>
+</style><
+<style id="marsV908MobileModalFix">
+/* On mobile the fixed bottom tab bar must never cover the trip report dialog. */
+@media(max-width:760px){
+  #reportBack{z-index:11050!important;position:fixed!important;inset:0!important;padding:0!important;align-items:flex-end!important;justify-content:center!important;overscroll-behavior:contain!important}
+  #reportBack>.modal{box-sizing:border-box!important;display:flex!important;flex-direction:column!important;width:100%!important;max-width:100%!important;height:calc(100dvh - 12px)!important;max-height:calc(100dvh - 12px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:14px 12px calc(22px + env(safe-area-inset-bottom,0px))!important;border-radius:20px 20px 0 0!important}
+  #reportBack .mars908ReportTop{position:sticky!important;top:-14px!important;z-index:5!important;display:flex!important;justify-content:space-between!important;align-items:center!important;gap:8px!important;background:white!important;padding:10px 2px!important;border-bottom:1px solid #e4ecec!important;flex-shrink:0!important}
+  #reportBack .mars908ReportTop h2{margin:0!important;font-size:18px!important}
+  #reportBack .mars908TopClose{font-size:14px!important;font-weight:750!important;min-height:44px!important;flex:0 0 auto!important;border:1px solid #cbd5d8!important;border-radius:11px!important;background:#eef3f5!important;color:#263c47!important;padding:10px 14px!important}
+  #reportBack .footerBtns{position:sticky!important;bottom:calc(-22px - env(safe-area-inset-bottom,0px))!important;z-index:6!important;display:flex!important;flex-direction:column!important;background:#fff!important;padding:12px 4px calc(15px + env(safe-area-inset-bottom,0px))!important;border-top:1px solid #dbe5e9!important;box-shadow:0 -6px 18px rgba(15,40,50,.07)!important;margin-top:20px!important}
+  #reportBack .footerBtns .btn{flex:none!important;width:100%!important;white-space:normal!important;min-height:46px!important}
+}
+@media(min-width:761px){#reportBack .mars908ReportTop{display:flex;align-items:center;justify-content:space-between;gap:12px}#reportBack .mars908TopClose{background:#edf3f4;border:1px solid #d8e5e6;border-radius:9px;padding:9px 14px;cursor:pointer;color:#173b42;font-weight:700}}
+</style>
+/head>
 <body>
 
 <script>
@@ -521,6 +545,16 @@ button.btn:not(.secondary),.m80Primary{background:#196d61!important;border-radiu
   </div>
   <nav class="m80BottomBar" aria-label="Mobil gezinme"><button onclick="mars80Home()" class="active" type="button"><span>⌂</span>Ana Sayfa</button><button onclick="mars80TodayList()" type="button"><span>▤</span>Firmalar</button><button onclick="mars80AddReceipt()" type="button"><span>▧</span>Fiş Ekle</button><button onclick="mars80OpenArchive()" type="button"><span>▱</span>Arşiv</button><button onclick="mars80OpenMenu()" type="button"><span>☰</span>Diğer</button></nav>
 </section>
+<div class="m80PickerBackdrop" id="m80ReceiptPickerBack" hidden onclick="if(event.target===this)m80CloseReceiptPicker()"></div>
+<div class="m80PickerSheet" id="m80ReceiptPicker" role="dialog" aria-modal="true" aria-label="Fiş için seyahat seçimi" hidden>
+ <div class="m80PickerHead">
+  <div><h2>Fiş Ekle</h2><p>Fişi eklemek istediğin seyahati listeden seç. Yazı yazarak numara seçmene gerek yok.</p></div>
+  <button type="button" class="m80PickerClose" onclick="m80CloseReceiptPicker()" aria-label="Kapat">×</button>
+ </div>
+ <div class="m80PickerInfo">En güncel seyahatler yukarıda gösterilir. Doğru seyahati seçerek hatalı kayıt riskini azaltabilirsin.</div>
+ <div class="m80PickerList" id="m80ReceiptPickerList"></div>
+ <div class="m80PickerFooter"><button type="button" class="m80PickerCancel" onclick="m80CloseReceiptPicker()">Kapat</button></div>
+</div>
 <div class="m80SheetBackdrop" id="m80SheetBackdrop" hidden onclick="mars80CloseSheet()"></div>
 <div class="m80Sheet" id="m80CompanySheet" role="dialog" aria-modal="true" aria-label="Firma işlemleri" hidden>
   <div class="m80SheetHeader"><div><h2 id="m80SheetTitle">Firma</h2><p id="m80SheetSub"></p></div><button type="button" onclick="mars80CloseSheet()" aria-label="Kapat" class="m80SheetClose">×</button></div>
@@ -5011,7 +5045,7 @@ function forceInitialDataLoad(){
 
 <div class="modalBack" id="reportBack">
   <div class="modal" style="width:min(1180px,100%)">
-    <h2 id="reportModalTitle">Seyahat Planı / Rapor</h2>
+    <div class="mars908ReportTop"><h2 id="reportModalTitle">Seyahat Planı / Rapor</h2><button type="button" class="mars908TopClose" onclick="closeReport()" aria-label="Seyahat planını kapat">✕ Kapat</button></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
       <button type="button" class="btn" id="preTripModeBtn" onclick="setReportMode('pre')">Seyahat Öncesi Plan</button>
       <button type="button" class="btn secondary" id="postTripModeBtn" onclick="setReportMode('post')">Seyahat Sonrası Rapor</button>
@@ -6435,18 +6469,61 @@ window.mars80ToggleAllFirms=function(){mob.all=!mob.all;refresh();};
 window.mars80ShowPotential=function(){mob.all=true;$('m80FilterPotential').value='high';refresh();$('m80DirectoryHead')?.scrollIntoView({behavior:'smooth'});};
 window.mars80OpenArchive=()=>typeof openTravelArchive==='function'&&openTravelArchive();
 window.mars80OpenTripPlan=()=>typeof openReport==='function'&&openReport();
-window.mars80AddReceipt=function(){
- const c=context();let rec=c.rec;
- if(!rec || !(String(rec.from||'')<=c.day&&String(rec.to||rec.from||'')>=c.day)){
-   const candidates=tripRecords().sort((a,b)=>String(b.from||'').localeCompare(String(a.from||''))).slice(0,10);
-   if(!candidates.length){alert('Henüz seyahat kaydı yok. Önce seyahat planı oluşturmalısın.');return;}
-   const lines=candidates.map((r,i)=>(i+1)+') '+r.country+' — '+r.from+' / '+(r.to||r.from));
-   const answer=prompt('Fişi hangi seyahate eklemek istiyorsun? Numara seç:\n'+lines.join('\n'),'1');
-   if(answer===null)return;
-   const index=Number(answer)-1;if(!Number.isInteger(index)||index<0||index>=candidates.length){alert('Geçerli bir seyahat numarası seç.');return;}
-   rec=candidates[index];
+function m80ReceiptCandidates(){
+ const cands=tripRecords().slice().sort((a,b)=>String(b.from||'').localeCompare(String(a.from||'')));
+ const uniq=[]; const seen=new Set();
+ for(const r of cands){
+   if(!r||!r.id) continue;
+   const key=[r.country||'',r.from||'',r.to||'',r.hotelName||''].join('|');
+   if(seen.has(key)) continue; seen.add(key); uniq.push(r);
+   if(uniq.length>=12) break;
  }
- if(typeof window.openReceiptModal==='function')window.openReceiptModal(rec.id);else alert('Fiş modülü kullanılamıyor.');
+ return uniq;
+}
+window.m80CloseReceiptPicker=function(){
+ const back=$('m80ReceiptPickerBack'), box=$('m80ReceiptPicker');
+ if(back) back.hidden=true; if(box) box.hidden=true;
+};
+window.m80SelectReceiptTrip=function(id){
+ m80CloseReceiptPicker();
+ if(typeof window.openReceiptModal==='function') window.openReceiptModal(id);
+ else alert('Fiş modülü kullanılamıyor.');
+};
+window.m80OpenReceiptPicker=function(candidates, activeId){
+ const back=$('m80ReceiptPickerBack'), box=$('m80ReceiptPicker'), list=$('m80ReceiptPickerList');
+ if(!back || !box || !list) return;
+ if(!candidates.length){ list.innerHTML='<div class="m80PickerEmpty">Henüz kayıtlı seyahat bulunmuyor. Önce bir seyahat planı oluşturmalısın.</div>'; }
+ else {
+   list.innerHTML=candidates.map(r=>{
+     const active = activeId && r.id===activeId;
+     const meta=[];
+     if(r.hotelName) meta.push('<span>🏨 '+safe(r.hotelName)+'</span>');
+     if(r.city) meta.push('<span>📍 '+safe(r.city)+'</span>');
+     if(r.status) meta.push('<span>Durum: '+safe(r.status)+'</span>');
+     const range=safe(r.from||'—') + (r.to&&r.to!==r.from ? ' / '+safe(r.to) : '');
+     return '<div class="m80ReceiptChoice '+(active?'is-active':'')+'">' +
+       '<div class="m80ReceiptChoiceTop"><div><strong>'+safe(r.country||'Seyahat')+'</strong><div class="m80ReceiptChoiceRange">'+range+'</div></div>' +
+       (active?'<span class="m80ReceiptChoiceBadge">Aktif seyahat</span>':'') + '</div>' +
+       '<div class="m80ReceiptChoiceMeta">'+(meta.join('') || '<span>Ek bilgi yok</span>')+'</div>' +
+       '<button type="button" class="m80ReceiptChoiceAction" onclick="m80SelectReceiptTrip(\''+safe(r.id)+'\')">Bu seyahate fiş ekle</button>' +
+     '</div>';
+   }).join('');
+ }
+ back.hidden=false; box.hidden=false;
+};
+window.mars80AddReceipt=function(){
+ const c=context(); let rec=c.rec;
+ if(rec && String(rec.from||'')<=c.day && String(rec.to||rec.from||'')>=c.day){
+   if(typeof window.openReceiptModal==='function') window.openReceiptModal(rec.id);
+   else alert('Fiş modülü kullanılamıyor.');
+   return;
+ }
+ const candidates=m80ReceiptCandidates();
+ if(!candidates.length){
+   alert('Henüz seyahat kaydı yok. Önce seyahat planı oluşturmalısın.');
+   return;
+ }
+ m80OpenReceiptPicker(candidates, rec?.id||'');
 };
 window.mars80EditHotel=function(){const c=context();if(!c.rec?.id){alert('Önce seyahat planını oluştur.');return;}const name=prompt('Bu seyahat için otelin adı:',c.rec.hotelName||'');if(name===null)return;const clean=name.trim();if(!clean)return;const rows=tripRecords();const item=rows.find(r=>r.id===c.rec.id);if(item){item.hotelName=clean;item.updatedAt=new Date().toISOString();writeTripArchive(rows);refresh();}};
 window.mars80HotelMaps=function(encodedName,encodedCountry){const q=decodeURIComponent(encodedName)+' '+decodeURIComponent(encodedCountry);window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q),'_blank','noopener');};
@@ -6479,13 +6556,26 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
 <style id="mars84Style">
 .m84Back{position:fixed;inset:0;background:#081b2bf0;z-index:22000;display:none;overflow:auto;padding:18px 10px}.m84App{background:#f7f9fb;max-width:1120px;margin:0 auto;min-height:calc(100vh - 40px);border-radius:16px;overflow:hidden;color:#192b36}.m84Header{background:#142b37;color:white;padding:22px 26px;display:flex;justify-content:space-between;gap:12px;align-items:center}.m84Header h2{margin:0;font-size:21px}.m84Body{padding:22px}.m84Tabs{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 18px}.m84Tab{border:1px solid #d9e1e5;background:#fff;padding:10px 15px;border-radius:8px;cursor:pointer;font-weight:650}.m84Tab.is-on{color:white;background:#176b60;border-color:#176b60}.m84Toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}.m84Toolbar input,.m84Toolbar select,.m84Form input,.m84Form select,.m84Form textarea{box-sizing:border-box;max-width:100%;min-height:42px;border:1px solid #c9d5da;border-radius:9px;padding:10px;background:#fff;color:#1d3540;font:inherit}.m84Toolbar input{flex:1;min-width:180px}.m84Btn{background:#156b60;border:0;color:white;padding:11px 15px;border-radius:9px;font-weight:700;cursor:pointer}.m84Btn.light{background:#ebf2f3;color:#1a4b54}.m84Rows{display:grid;gap:12px}.m84Card{padding:15px 18px;background:white;border:1px solid #e0e8eb;border-radius:13px;display:grid;gap:9px;box-shadow:0 2px 9px #14304008}.m84Card h3{margin:0;font-size:17px;color:#1c3640}.m84Meta{font-size:13px;color:#60717b}.m84Actions{display:flex;gap:8px;flex-wrap:wrap}.m84Form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.m84Form label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:650}.m84Form label.full{grid-column:1/-1}.m84Form textarea{min-height:90px}.m84Pill{display:inline-block;background:#f3eada;color:#765a17;border-radius:30px;padding:4px 10px;font-size:12px}.m84Info{background:#eaf3f3;padding:12px;border-radius:10px;font-size:13px;margin-bottom:13px}.m84Empty{padding:25px;background:white;border:1px dashed #cedade;text-align:center;border-radius:12px;color:#5b6d76}.m84Preview{max-width:180px;max-height:120px;object-fit:contain}.m84Hidden{display:none!important}
 @media(max-width:650px){.m84Body{padding:14px}.m84Header{padding:16px}.m84Form{grid-template-columns:1fr}.m84Toolbar input{min-width:100%}.m84App{min-height:100vh;border-radius:0}.m84Back{padding:0}}
+
+/* v90.9: distinct camera and library choices on mobile */
+.m84ImageInputField{display:flex;flex-direction:column;gap:8px;font-size:13px;min-width:0}
+.m84ImageChoices{display:flex;gap:9px;flex-wrap:wrap}
+.m84ImageChoices .m84ImageChoice{flex:1 1 148px;min-height:48px;display:flex;align-items:center;justify-content:center;position:relative;gap:8px;border:1px solid #b4d4ce;border-radius:11px;padding:12px 10px;background:#e5f3ef;color:#14584f;font:700 14px/1.3 system-ui,sans-serif;cursor:pointer;text-align:center}
+.m84ImageChoices .m84ImageChoiceGallery{background:white;border-color:#a9bac4;color:#234356}
+.m84ImageChoices .m84ImageChoice:focus-within{outline:3px solid #6ac4b0;outline-offset:2px}
+.m84ImageChoices input[type=file]{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;clip-path:inset(50%)!important;pointer-events:none!important;border:0!important;padding:0!important;min-height:0!important}
+.m84ImagePicked{font-size:12px;color:#60747b}
+@media(max-width:650px){.m84ImageInputField{width:100%}.m84ImageChoices .m84ImageChoice{font-size:14px}}
 </style>
 <div id="mars84Back" class="m84Back" role="dialog" aria-modal="true" aria-label="Fuar Yönetimi">
  <div class="m84App"><header class="m84Header"><div><h2>Fuar Yönetimi</h2><div style="font-size:12px;opacity:.85;margin-top:4px">Uluslararası fuarlar · adresler · kartvizitler · seyahat entegrasyonu</div></div><button class="m84Btn light" onclick="mars84CloseFair()">✕ Kapat</button></header>
  <div class="m84Body"><div class="m84Tabs"><button id="m84TabCalendar" class="m84Tab is-on" onclick="mars84Tab('calendar')">Fuar Takvimi</button><button id="m84TabAdd" class="m84Tab" onclick="mars84Tab('add')">+ Fuar Ekle</button><button id="m84TabCards" class="m84Tab" onclick="mars84Tab('cards')">Kartvizitler</button></div>
  <section id="m84Calendar"><div class="m84Info">Fuarların tam adresi ve tarihleri doğrulanmadan kesin kayıt olarak gösterilmez. Yeni fuarları ekleyebilir, daha sonra doğrulayabilirsin. Google Maps butonu yalnızca kayıtlı adrese yönlendirir.</div><div class="m84Toolbar"><input id="m84Search" placeholder="Fuar adı, şehir, ülke ara…" oninput="mars84RenderFairs()"><select id="m84Country" onchange="mars84RenderFairs()"><option value="">Tüm Ülkeler</option></select><button class="m84Btn" onclick="mars84Tab('add')">+ Fuar Ekle</button></div><div id="m84Fairs" class="m84Rows"></div></section>
  <section id="m84Add" hidden><form id="m84FairForm" class="m84Form" onsubmit="mars84SaveFair(event)"><input type="hidden" id="m84EditId"><label>Fuar adı *<input id="m84Name" required></label><label>Ülke *<select id="m84AddCountry" required></select></label><label>Şehir *<input id="m84City" required></label><label>Fuar merkezi / salon<input id="m84Venue"></label><label>Başlangıç tarihi *<input type="date" id="m84Start" required></label><label>Bitiş tarihi *<input type="date" id="m84End" required></label><label class="full">Tam adres (sokak, bina, posta kodu, giriş) *<input id="m84Address" required></label><label>Resmî fuar sitesi<input type="url" id="m84Website" placeholder="https://..."></label><label>Adres doğrulama<select id="m84Verified"><option value="no">Doğrulanmadı</option><option value="yes">Resmî kaynaktan doğrulandı</option></select></label><label class="full">Not / salon-giriş bilgisi<textarea id="m84Note"></textarea></label><div class="m84Actions"><button type="submit" class="m84Btn">Fuarı Kaydet</button><button type="button" class="m84Btn light" onclick="mars84Tab('calendar')">Vazgeç</button></div></form></section>
- <section id="m84Cards" hidden><div class="m84Info">Ön/arka kartvizit fotoğrafı ekle. OCR, cihazın internet bağlantısıyla çalışır. Okunan alanları onaylamadan müşteri kaydı oluşmaz.</div><div class="m84Form"><label>Bağlı Fuar<select id="m84CardFair"></select></label><label>Kartvizit fotoğrafı (kamera / galeri)<input type="file" id="m84Photo" accept="image/*" capture="environment" onchange="mars84CardImage(this)"></label><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Telefon / WhatsApp<input id="m84CardPhone"></label><label>E-posta<input id="m84CardEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta">Kartvizit ekleyin.</div></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
+ <section id="m84Cards" hidden><div class="m84Info">Ön/arka kartvizit fotoğrafı ekle. OCR, cihazın internet bağlantısıyla çalışır. Okunan alanları onaylamadan müşteri kaydı oluşmaz.</div><div class="m84Form"><label>Bağlı Fuar<select id="m84CardFair"></select></label><div class="m84ImageInputField"><strong>Kartvizit fotoğrafı</strong><div class="m84ImageChoices">
+<label for="m84CameraPhoto" class="m84ImageChoice m84ImageChoiceCamera">📷 Fotoğraf Çek<input type="file" id="m84CameraPhoto" accept="image/*" capture="environment" onchange="mars84CardImage(this)"></label>
+<label for="m84Photo" class="m84ImageChoice m84ImageChoiceGallery">🖼️ Galeriden Seç<input type="file" id="m84Photo" accept="image/*" onchange="mars84CardImage(this)"></label>
+</div><span id="m84ImagePicked" class="m84ImagePicked" role="status" aria-live="polite">Henüz fotoğraf seçilmedi.</span></div><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Telefon / WhatsApp<input id="m84CardPhone"></label><label>E-posta<input id="m84CardEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta">Kartvizit ekleyin.</div></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
  </div></div>
 </div>
 <script>
@@ -6511,10 +6601,18 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
  window.mars84PlanFair=id=>{const x=read(fk).find(y=>y.id===id);if(!x)return;mars84CloseFair();if(typeof window.openReport==='function')window.openReport();setTimeout(()=>{const el=$('rCountry');if(el){el.value=x.country;el.dispatchEvent(new Event('change'));}if($('rFrom'))$('rFrom').value=x.start;if($('rTo'))$('rTo').value=x.end;$('mars84TravelType').value='fair';mars84TravelTypeChanged();$('mars84TripFair').value=x.id;mars84FairPicked();if(typeof window.renderReportRows==='function')window.renderReportRows();},80)};
  window.mars84TravelTypeChanged=()=>{const fair=$('mars84TravelType')?.value==='fair';$('mars84FairPickerWrap').style.display=fair?'':'none';if(!fair){$('rPurpose').value='B2B görüşmeler, müşteri ziyareti ve yeni pazar araştırması.'}fairOptions();};
  window.mars84FairPicked=()=>{const x=read(fk).find(y=>y.id===$('mars84TripFair').value);if(x){$('rPurpose').value='Fuar ziyareti: '+x.name+' — '+x.city+', '+x.country+' / '+x.address;}};
- window.mars84CardImage=(input)=>{const f=input.files?.[0];if(!f)return;if(f.size>8*1024*1024){alert('Fotoğraf 8 MB üzerindedir. Daha küçük çekim seçin.');input.value='';return;}const r=new FileReader();r.onload=()=>{cardImage=String(r.result);$('m84PhotoPreview').src=cardImage;$('m84PhotoPreview').style.display='block'};r.readAsDataURL(f)};
+ window.mars84CardImage=(input)=>{const f=input.files?.[0];if(!f)return;
+  // Selecting a new picture with either input replaces the current preview.
+  const otherId=input.id==='m84Photo'?'m84CameraPhoto':'m84Photo';const other=$(otherId);if(other)other.value='';
+  if(f.size>8*1024*1024){alert('Fotoğraf 8 MB üzerindedir. Daha küçük bir fotoğraf seçin.');input.value='';return;}
+  const r=new FileReader();
+  r.onload=()=>{cardImage=String(r.result);$('m84PhotoPreview').src=cardImage;$('m84PhotoPreview').style.display='block';const label=$('m84ImagePicked');if(label)label.textContent='Seçildi: '+f.name;};
+  r.onerror=()=>{alert('Fotoğraf okunamadı. Lütfen yeniden seçin.');input.value='';};
+  r.readAsDataURL(f)
+};
  function parseText(t){let emails=t.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/ig)||[];let phones=t.match(/(?:\+?\d[\d\s().-]{7,}\d)/g)||[];let sites=t.match(/(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+\.(?:com|net|org|al|de|it|rs|ba|tr|eu)(?:\.[a-z]{2})?/ig)||[];if(emails[0])$('m84CardEmail').value=emails[0];if(phones[0])$('m84CardPhone').value=phones[0].trim();if(sites[0])$('m84CardWeb').value=sites.find(x=>!emails.some(e=>e.includes(x)))||sites[0];const lines=t.split('\n').map(x=>x.trim()).filter(x=>x.length>2&&!/@|www\.|https?:|\d{4}/i.test(x));if(lines[0]&&!$('m84CardCompany').value)$('m84CardCompany').value=lines[0];$('m84OCRStatus').textContent='OCR tamamlandı. Firma ve kişi adları karışmış olabilir; kaydetmeden önce mutlaka kontrol edin.';}
  window.mars84ReadCard=async()=>{if(!cardImage){alert('Önce kartvizit fotoğrafı ekleyin.');return;}$('m84OCRStatus').textContent='OCR yükleniyor…';try{if(!window.Tesseract){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}const result=await window.Tesseract.recognize(cardImage,'eng');parseText(result.data.text||'');}catch(err){$('m84OCRStatus').textContent='OCR yüklenemedi. İnternet bağlantısını kontrol edin; bilgileri manuel de kaydedebilirsiniz.';}};
- window.mars84ClearCard=()=>{for(const id of ['m84CardCompany','m84CardPerson','m84CardTitle','m84CardPhone','m84CardEmail','m84CardWeb','m84CardCountry','m84CardCity','m84CardAddress','m84CardNote'])$(id).value='';$('m84Photo').value='';$('m84PhotoPreview').style.display='none';cardImage='';};
+ window.mars84ClearCard=()=>{for(const id of ['m84CardCompany','m84CardPerson','m84CardTitle','m84CardPhone','m84CardEmail','m84CardWeb','m84CardCountry','m84CardCity','m84CardAddress','m84CardNote'])$(id).value='';$('m84Photo').value='';$('m84CameraPhoto').value='';$('m84PhotoPreview').style.display='none';const picked=$('m84ImagePicked');if(picked)picked.textContent='Henüz fotoğraf seçilmedi.';cardImage='';};
  window.mars84SaveCard=()=>{const f=$('m84CardFair').value;const company=$('m84CardCompany').value.trim();if(!company){alert('Firma adı girilmeli.');return;}let x={id:'card_'+Date.now(),fairId:f,createdAt:new Date().toISOString()};for(let [k,id] of Object.entries({company:'m84CardCompany',person:'m84CardPerson',title:'m84CardTitle',phone:'m84CardPhone',email:'m84CardEmail',website:'m84CardWeb',country:'m84CardCountry',city:'m84CardCity',address:'m84CardAddress',note:'m84CardNote'}))x[k]=$(id).value.trim();x.photo=cardImage;const rows=read(ck);rows.push(x);try{write(ck,rows)}catch{alert('Telefon depolama alanı dolu olabilir. Fotoğrafı küçültüp tekrar deneyin.');return;}mars84ClearCard();mars84RenderCards();alert('Kartvizit kaydedildi. Yeni firmalar müşteri listesine aktarılır; aynı isimli mevcut kayıtlar değiştirilmez.');};
  window.mars84RenderCards=()=>{let fairMap=Object.fromEntries(read(fk).map(x=>[x.id,x.name]));$('m84CardsList').innerHTML=read(ck).slice().reverse().map(x=>'<div class="m84Card"><strong>'+E(x.company)+'</strong><div class="m84Meta">'+E(fairMap[x.fairId]||'Fuar seçilmedi')+' · '+E(x.person)+' · '+E(x.phone)+'</div><div>'+E(x.email)+'</div><div class="m84Actions"><button class="m84Btn light" onclick="mars84DeleteCard(\''+E(x.id)+'\')">Sil</button></div></div>').join('')||'<div class="m84Empty">Henüz kartvizit eklenmedi.</div>'};
  window.mars84DeleteCard=id=>{if(!confirm('Kartvizit silinsin mi?'))return;write(ck,read(ck).filter(x=>x.id!==id));mars84RenderCards()};
