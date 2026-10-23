@@ -325,6 +325,13 @@ header{background:#102c32!important;box-shadow:none!important}
  #m80Search{height:43px;border:0!important;outline:0!important;background:transparent!important;font-size:16px;width:100%;min-width:0;box-shadow:none!important;color:#243b46}
  .m80SelectRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
  .m80SelectRow select{min-width:0;width:100%;height:41px;background:#fff;border:1px solid #d9e3e6;border-radius:10px;padding:7px;color:#27434b;font-size:12px}
+ .m80CountryField{min-width:0}.m80PickerTrigger{width:100%;min-height:41px;background:#fff;border:1px solid #d9e3e6;border-radius:10px;padding:7px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#27434b;font-size:12px;font-weight:700}.m80PickerTrigger span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m80PickerTriggerIcon{font-size:15px;color:#56737f}
+ .m80CountryPickerBackdrop:not([hidden]){display:block!important;position:fixed;inset:0;z-index:10060;background:#08161d8a;backdrop-filter:blur(2px)}
+ .m80CountryPickerSheet:not([hidden]){display:block!important;position:fixed;left:12px;right:12px;bottom:12px;z-index:10061;background:#fff;border-radius:22px;padding:16px 14px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 34px #00000026;max-height:78dvh;overflow-y:auto}
+ .m80CountryPickerHead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}.m80CountryPickerHead h2{margin:0;font-size:24px;color:#17353d}.m80CountryPickerHead p{margin:6px 0 0;font-size:12px;color:#6f838b;line-height:1.45}
+ .m80CountryPickerClose{border:0;background:#eef2f3;color:#47606b;border-radius:12px;width:40px;height:40px;font-size:29px;line-height:1;flex:0 0 auto}
+ .m80CountrySearchWrap{display:flex;align-items:center;gap:9px;border:1px solid #d9e3e6;border-radius:12px;background:#fbfcfd;padding:0 11px;margin-bottom:12px}.m80CountrySearchWrap span{font-size:22px;color:#627d8b}.m80CountrySearchWrap input{border:0;outline:0;background:transparent;width:100%;min-height:44px;font-size:16px;color:#17353d}
+ .m80CountryPickerList{display:grid;gap:8px}.m80CountryOption{width:100%;text-align:left;border:1px solid #d9e5e8;background:#fff;border-radius:14px;padding:13px 12px;font-size:16px;font-weight:700;color:#17353d}.m80CountryOption small{display:block;margin-top:4px;font-size:12px;font-weight:500;color:#6f838b}.m80CountryOption.is-active{border-color:#7bc0af;background:#f3fbf8}.m80CountryEmpty{padding:18px 12px;text-align:center;border:1px dashed #d1dde0;border-radius:14px;color:#6e8088;font-size:13px;background:#fafcfd}
  .m80Tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #e3eaec;margin:13px -12px 0}
  .m80Tab{background:#fff;border:0;border-bottom:2px solid transparent;color:#72828a;font-weight:800;padding:10px;font-size:12px;cursor:pointer}
  .m80Tab.active{color:#105f53;border-bottom-color:#105f53}
@@ -535,7 +542,7 @@ button.btn:not(.secondary),.m80Primary{background:#196d61!important;border-radiu
     <div class="m80QuickActions"><button type="button" class="m80Primary" onclick="mars80AddReceipt()">▤ <b>Fiş Ekle</b><span>›</span></button><button type="button" class="m80SubAction" onclick="mars80TodayList()">▦ <b>Bugünün Firmaları</b></button></div>
     <section class="m80Panel m80DirectoryPanel" aria-labelledby="m80DirectoryHead"><div class="m80PanelHead"><h2 id="m80DirectoryHead">Firma Ara</h2><button class="m80TextButton" onclick="mars80ToggleAllFirms()" id="m80SwitchAll">Tüm Firmalar</button></div>
       <div class="m80SearchWrap"><span aria-hidden="true">⌕</span><input type="search" id="m80Search" placeholder="Firma, şehir, e-posta ara..." autocomplete="off" oninput="mars80Refresh()"/></div>
-      <div class="m80SelectRow"><select id="m80FilterCountry" aria-label="Ülke seçimi" onchange="mars80CountryChanged(this.value)"><option value="">Tüm Ülkeler</option></select><select id="m80FilterPotential" aria-label="Potansiyel filtresi" onchange="mars80Refresh()"><option value="">Potansiyeller</option><option value="high">A+ / A</option><option value="A+">A+</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+      <div class="m80SelectRow"><div class="m80CountryField"><button type="button" id="m80CountryPickerBtn" class="m80PickerTrigger" onclick="m80OpenCountryPicker()"><span id="m80CountryPickerLabel">Tüm Ülkeler</span><span class="m80PickerTriggerIcon">⌕</span></button><select id="m80FilterCountry" aria-label="Ülke seçimi" onchange="mars80CountryChanged(this.value)" hidden><option value="">Tüm Ülkeler</option></select></div><select id="m80FilterPotential" aria-label="Potansiyel filtresi" onchange="mars80Refresh()"><option value="">Potansiyeller</option><option value="high">A+ / A</option><option value="A+">A+</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
       <div class="m80Tabs"><button id="m80TabFirms" type="button" class="m80Tab active" onclick="mars80TodayList()">Firma Listesi</button><button type="button" class="m80Tab" onclick="mars80OpenArchive()">Seyahat Arşivi</button></div><p id="m80DirectoryHint" class="m80DirectoryHint"></p>
       <div id="m80FirmList" class="m80FirmList"></div>
     </section>
@@ -545,6 +552,12 @@ button.btn:not(.secondary),.m80Primary{background:#196d61!important;border-radiu
   </div>
   <nav class="m80BottomBar" aria-label="Mobil gezinme"><button onclick="mars80Home()" class="active" type="button"><span>⌂</span>Ana Sayfa</button><button onclick="mars80TodayList()" type="button"><span>▤</span>Firmalar</button><button onclick="mars80AddReceipt()" type="button"><span>▧</span>Fiş Ekle</button><button onclick="mars80OpenArchive()" type="button"><span>▱</span>Arşiv</button><button onclick="mars80OpenMenu()" type="button"><span>☰</span>Diğer</button></nav>
 </section>
+<div class="m80CountryPickerBackdrop" id="m80CountryPickerBack" hidden onclick="if(event.target===this)m80CloseCountryPicker()"></div>
+<div class="m80CountryPickerSheet" id="m80CountryPicker" hidden role="dialog" aria-modal="true" aria-label="Ülke seçimi">
+ <div class="m80CountryPickerHead"><div><h2>Ülke Seç</h2><p>Baş harfleri yazarak ülkeyi hızlıca bulabilirsin.</p></div><button type="button" class="m80CountryPickerClose" onclick="m80CloseCountryPicker()" aria-label="Kapat">×</button></div>
+ <div class="m80CountrySearchWrap"><span aria-hidden="true">⌕</span><input type="search" id="m80CountrySearch" placeholder="Ülke adı yaz..." autocomplete="off" oninput="m80RenderCountryPicker(this.value)"></div>
+ <div class="m80CountryPickerList" id="m80CountryPickerList"></div>
+</div>
 <div class="m80PickerBackdrop" id="m80ReceiptPickerBack" hidden onclick="if(event.target===this)m80CloseReceiptPicker()"></div>
 <div class="m80PickerSheet" id="m80ReceiptPicker" role="dialog" aria-modal="true" aria-label="Fiş için seyahat seçimi" hidden>
  <div class="m80PickerHead">
@@ -6426,7 +6439,34 @@ function countryOptions(country){
  const html='<option value="">Tüm Ülkeler</option>'+countries.map(c=>'<option value="'+safe(c)+'">'+safe(c)+'</option>').join('');
  if(input.dataset.options!==html){input.innerHTML=html;input.dataset.options=html;}
  if(country&&!input.value&&countries.includes(country))input.value=country;
+ updateCountryTriggerLabel();
 }
+function updateCountryTriggerLabel(){
+ const val=$('m80FilterCountry')?.value||'';
+ const label=$('m80CountryPickerLabel');
+ if(label) label.textContent=val||'Tüm Ülkeler';
+}
+function countryListItems(query=''){
+ const input=$('m80FilterCountry');
+ const countries=[...(window.mars84AllCountries||[])];
+ const unique=(countries.length?countries:[...new Set(allCompanies().map(x=>x.country).filter(Boolean))]).filter(Boolean).sort((a,b)=>a.localeCompare(b,'tr'));
+ const q=String(query||'').toLocaleLowerCase('tr').trim();
+ return unique.filter(x=>!q||x.toLocaleLowerCase('tr').includes(q));
+}
+window.m80RenderCountryPicker=function(query=''){
+ const list=$('m80CountryPickerList'); if(!list) return;
+ const current=$('m80FilterCountry')?.value||'';
+ const rows=countryListItems(query);
+ const allBtn='<button type="button" class="m80CountryOption '+(!current?'is-active':'')+'" onclick="m80PickCountry('')">Tüm Ülkeler<small>Ülke filtresini kaldır</small></button>';
+ if(!rows.length){ list.innerHTML=allBtn+'<div class="m80CountryEmpty">Aramana uygun ülke bulunamadı.</div>'; return; }
+ list.innerHTML=allBtn+rows.map(x=>'<button type="button" class="m80CountryOption '+(current===x?'is-active':'')+'" onclick="m80PickCountry('+JSON.stringify(x).replace(/"/g,'&quot;')+')">'+safe(x)+'</button>').join('');
+};
+window.m80OpenCountryPicker=function(){
+ const back=$('m80CountryPickerBack'), box=$('m80CountryPicker'), search=$('m80CountrySearch');
+ if(!back||!box) return; updateCountryTriggerLabel(); if(search) search.value=''; m80RenderCountryPicker(''); back.hidden=false; box.hidden=false; setTimeout(()=>search&&search.focus(),30);
+};
+window.m80CloseCountryPicker=function(){ const back=$('m80CountryPickerBack'), box=$('m80CountryPicker'); if(back) back.hidden=true; if(box) box.hidden=true; };
+window.m80PickCountry=function(value){ const input=$('m80FilterCountry'); if(input) input.value=value||''; updateCountryTriggerLabel(); m80CloseCountryPicker(); window.mars80CountryChanged(value||''); };
 function renderSchedule(c){
  const box=$('m80Schedule');if(!box)return;
  $('m80PlanSubtitle').textContent=new Intl.DateTimeFormat('tr-TR',{day:'numeric',month:'long',year:'numeric'}).format(new Date(c.day+'T12:00:00'))+(c.country?' • '+c.country:'');
@@ -6462,8 +6502,8 @@ function refresh(){if(!document.getElementById('mars80Mobile'))return;const c=co
 window.mars80Refresh=refresh;
 window.mars80OpenMenu=()=>$('mobileNavToggle')?.click();
 window.mars80Home=()=>{window.scrollTo({top:0,behavior:'smooth'});};
-window.mars80ChooseCountry=()=>{$('m80FilterCountry')?.focus();$('m80FilterCountry')?.scrollIntoView({behavior:'smooth',block:'center'});};
-window.mars80CountryChanged=function(s){mob.country=s;mob.all=true;refresh();};
+window.mars80ChooseCountry=()=>window.m80OpenCountryPicker&&window.m80OpenCountryPicker();
+window.mars80CountryChanged=function(s){mob.country=s;mob.all=true;updateCountryTriggerLabel();refresh();};
 window.mars80TodayList=function(){mob.all=false;refresh();$('m80DirectoryHead')?.scrollIntoView({behavior:'smooth',block:'start'});};
 window.mars80ToggleAllFirms=function(){mob.all=!mob.all;refresh();};
 window.mars80ShowPotential=function(){mob.all=true;$('m80FilterPotential').value='high';refresh();$('m80DirectoryHead')?.scrollIntoView({behavior:'smooth'});};
