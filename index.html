@@ -7402,26 +7402,52 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
   }
   function expenseOverview(f){
     const costs=visibleEvents(f.id,'expense'), people=fairPersonCount(f.id), sum=fairSums(f.id);
-    const chips=Object.keys(sum).sort().map(c=>'<strong class="m919SumChip">'+money(sum[c],c)+' <small>· '+people+' kişi · Kişi başı '+money(sum[c]/people,c)+'</small></strong>').join('');
+    const chips=Object.keys(sum).sort().map(c=>'<strong class="m919SumChip">'+money(sum[c],c)+' <small data-person-split data-overview-split="1" data-total-raw="'+sum[c]+'" data-currency="'+escape(c)+'">· '+people+' kişi · Kişi başı '+money(sum[c]/people,c)+'</small></strong>').join('');
     return '<section class="m919Overview m921Totals" aria-label="Fuar harcama özeti"><div class="m919OverviewTop"><div><h3>Fuar Harcama Toplamı</h3><p>'+costs.length+' harcama kaydı · Belgeler yukarıdaki ilgili kutularda saklanır. Tutarlar fuar Excel raporuna otomatik aktarılır.</p></div><div class="m919Sums">'+(chips||'<span>Henüz tutar girilmedi.</span>')+'</div></div></section>';
   }
-  // Inline PDF/photo capture: nothing jumps to a workspace at the bottom of the page.
+  // v90.22: Native file chooser only. No expanding file-form, no scrolling.
+  // Invisible form fields preserve the storage/OCR pipeline and permit background saving.
   function inlineDocForm(kind){
-    const names={hotel:'Konaklama',ticket:'Uçak / Ulaşım',car:'Araç / Kiralama',receipt:'Fiş / Harcamalar'};
-    return '<div class="m920InlineUpload" data-upload-kind="'+kind+'"'+(openDocKind===kind?'':' hidden')+'>'+
-      '<div class="m920InlineTitle"><strong>'+names[kind]+' · Belge ekle</strong>'+(kind==='receipt'?'':button('✕ Kapat','data-close-doc="'+kind+'"','m90MiniBtn'))+'</div>'+
-      '<p class="m920Guidance">PDF seç veya fotoğraf çek. Toplam tutar otomatik bulunursa aşağıya yazılır; kaydetmeden önce kontrol et.</p>'+
-      '<form class="m90Form m920InlineForm" data-inline-doc="'+kind+'">'+
+    return '<form hidden class="m922HiddenForm" data-inline-doc="'+kind+'">'+
       '<input type="hidden" name="docType" value="'+kind+'">'+
-      '<div class="m90Field wide m919Pickers"><label>📎 PDF / Galeriden Yükle<input type="file" name="uploadFile" accept="image/*,.pdf,application/pdf"></label><label>📷 Fotoğraf Çek<input type="file" name="cameraFile" accept="image/*" capture="environment"></label></div>'+
-      '<div class="m90Field wide"><div class="m919OCRStatus" data-ocr-status aria-live="polite">Belge seçtiğinde OCR ile tutar okunmaya çalışılacak.</div></div>'+
-      '<div class="m90Field"><label>Ödenen toplam tutar</label><input type="number" name="receiptAmount" min="0.01" step="0.01" inputmode="decimal" placeholder="OCR veya elle giriş"></div>'+
-      '<div class="m90Field"><label>Para birimi</label><select name="receiptCurrency"><option>EUR</option><option>USD</option><option>TRY</option><option>GBP</option><option>ALL</option><option>BAM</option><option>RSD</option><option>RON</option><option>CHF</option></select></div>'+
-      '<div class="m90Field"><label>Belge tarihi</label><input type="date" name="receiptDate" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
-      '<div class="m90Field"><label>Fiş / rezervasyon no</label><input name="receiptNo" placeholder="Varsa"></div>'+
-      '<div class="m90Field"><label>Ödeme şekli</label><select name="receiptPayment"><option>Kredi kartı</option><option>Nakit</option><option>Banka</option><option>Diğer</option></select></div>'+
-      '<div class="m90Field wide"><label>Not / açıklama</label><input name="note" placeholder="Otel adı, araç / uçuş bilgisi, fiş açıklaması"></div>'+
-      '<div class="m90Field wide"><button class="m84Btn m920SaveDoc" type="submit">✓ Belgeyi Bu Fuara Kaydet</button></div></form></div>';
+      '<input type="file" name="uploadFile" accept="application/pdf,.pdf,image/*">'+
+      '<input type="file" name="cameraFile" accept="image/*" capture="environment">'+
+      '<input type="hidden" name="receiptAmount" value="">'+
+      '<select name="receiptCurrency"><option>EUR</option><option>USD</option><option>TRY</option><option>GBP</option><option>ALL</option><option>BAM</option><option>RSD</option><option>RON</option><option>CHF</option></select>'+ 
+      '<input type="hidden" name="receiptDate" value="'+new Date().toISOString().slice(0,10)+'">'+
+      '<input type="hidden" name="receiptNo"><input type="hidden" name="receiptPayment" value="Kredi kartı">'+
+      '<input type="hidden" name="note"><span data-ocr-status hidden></span></form>'+ 
+      '<div class="m922UploadState" data-upload-status="'+kind+'" aria-live="polite" hidden></div>';
+  }
+  function docAmountOverrides(fairId){
+    const byId=new Map();
+    visibleEvents(fairId,'file_amount_override').forEach(x=>{if(x.targetId&&!byId.has(x.targetId))byId.set(x.targetId,x)});
+    return byId;
+  }
+  function amountInputToNumber(raw){
+    let s=String(raw||'').replace(/\s/g,'');
+    if(!/^[0-9.,]+$/.test(s))return NaN;
+    const comma=s.lastIndexOf(','),dot=s.lastIndexOf('.'),at=Math.max(comma,dot);
+    if(at>=0 && s.length-at-1<=2 && s.length-at-1>=1){return Number(s.slice(0,at).replace(/[.,]/g,'')+'.'+s.slice(at+1));}
+    return Number(s.replace(/[.,]/g,''));
+  }
+  function correctDocAmount(fairId, id){
+    const file=visibleEvents(fairId,'file').find(x=>x.id===id);if(!file)return;
+    const expenses=visibleEvents(fairId,'expense').filter(x=>x.attachmentId===id);
+    const correction=docAmountOverrides(fairId).get(id);
+    const cur=correction?.currency||expenses[0]?.currency||file.currency||'EUR';
+    const val=correction?Number(correction.amount||0):Number(expenses[0]?.amount||file.amount||0);
+    const start=(val>0?new Intl.NumberFormat('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(val):'0')+' '+cur;
+    const answer=prompt('"'+(file.filename||'Belge')+'" için ödenen tutarı ve para birimini yaz.\nÖrnek: 572,00 EUR\nTutar yoksa 0 EUR yaz.',start);
+    if(answer===null)return;
+    const match=answer.trim().match(/^([0-9.,\s]+)\s*([a-zA-Z]{3})$/);
+    const allowed=['EUR','USD','TRY','GBP','ALL','BAM','RSD','RON','CHF'];
+    const amount=match?amountInputToNumber(match[1]):NaN, currency=match?match[2].toUpperCase():'';
+    if(!Number.isFinite(amount)||amount<0||!allowed.includes(currency)){alert('Örnek biçim: 572,00 EUR. Para birimini ve tutarı kontrol et.');return;}
+    if(!emit(fairId,'file_amount_override',{targetId:id,amount,currency})){alert('Tutar düzeltmesi kaydedilemedi.');return;}
+    for(const expense of expenses)emit(fairId,'delete',{targetId:expense.id});
+    if(amount>0)emit(fairId,'expense',{date:new Date().toISOString().slice(0,10),category:({'hotel':'Otel','ticket':'Ulaşım / uçak bileti','car':'Araç / Kiralama','receipt':'Fiş / fatura'}[file.docType]||'Fuar gideri'),amount,currency,attachmentId:file.id,note:file.note||''});
+    render();
   }
   function attachedDocumentRows(fairId, kind){
     const docs=visibleEvents(fairId,'file').filter(x=>x.docType===kind);
@@ -7429,17 +7455,19 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     const expenses=visibleEvents(fairId,'expense');
     const people=fairPersonCount(fairId);
     const expenseMap=new Map(expenses.filter(x=>x.attachmentId).map(x=>[x.attachmentId,x]));
+    const overrides=docAmountOverrides(fairId);
     const sums={};
     docs.forEach(x=>{
       const linked=expenseMap.get(x.id);
-      const amount=Number(linked?.amount||x.amount||0);
-      if(amount>0){const currency=linked?.currency||x.currency||'EUR';sums[currency]=(sums[currency]||0)+amount;}
+      const override=overrides.get(x.id);
+      const amount=Number(override?override.amount:(linked?.amount??x.amount??0));
+      if(amount>0){const currency=override?.currency||linked?.currency||x.currency||'EUR';sums[currency]=(sums[currency]||0)+amount;}
     });
     const currencies=Object.keys(sums).sort();
-    const chips=currencies.map(c=>'<span class="m920DocTotal">Toplam: '+money(sums[c],c)+' <small>· Kişi başı ('+people+'): '+money(sums[c]/people,c)+'</small></span>').join('');
+    const chips=currencies.map(c=>'<span class="m920DocTotal">Toplam: '+money(sums[c],c)+' <small data-person-split data-total-raw="'+sums[c]+'" data-currency="'+escape(c)+'">· Kişi başı ('+people+'): '+money(sums[c]/people,c)+'</small></span>').join('');
     return '<div class="m920CardDocs"><div class="m920CardDocsHeader"><strong>Yüklenen belgeler ('+docs.length+')</strong>'+chips+'</div>'+docs.map(x=>{
-      const expense=expenseMap.get(x.id), amount=Number(expense?.amount||x.amount||0), currency=expense?.currency||x.currency||'EUR';
-      return '<div class="m920CardFile"><div><strong>'+escape(x.filename||'Belge')+'</strong><small>'+escape(dateLabel(x.createdAt))+(amount>0?' · '+money(amount,currency):' · Tutar girilmedi')+'</small></div><div class="m921FileActions">'+button('Gör','data-preview="'+escape(x.id)+'"','m90MiniBtn')+button('Sil','data-remove-file="'+escape(x.id)+'"','m90MiniDanger')+'</div></div>';
+      const expense=expenseMap.get(x.id),override=overrides.get(x.id),amount=Number(override?override.amount:(expense?.amount??x.amount??0)),currency=override?.currency||expense?.currency||x.currency||'EUR';
+      return '<div class="m920CardFile"><div><strong>'+escape(x.filename||'Belge')+'</strong><small>'+escape(dateLabel(x.createdAt))+' · '+(amount>0?money(amount,currency):'Tutar okunamadı')+' · '+button(amount>0?'Tutarı düzelt':'Tutar gir','data-correct-doc="'+escape(x.id)+'"','m922EditAmount')+'</small></div><div class="m921FileActions">'+button('Gör','data-preview="'+escape(x.id)+'"','m90MiniBtn')+button('Sil','data-remove-file="'+escape(x.id)+'"','m90MiniDanger')+'</div></div>';
     }).join('')+'</div>';
   }
   function detail(f) {
@@ -7451,7 +7479,7 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       '<div class="m918ServiceCard'+(kind&&openDocKind===kind?' m920DocOpen':'')+'"'+(kind?' data-doc-card="'+kind+'"':'')+'><div class="m918ServiceHead"><span class="m918Icon">'+icon+'</span><div><strong>'+title+'</strong><p>'+desc+'</p></div></div>'+
       '<div class="m918ServiceCount">'+count+'</div>'+(legacy||'')+
       (kind?attachedDocumentRows(f.id,kind)+inlineDocForm(kind):'')+
-      '<div class="m918ServiceFoot">'+button(label,attr,'m84Btn m918WideButton')+'</div></div>';
+      '<div class="m918ServiceFoot">'+(kind?'<div class="m922UploaderButtons">'+button('PDF Ekle',attr,'m84Btn m918WideButton')+button('📷 Fotoğraf Çek','data-camera-kind="'+kind+'"','m84Btn light m922CameraButton')+'</div>':button(label,attr,'m84Btn m918WideButton'))+'</div></div>';
     const basicLegacy=(eventType,name)=>{
       const records=visibleEvents(f.id,eventType);if(!records.length)return '';
       return '<div class="m921OldRecords"><small>Önceki kayıtlar ('+records.length+')</small>'+records.map(x=>'<div class="m921OldRow"><span>'+escape(x[name]||'Kayıt')+'</span>'+button('Sil','data-remove="'+escape(x.id)+'"','m90MiniDanger')+'</div>').join('')+'</div>';
@@ -7463,7 +7491,7 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       card('🚗','Araç / Kiralama','Kiralama PDF / fotoğraf. Ödenen toplam otomatik okunur.',carCount+' kayıt','data-service-doc="car"','PDF / Fotoğraf Ekle','car',basicLegacy('car','company'))+
       '</div>';
     const receiptCount=getDocs('receipt');
-    const receiptDock='<section class="m921ReceiptDock'+(openDocKind==='receipt'?' m920DocOpen':'')+'" data-doc-card="receipt"'+(openDocKind==='receipt'?'':' hidden')+'><div class="m920InlineTitle"><strong>🧾 Fiş Ekle / Fişleri Gör</strong>'+button('✕ Kapat','data-close-doc="receipt"','m90MiniBtn')+'</div>'+attachedDocumentRows(f.id,'receipt')+inlineDocForm('receipt')+'</section>';
+    const receiptDock='<section class="m922ReceiptRecords" data-doc-card="receipt">'+(receiptCount?'<h4>🧾 Fişler / Harcamalar ('+receiptCount+')</h4>'+attachedDocumentRows(f.id,'receipt'):'')+inlineDocForm('receipt')+'</section>';
     return '<div class="m918EventBoard">'+
       '<aside class="m918EventInfo"><div class="m918EventDate">'+escape(dateLabel(f.start))+' – '+escape(dateLabel(f.end))+' <span class="m918Planned">Fuar</span></div>'+
       '<h3>'+escape(f.name)+'</h3><p>📍 '+escape(f.country||'Ülke yok')+' / '+escape(f.city||'Şehir yok')+'</p>'+
@@ -7642,27 +7670,19 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     if(btn.hasAttribute('data-edit-fair')){window.mars84EditFair?.(btn.dataset.editFair);return;}
     if(btn.hasAttribute('data-delete-fair')){deleteFair(btn.dataset.deleteFair);return;}
     if(btn.hasAttribute('data-close-workspace')){$('m919Workspace').hidden=true;document.querySelectorAll('#m84Archive .m90FolderSection').forEach(el=>el.open=false);return;}
-    if(btn.hasAttribute('data-service-doc')){
-      const kind=btn.dataset.serviceDoc;
-      const card=docRoot.querySelector('[data-doc-card="'+kind+'"]');
-      if(!card) return;
-      const panel=card.querySelector('[data-upload-kind]');
-      const shouldOpen=panel.hidden;
-      // Open exactly where the user clicked. No window scrolling or detached bottom workspace.
-      docRoot.querySelectorAll('[data-doc-card]').forEach(el=>{
-        const editor=el.querySelector('[data-upload-kind]');if(editor)editor.hidden=true;
-        el.classList.remove('m920DocOpen');
-        if(el.matches('.m921ReceiptDock'))el.hidden=true;
-      });
-      panel.hidden=!shouldOpen;
-      if(card.matches('.m921ReceiptDock'))card.hidden=!shouldOpen;
-      card.classList.toggle('m920DocOpen',shouldOpen);
-      openDocKind=shouldOpen?kind:null;
+    if(btn.hasAttribute('data-service-doc') || btn.hasAttribute('data-camera-kind')){
+      const camera=btn.hasAttribute('data-camera-kind');
+      const kind=camera?btn.dataset.cameraKind:btn.dataset.serviceDoc;
+      const form=docRoot.querySelector('form[data-inline-doc="'+kind+'"]');
+      const input=form?.elements.namedItem(camera?'cameraFile':'uploadFile');
+      if(!input){alert('Dosya seçme alanı bulunamadı. Sayfayı yenile.');return;}
+      // This call is synchronous with user click: native OS file picker, no panels.
+      input.click();
       return;
     }
-    if(btn.hasAttribute('data-close-doc')){
-      const card=btn.closest('[data-doc-card]');if(card){card.querySelector('[data-upload-kind]').hidden=true;card.classList.remove('m920DocOpen');if(card.matches('.m921ReceiptDock'))card.hidden=true;}
-      openDocKind=null;return;
+    if(btn.hasAttribute('data-correct-doc')){
+      if(route.fairId)correctDocAmount(route.fairId,btn.dataset.correctDoc);
+      return;
     }
     if(btn.hasAttribute('data-remove-file')){
       const file=visibleEvents(route.fairId,'file').find(x=>x.id===btn.dataset.removeFile);if(!file)return;
@@ -7714,19 +7734,44 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       try{await downloadFile(btn.dataset.download);}catch(err){alert(err.message);}finally{btn.disabled=false;}
     }
   });
-  docRoot?.addEventListener('change',e=>{
-    const countInput=e.target;
-    if(countInput?.matches?.('[data-person-count]')){
-      const n=Math.max(1,Math.min(50,Math.floor(Number(countInput.value)||1)));
-      countInput.value=n;
+  docRoot?.addEventListener('input',e=>{
+    if(!e.target.matches?.('[data-person-count]'))return;
+    const people=Math.max(1,Math.min(50,Math.floor(Number(e.target.value)||1)));
+    docRoot.querySelectorAll('[data-person-split]').forEach(el=>{
+      const total=Number(el.dataset.totalRaw)||0,currency=el.dataset.currency||'EUR';
+      el.textContent=el.hasAttribute('data-overview-split')?'· '+people+' kişi · Kişi başı '+money(total/people,currency):'· Kişi başı ('+people+'): '+money(total/people,currency);
+    });
+  });
+  docRoot?.addEventListener('change',async e=>{
+    if(e.target?.matches?.('[data-person-count]')){
+      const n=Math.max(1,Math.min(50,Math.floor(Number(e.target.value)||1)));
+      e.target.value=n;
       if(route.fairId)emit(route.fairId,'person_count',{count:n});
       return;
     }
-    const field=e.target;if(!field?.matches?.('form[data-inline-doc] input[type="file"]'))return;
-    const form=field.closest('form');if(!form)return;
-    form.querySelectorAll('input[type="file"]').forEach(other=>{if(other!==field)other.value='';});
+    const input=e.target;if(!input?.matches?.('form[data-inline-doc] input[type="file"]'))return;
+    const form=input.closest('form');
+    if(!form||!input.files?.length||form.dataset.uploading==='1')return;
+    const fairId=route.fairId,kind=form.dataset.inlineDoc;
+    if(!fairId)return;
+    form.dataset.uploading='1';
+    const card=form.closest('[data-doc-card]');
+    const status=card?.querySelector('[data-upload-status]');
+    if(status){status.hidden=false;status.textContent='📄 Dosya okunuyor ve yükleniyor…';}
+    form.querySelectorAll('input[type="file"]').forEach(other=>{if(other!==input)other.value='';});
     const amount=form.elements.namedItem('receiptAmount');if(amount)amount.value='';
-    form.__m919OCR=readFairDocument(form).catch(err=>console.warn('Fuar belge OCR',err));
+    // Read OCR first, then save immediately. Never show a form or scroll.
+    try{
+      await readFairDocument(form);
+      const result=await uploadFile(fairId,form);
+      // emit() refreshes the card and lists the new file; all existing PDFs remain.
+      if(route.fairId===fairId)render();
+    }catch(err){
+      if(status?.isConnected){status.hidden=false;status.textContent='Yüklenemedi: '+err.message;}
+      alert('Belge eklenemedi: '+err.message);
+    }finally{
+      form.dataset.uploading='0';input.value='';
+    }
   });
   docRoot?.addEventListener('submit',async e=>{
     const form=e.target;if(!(form instanceof HTMLFormElement))return;
@@ -8013,6 +8058,17 @@ window.addEventListener('focus',()=>{if(document.body.classList.contains('m904Ho
 #mars84Back .m921OldRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px}
 #mars84Back .m921OldRow span{overflow-wrap:anywhere;min-width:0}
 #mars84Back .m921Totals{margin-top:13px}
+#mars84Back form.m922HiddenForm,#mars84Back form.m922HiddenForm[hidden]{display:none!important}
+#mars84Back .m922UploaderButtons{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
+#mars84Back .m922CameraButton{font-size:11px;padding:8px;white-space:nowrap;border:1px solid #bfdcd4}
+#mars84Back .m922UploadState{background:#eef7f3;color:#256658;border-radius:7px;padding:8px;font-size:12px;margin-top:8px}
+#mars84Back .m922UploadState[hidden]{display:none!important}
+#mars84Back .m922ReceiptRecords{margin:0 0 14px}
+#mars84Back .m922ReceiptRecords h4{margin:0 0 6px;font-size:13px}
+#mars84Back .m922ReceiptRecords .m920CardDocs{background:#fff;border:1px solid #e2ebec;padding:10px;border-radius:10px}
+#mars84Back .m922EditAmount{background:none;border:0;padding:2px;text-decoration:underline;color:#246a5d;font-size:11px;cursor:pointer}
+#mars84Back .m920CardFile .m921FileActions button{min-height:32px}
+@media(max-width:650px){#mars84Back .m922UploaderButtons{grid-template-columns:1fr}#mars84Back .m922CameraButton{width:100%}}
 @media(max-width:780px){#mars84Back .m921ReceiptDock .m920InlineForm{grid-template-columns:1fr 1fr}}
 @media(max-width:540px){#mars84Back .m921ReceiptDock .m920InlineForm,#mars84Back .m921ReceiptDock .m919Pickers{grid-template-columns:1fr}#mars84Back .m921FileActions{width:100%;justify-content:flex-end}}
 </style>
