@@ -585,15 +585,32 @@ button.btn:not(.secondary),.m80Primary{background:#196d61!important;border-radiu
 </div>
 
 <section id="m904Dashboard" class="m904Dashboard" aria-label="Global Sales CRM ana sayfa">
- <div class="m904MobileOnly"><h2 style="margin:7px 0 3px">Global Sales CRM</h2><p class="m904Muted">Satış · Seyahat · Müşteri yönetimi</p></div>
- <div class="m904Kpis"><div class="m904Kpi"><b id="m904Firms">—</b><span>Toplam firma</span></div><div class="m904Kpi"><b id="m904Potential">—</b><span>A+ / A potansiyel</span></div><div class="m904Kpi"><b id="m904Countries">—</b><span>Ülke</span></div><div class="m904Kpi"><b id="m904Trips">—</b><span>Kayıtlı seyahat</span></div></div>
- <div class="m904Box"><h2>Firma Arama ve Filtreler</h2><input class="m904Search" id="m904Search" placeholder="⌕ Firma, şehir, e-posta veya telefon ara..." oninput="marsV904Update()"><div class="m904Filters"><select id="m904Country" onchange="marsV904Update()"><option value="">Tüm ülkeler</option></select><select id="m904Pot" onchange="marsV904Update()"><option value="">Potansiyeller</option><option>A+</option><option>A</option><option>B</option><option>C</option></select><button type="button" onclick="marsV903GoCompanies()">+ Firma Ekle / Liste</button></div></div>
- <div class="m904MobileOnly m904Box"><div class="m904Actions"><button onclick="mars80AddReceipt()">▣ Fiş Ekle</button><button onclick="mars80TodayList()">▤ Bugünün Firmaları</button><button onclick="marsV903GoArchive()">◇ Arşiv</button></div></div>
- <div class="m904Box"><h2>Firma Listesi</h2><table class="m904Table"><thead><tr><th>Firma</th><th>Ülke</th><th>Potansiyel</th><th class="m904DesktopOnly">Son temas</th></tr></thead><tbody id="m904FirmRows"></tbody></table><p class="m904Muted" id="m904FirmHint"></p><button class="btn secondary" onclick="marsV903GoCompanies()">Tüm firmaları aç →</button></div>
- <div class="m904MobileOnly m904Box"><h2>Bugünün Planı</h2><div id="m904Today" class="m904Muted">Bugün için planı görmek üzere Seyahat Planı'nı aç.</div><p><button class="btn secondary" onclick="marsV903GoTripPlan()">Seyahat Planı →</button></p></div>
- <div class="m904LowGrid"><div class="m904Box"><h2>Son Seyahatler</h2><div class="m904Feed" id="m904RecentTrips"></div><p><button class="btn secondary" onclick="marsV903GoArchive()">Arşivi aç →</button></p></div><div class="m904Box"><h2>Harcamalar & Fuarlar</h2><div class="m904Feed"><button onclick="mars80AddReceipt()">▣ Fiş Ekle</button><button onclick="marsV903GoFair()">▤ Fuar / Kartvizit</button></div></div></div>
- <div class="m904MobileOnly"><div class="m904Box"><h2>Otel Geçmişi</h2><p class="m904Muted">Otel bilgileri seyahat kayıtlarından görüntülenecek.</p><button class="btn secondary" onclick="marsV903GoArchive()">Konaklamaları görüntüle</button></div><div class="m904Box"><h2>Firma Fotoğrafları</h2><p class="m904Muted">Fotoğraflar firma kartları üzerinden görüntülenir.</p><button class="btn secondary" onclick="marsV903GoCompanies()">Firma seç →</button></div></div>
- </section>
+  <div class="m916MobileTitle"><strong>Global Sales CRM</strong><span>Satış · Seyahat · Müşteri yönetimi</span></div>
+  <div class="m904Kpis">
+    <div class="m904Kpi"><b id="m904Firms">—</b><span>Toplam Firma</span></div>
+    <div class="m904Kpi"><b id="m904Potential">—</b><span>A+ / A Potansiyel</span></div>
+    <div class="m904Kpi"><b id="m904Countries">—</b><span>Ülke</span></div>
+    <div class="m904Kpi"><b id="m904Trips">—</b><span>Kayıtlı Seyahat</span></div>
+  </div>
+  <div class="m904Box m916SearchBox"><div class="m916HeaderRow"><h2>Firma Arama ve Filtreler</h2></div>
+    <input class="m904Search" id="m904Search" type="search" placeholder="⌕ Firma, şehir, e-posta veya telefon ara..." oninput="marsV904Update()">
+    <div class="m904Filters">
+      <select id="m904Country" aria-label="Ülke filtresi" onchange="marsV904Update()"><option value="">Tüm Ülkeler</option></select>
+      <select id="m904Pot" aria-label="Potansiyel filtresi" onchange="marsV904Update()"><option value="">Potansiyeller</option><option>A+</option><option>A</option><option>B</option><option>C</option></select>
+      <button type="button" onclick="marsV916ShowFirms()">+ Firma Ekle / Liste</button>
+    </div>
+  </div>
+  <div class="m916Quick"><button class="m916QuickPrimary" type="button" onclick="mars80AddReceipt()">▣ Fiş Ekle</button><button type="button" onclick="marsV916TodayFirms()">▤ Bugünün Firmaları</button><button type="button" onclick="marsV903GoArchive()">▱ Arşiv</button></div>
+  <div class="m904Box m916CompanyBox"><div class="m916HeaderRow"><h2>Firma Listesi</h2><button class="m916TextLink" type="button" onclick="marsV916ShowFirms()">Tüm Firmaları Gör</button></div>
+    <table class="m904Table"><thead><tr><th>Firma</th><th>Ülke</th><th>Potansiyel</th><th class="m904DesktopOnly">Son Temas</th></tr></thead><tbody id="m904FirmRows"></tbody></table>
+    <p class="m904Muted" id="m904FirmHint"></p>
+  </div>
+  <div class="m916TodayPanel m904Box"><div class="m916HeaderRow"><h2>Bugünün Planı</h2><button class="m916TextLink" type="button" onclick="marsV903GoTripPlan()">Planı Aç ›</button></div><div id="m904Today" class="m916Activity"></div></div>
+  <div class="m904LowGrid"><div class="m904Box"><div class="m916HeaderRow"><h2>Son Seyahatler</h2><button class="m916TextLink" onclick="marsV903GoArchive()">Arşivi Aç ›</button></div><div class="m904Feed" id="m904RecentTrips"></div></div>
+  <div class="m904Box"><h2>Harcamalar & Fuarlar</h2><div class="m904Feed"><button type="button" onclick="mars80AddReceipt()">▣ Fiş Ekle</button><button type="button" onclick="marsV903GoFair()">▤ Fuar Arşivi / Kartvizit</button></div></div></div>
+  <div class="m916MobileExtras"><div class="m904Box"><div class="m916HeaderRow"><h2>Otel Geçmişi</h2><button class="m916TextLink" onclick="marsV903GoArchive()">Tümünü Gör</button></div><div id="m916Hotels" class="m904Feed"></div></div>
+  <div class="m904Box"><div class="m916HeaderRow"><h2>Firma Fotoğrafları</h2><button class="m916TextLink" onclick="marsV916ShowFirms()">Firmaları Aç</button></div><p class="m904Muted">Fotoğraflar ilgili firma kartından açılır ve eklenir.</p></div></div>
+</section>
 <div class="cards">
 <div class="card"><b id="kTotal">0</b><span>Toplam Firma</span></div>
 <div class="card"><b id="kA">0</b><span>A+ / A Potansiyel</span></div>
@@ -6650,10 +6667,10 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
  <div class="m84Body"><div class="m84Tabs"><button id="m84TabCalendar" class="m84Tab is-on" onclick="mars84Tab('calendar')">Fuar Takvimi</button><button id="m84TabAdd" class="m84Tab" onclick="mars84Tab('add')">+ Fuar Ekle</button><button id="m84TabCards" class="m84Tab" onclick="mars84Tab('cards')">Kartvizitler</button><button id="m84TabArchive" class="m84Tab" onclick="mars84Tab('archive')">📁 Fuar Arşivi</button></div>
  <section id="m84Calendar"><div class="m84Info">Fuarların tam adresi ve tarihleri doğrulanmadan kesin kayıt olarak gösterilmez. Yeni fuarları ekleyebilir, daha sonra doğrulayabilirsin. Google Maps butonu yalnızca kayıtlı adrese yönlendirir.</div><div class="m84Toolbar"><input id="m84Search" placeholder="Fuar adı, şehir, ülke ara…" oninput="mars84RenderFairs()"><select id="m84Country" onchange="mars84RenderFairs()"><option value="">Tüm Ülkeler</option></select><button class="m84Btn" onclick="mars84Tab('add')">+ Fuar Ekle</button></div><div id="m84Fairs" class="m84Rows"></div></section>
  <section id="m84Add" hidden><form id="m84FairForm" class="m84Form" onsubmit="mars84SaveFair(event)"><input type="hidden" id="m84EditId"><label>Fuar adı *<input id="m84Name" required></label><label>Ülke *<select id="m84AddCountry" required></select></label><label>Şehir *<input id="m84City" required></label><label>Fuar merkezi / salon<input id="m84Venue"></label><label>Başlangıç tarihi *<input type="date" id="m84Start" required></label><label>Bitiş tarihi *<input type="date" id="m84End" required></label><label class="full">Tam adres (sokak, bina, posta kodu, giriş) *<input id="m84Address" required></label><label>Resmî fuar sitesi<input type="url" id="m84Website" placeholder="https://..."></label><label>Adres doğrulama<select id="m84Verified"><option value="no">Doğrulanmadı</option><option value="yes">Resmî kaynaktan doğrulandı</option></select></label><label class="full">Not / salon-giriş bilgisi<textarea id="m84Note"></textarea></label><div class="m84Actions"><button type="submit" class="m84Btn">Fuarı Kaydet</button><button type="button" class="m84Btn light" onclick="mars84Tab('calendar')">Vazgeç</button></div></form></section>
- <section id="m84Cards" hidden><div class="m84Info">Ön/arka kartvizit fotoğrafı ekle. OCR, cihazın internet bağlantısıyla çalışır. Okunan alanları onaylamadan müşteri kaydı oluşmaz.</div><div class="m84Form"><label>Bağlı Fuar<select id="m84CardFair"></select></label><div class="m84ImageInputField"><strong>Kartvizit fotoğrafı</strong><div class="m84ImageChoices">
+ <section id="m84Cards" hidden><div class="m84Info">Kartviziti kamerayla çek veya galeriden seç. Görsel küçültülerek ayrı saklanır; büyük fotoğraf müşteri kaydını engellemez. OCR önerilerini kontrol edip onayla.</div><div class="m84Form"><label>Bağlı Fuar<select id="m84CardFair"></select></label><div class="m84ImageInputField"><strong>Kartvizit fotoğrafı</strong><div class="m84ImageChoices">
 <label for="m84CameraPhoto" class="m84ImageChoice m84ImageChoiceCamera">📷 Fotoğraf Çek<input type="file" id="m84CameraPhoto" accept="image/*" capture="environment" onchange="mars84CardImage(this)"></label>
 <label for="m84Photo" class="m84ImageChoice m84ImageChoiceGallery">🖼️ Galeriden Seç<input type="file" id="m84Photo" accept="image/*" onchange="mars84CardImage(this)"></label>
-</div><span id="m84ImagePicked" class="m84ImagePicked" role="status" aria-live="polite">Henüz fotoğraf seçilmedi.</span></div><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Telefon / WhatsApp<input id="m84CardPhone"></label><label>E-posta<input id="m84CardEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta">Kartvizit ekleyin.</div></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
+</div><span id="m84ImagePicked" class="m84ImagePicked" role="status" aria-live="polite">Henüz fotoğraf seçilmedi.</span></div><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Telefon / WhatsApp<input id="m84CardPhone"></label><label>E-posta<input id="m84CardEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta" role="status" aria-live="polite">Kartvizit ekleyin.</div></label><label class="full">OCR tarafından okunan metin (düzeltilebilir)<textarea id="m84OCRRaw" rows="5" spellcheck="false" placeholder="Fotoğraf okunduktan sonra bulunan yazılar burada görünecek. Gerekirse düzeltip yeniden ayırabilirsin."></textarea><button class="m84Btn light" type="button" onclick="mars915ReparseOCR()">↻ Metinden Alanları Yeniden Ayır</button></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
 <section id="m84Archive" hidden aria-label="Fuar arşivi"></section>
  </div></div>
 </div>
@@ -6667,6 +6684,9 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
  const write=(key,rows)=>localStorage.setItem(key,JSON.stringify(rows));
  const fk='mars_crm_fairs_v1',ck='mars_crm_fair_cards_v1';
  let cardImage='';
+ let cardImageFile=null;
+ let cardImageBusy=false;
+ let cardOcrBusy=false;
  function options(el,empty='Ülke seçiniz'){if(!el)return;let v=el.value;el.innerHTML='<option value="">'+empty+'</option>'+window.mars84AllCountries.map(x=>'<option value="'+E(x)+'">'+E(x)+'</option>').join('');if(v)el.value=v}
  function fairOptions(){let rows=read(fk);for(let id of ['m84CardFair','mars84TripFair']){const el=$(id);if(!el)continue;const v=el.value;const country=$('rCountry')?.value||'';const match=id==='mars84TripFair'?rows.filter(x=>!country||x.country===country):rows;el.innerHTML='<option value="">Fuar seçiniz</option>'+match.map(x=>'<option value="'+E(x.id)+'">'+E(x.name+' — '+x.city+' ('+x.start+')')+'</option>').join('');el.value=v;}}
  window.mars84OpenFair=()=>{if(!window.marsCloudUser){alert('Fuar verileri için önce CRM hesabına giriş yapmalısınız.');return;}$('mars84Back').style.display='block';mars84Tab('calendar')};
@@ -6680,23 +6700,187 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
  window.mars84PlanFair=id=>{const x=read(fk).find(y=>y.id===id);if(!x)return;mars84CloseFair();if(typeof window.openReport==='function')window.openReport();setTimeout(()=>{const el=$('rCountry');if(el){el.value=x.country;el.dispatchEvent(new Event('change'));}if($('rFrom'))$('rFrom').value=x.start;if($('rTo'))$('rTo').value=x.end;$('mars84TravelType').value='fair';mars84TravelTypeChanged();$('mars84TripFair').value=x.id;mars84FairPicked();if(typeof window.renderReportRows==='function')window.renderReportRows();},80)};
  window.mars84TravelTypeChanged=()=>{const fair=$('mars84TravelType')?.value==='fair';$('mars84FairPickerWrap').style.display=fair?'':'none';if(!fair){$('rPurpose').value='B2B görüşmeler, müşteri ziyareti ve yeni pazar araştırması.'}fairOptions();};
  window.mars84FairPicked=()=>{const x=read(fk).find(y=>y.id===$('mars84TripFair').value);if(x){$('rPurpose').value='Fuar ziyareti: '+x.name+' — '+x.city+', '+x.country+' / '+x.address;}};
- window.mars84CardImage=(input)=>{const f=input.files?.[0];if(!f)return;
-  // Selecting a new picture with either input replaces the current preview.
+ // v90.15 — Kartvizit resmi asla müşteri kartı JSON verisine gömülmez.
+ function photoDB(){return new Promise((ok,fail)=>{if(!window.indexedDB)return fail(Error('IndexedDB kullanılamıyor'));
+   const req=indexedDB.open('mars_crm_card_photos_v9015',1);
+   req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('photos'))req.result.createObjectStore('photos');};
+   req.onsuccess=()=>ok(req.result);req.onerror=()=>fail(req.error||Error('Fotoğraf veritabanı açılamadı'));
+ });}
+ async function putPhoto(id,blob){const db=await photoDB();try{await new Promise((ok,fail)=>{
+   const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put(blob,id);
+   tx.oncomplete=()=>ok();tx.onerror=()=>fail(tx.error||Error('Fotoğraf saklanamadı'));
+ });}finally{db.close();}}
+ async function getPhoto(id){const db=await photoDB();try{return await new Promise((ok,fail)=>{
+   const tx=db.transaction('photos','readonly'),q=tx.objectStore('photos').get(id);
+   q.onsuccess=()=>ok(q.result||null);q.onerror=()=>fail(q.error||Error('Fotoğraf okunamadı'));
+ });}finally{db.close();}}
+ function photoDataToBlob(data){const parts=data.split(','),bin=atob(parts[1]||''),bytes=new Uint8Array(bin.length);
+   for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);const mime=(parts[0].match(/^data:([^;]+)/)||[])[1]||'image/jpeg';return new Blob([bytes],{type:mime});}
+ async function migrateLegacyCardPhotos(){
+   const rows=read(ck);if(!rows.some(x=>typeof x.photo==='string'&&x.photo.startsWith('data:')))return rows;
+   // Only remove a legacy embedded photo after the blob was successfully persisted.
+   let changed=false;
+   for(const x of rows){if(typeof x.photo==='string'&&x.photo.startsWith('data:')){
+     try{await putPhoto(x.id,photoDataToBlob(x.photo));x.photoLocalId=x.id;delete x.photo;changed=true;}
+     catch(err){console.warn('Eski kartvizit fotoğrafı korunuyor; aktarılamadı',err);}
+   }}
+   if(changed){try{write(ck,rows);}catch(err){console.warn('Eski fotoğraf verileri korunuyor',err);}}
+   return rows;
+ }
+ function imgToJpeg(file,maxEdge,quality){return new Promise((ok,fail)=>{
+   const url=URL.createObjectURL(file),img=new Image();
+   img.onload=()=>{try{const scale=Math.min(1,maxEdge/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
+     const c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.naturalWidth*scale));c.height=Math.max(1,Math.round(img.naturalHeight*scale));
+     c.getContext('2d',{alpha:false}).drawImage(img,0,0,c.width,c.height);
+     c.toBlob(blob=>blob?ok(blob):fail(Error('Fotoğraf dönüştürülemedi')),'image/jpeg',quality);
+   }catch(err){fail(err)}finally{URL.revokeObjectURL(url)}};
+   img.onerror=()=>{URL.revokeObjectURL(url);fail(Error('Görsel açılamadı. Fotoğrafı JPG olarak yeniden seç.'));};
+   img.src=url;
+ });}
+ const readCardFile=blob=>new Promise((ok,fail)=>{const r=new FileReader();r.onload=()=>ok(String(r.result));r.onerror=()=>fail(r.error||Error('Fotoğraf okunamadı'));r.readAsDataURL(blob)});
+ async function uploadCardPhotoIfAvailable(id,blob){
+   const session=await ensureCloudSession();if(!session?.user?.id)return '';
+   // Storage RLS limits upload to the authenticated user's own prefix.
+   const path=session.user.id+'/cards/'+encodeURIComponent(id)+'.jpg';
+   await uploadStorageObject('fair-documents',path,blob,'image/jpeg',false);
+   return path;
+ }
+ window.mars915ShowCardPhoto=async function(id){
+   const item=read(ck).find(x=>x.id===id);if(!item)return;
+   try{
+     let blob=await getPhoto(item.photoLocalId||item.id).catch(()=>null);
+     if(!blob&&item.photo?.startsWith('data:'))blob=photoDataToBlob(item.photo);
+     if(!blob&&item.photoPath){const session=await ensureCloudSession();if(!session?.access_token)throw Error('Bulut oturumunu aç.');
+       const url=marsSupabaseUrl()+'/storage/v1/object/authenticated/fair-documents/'+item.photoPath.split('/').map(encodeURIComponent).join('/');
+       const res=await fetch(url,{headers:cloudHeaders(session.access_token)});if(!res.ok)throw Error('Fotoğraf indirilemedi: '+res.status);blob=await res.blob();
+       putPhoto(item.id,blob).catch(()=>{});
+     }
+     if(!blob)throw Error('Fotoğraf bu cihazda bulunamadı. Diğer cihazda yerel olarak saklanmış olabilir.');
+     const url=URL.createObjectURL(blob);const existing=document.getElementById('m915CardViewer');if(existing)existing.remove();
+     const overlay=document.createElement('div');overlay.id='m915CardViewer';overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.90);z-index:35000;display:flex;align-items:center;justify-content:center;padding:60px 10px 40px;box-sizing:border-box';
+     const image=new Image();image.src=url;image.alt='Kartvizit fotoğrafı';image.style.cssText='max-width:100%;max-height:80dvh;object-fit:contain';
+     const close=document.createElement('button');close.type='button';close.textContent='✕ Kapat';close.style.cssText='position:absolute;top:15px;right:16px;color:#123;background:white;padding:11px 15px;border:0;border-radius:10px;font-weight:bold';
+     const finish=()=>{overlay.remove();URL.revokeObjectURL(url);};close.onclick=finish;overlay.addEventListener('click',e=>{if(e.target===overlay)finish();});
+     overlay.appendChild(image);overlay.appendChild(close);document.body.appendChild(overlay);
+   }catch(err){alert('Fotoğraf açılamadı: '+err.message);}
+ };
+ function normLine(line){return String(line||'').replace(/[|]+/g,' ').replace(/\s+/g,' ').trim();}
+ function looksLikeAddress(v){return /\b(via|viale|piazza|corso|strada|street|st\.?|road|rd\.?|avenue|ave\.?|boulevard|blvd\.?|rruga|rr\.?|ulitsa|ul\.?|sokak|sk\.?|cadde|caddesi|mahalle|mah\.?|no\.?[: ]\d+|floor|kat|apt\.?|building|postcode|postal|zip|address|adres|indirizzo|sede|localit[aà]|zona industriale)\b/i.test(v)||/\b\d{4,6}\s+[\p{L}]{3,}/iu.test(v);}
+ function companyScore(line,pos){let score=pos<3?2:0;
+   if(/\b(lift|elevator|ascensor|asans[oö]r|d\.o\.o|sh\.?p\.?k|s\.?r\.?l\.?|ltd\.?|gmbh|a\.?ş\.?|s\.?p\.?a\.?|inc\.?|company|group|holding|engineering|technology|industr|elettric|sistemi|solutions|construction|trade)\b/i.test(line))score+=8;
+   if(/^[^a-z]{3,}$/u.test(line)&&/[\p{L}]/u.test(line))score+=3;
+   if(looksLikeAddress(line))score-=8;
+   if(/\d{5,}|@|www\.|https?:|\+\d/.test(line))score-=9;
+   if(/\b(manager|director|engineer|sales|ceo|owner|marketing|commercial|telephone|tel|fax|mobile|email|e-mail)\b/i.test(line))score-=8;
+   return score;
+ }
+ function personScore(line){if(/[\d@]|www\.|https?:|[\/:]/.test(line)||looksLikeAddress(line))return -20;
+   if(/\b(lift|elevator|ascensor|asans[oö]r|d\.o\.o|sh\.?p\.?k|s\.?r\.?l\.?|ltd\.?|gmbh|a\.?ş\.?|inc\.?|group|company|sales|manager|director|engineer|ceo|tel|fax|email|website|industrial)\b/i.test(line))return -12;
+   const words=line.split(/\s+/).filter(Boolean);if(words.length<2||words.length>4)return -8;
+   if(!words.every(w=>/^[\p{L}][\p{L}'’-]+$/u.test(w)))return -5;
+   return 4+(words.every(w=>w[0]===w[0].toLocaleUpperCase('tr'))?2:0);
+ }
+ function parseText(text,reason='ocr'){
+   const rows=String(text||'').split(/\r?\n/).map(normLine).filter(Boolean).slice(0,85);
+   const full=rows.join('\n');
+   const emails=[...full.matchAll(/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/gi)].map(m=>m[0]);
+   const phones=[...full.matchAll(/(?:\+|00)?\d[\d\s().\-]{7,}\d/g)].map(m=>m[0].trim()).filter(x=>x.replace(/\D/g,'').length>=9);
+   const sites=[...full.matchAll(/(?:https?:\/\/)?(?:www\.)?[\w.-]+\.(?:com|net|org|al|de|it|rs|ba|tr|eu|me|co|io|uk|hr|xk|ro)(?:\.[a-z]{2})?/gi)].map(m=>m[0]).filter(x=>!x.includes('@')&&!emails.some(e=>e.includes(x)));
+   const companyTag=rows.find(x=>/^(?:company|firma|kompani|societ[aà]|business|azienda)\s*[:\-]\s*\S/i.test(x));
+   const personTag=rows.find(x=>/^(?:name|contact|person|yetkili|isim|ad soyad|nome|kontakt)\s*[:\-]\s*\S/i.test(x));
+   const positions=rows.map((v,i)=>({v,i,score:companyScore(v,i)})).sort((a,b)=>b.score-a.score);
+   const company=companyTag?.replace(/^[^:–-]+[:–-]\s*/,'') || (positions[0]?.score>=3?positions[0].v:'');
+   const clean=rows.filter(x=>x!==company&&!/@|www\.|https?:|\b(?:tel|fax|phone|mobile|gsm|whatsapp|e-?mail)\b/i.test(x));
+   const roles=/\b(manager|director|sales|representative|business development|marketing|ceo|owner|founder|engineer|president|general manager|account manager|commercial|administrator|responsabile|direttore|amministratore|y[oö]netici|m[uü]d[uü]r|sat[iı]ş)\b/i;
+   const role=clean.find(x=>roles.test(x)&&x.length<85);
+   let person=personTag?.replace(/^[^:–-]+[:–-]\s*/,'')||'';
+   if(!person){const cands=clean.filter(x=>x!==role).map((v,i)=>({v,score:personScore(v),i})).sort((a,b)=>b.score-a.score);if(cands[0]?.score>=5)person=cands[0].v;}
+   let addr=rows.find(x=>/^(?:adres|address|indirizzo|street address)\s*[:\-]/i.test(x));
+   if(addr)addr=addr.replace(/^[^:]+:\s*/,'');
+   else {const ai=rows.findIndex(x=>looksLikeAddress(x)&&x!==company&&!/@|www\./.test(x));if(ai>=0){addr=rows[ai];
+       const next=rows[ai+1]||'';if(next&&!/@|www\.|https?:|\b(?:tel|fax|phone|mobile)\b/i.test(next)&&(/\d{4,6}|,|ital|alban|kosov|serb|tirana|milano|belgrad/i.test(next)||looksLikeAddress(next)))addr+=' '+next;
+   }}
+   const val={m84CardCompany:company,m84CardPerson:person,m84CardTitle:role||'',m84CardEmail:emails[0]||'',m84CardPhone:phones[0]||'',m84CardWeb:sites[0]||'',m84CardAddress:addr||''};
+   const countryLine=rows.find(x=>/\b(italy|italia|albania|shqip[eë]ria|kosovo|kosova|serbia|srbija|romania|bosnia|t[uü]rkiye|turkey|germany|deutschland)\b/i.test(x));
+   if(countryLine){const codes=[[/italy|italia/i,'İTALYA'],[/albania|shqip/i,'ARNAVUTLUK'],[/kosov/i,'KOSOVA'],[/serbia|srbija/i,'SIRBISTAN'],[/romania/i,'ROMANYA'],[/bosnia/i,'BOSNA HERSEK'],[/t[uü]rkiye|turkey/i,'TÜRKİYE'],[/germany|deutschland/i,'ALMANYA']];const hit=codes.find(([r])=>r.test(countryLine));if(hit)val.m84CardCountry=hit[1];}
+   const cityMatch=full.match(/\b(milano|rome|roma|tirana|tiran[eë]|durres|durr[eë]s|prishtin[aë]|belgrad|beograd|zagreb|sarajevo|bucharest|bucuresti|istanbul|ankara)\b/i);
+   if(cityMatch)val.m84CardCity=cityMatch[0];
+   let filled=0;for(const [id,value] of Object.entries(val)){
+     const input=$(id);if(input&&value&&(!input.value.trim()||reason==='reparse')){input.value=value;filled++;}
+   }
+   const status=$('m84OCRStatus');if(status)status.textContent='OCR '+(reason==='reparse'?'yeniden değerlendirildi':'tamamlandı')+' · '+filled+' alan önerildi. Firma, yetkili ve adresi kontrol edip gerekirse düzelt.';
+   return val;
+ }
+ window.mars915ReparseOCR=()=>parseText($('m84OCRRaw')?.value||'','reparse');
+
+ window.mars84CardImage=async(input)=>{
+  const f=input.files?.[0];if(!f)return;
   const otherId=input.id==='m84Photo'?'m84CameraPhoto':'m84Photo';const other=$(otherId);if(other)other.value='';
-  if(f.size>8*1024*1024){alert('Fotoğraf 8 MB üzerindedir. Daha küçük bir fotoğraf seçin.');input.value='';return;}
-  const r=new FileReader();
-  r.onload=()=>{cardImage=String(r.result);$('m84PhotoPreview').src=cardImage;$('m84PhotoPreview').style.display='block';const label=$('m84ImagePicked');if(label)label.textContent='Seçildi: '+f.name;};
-  r.onerror=()=>{alert('Fotoğraf okunamadı. Lütfen yeniden seçin.');input.value='';};
-  r.readAsDataURL(f)
-};
- function parseText(t){let emails=t.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/ig)||[];let phones=t.match(/(?:\+?\d[\d\s().-]{7,}\d)/g)||[];let sites=t.match(/(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+\.(?:com|net|org|al|de|it|rs|ba|tr|eu)(?:\.[a-z]{2})?/ig)||[];if(emails[0])$('m84CardEmail').value=emails[0];if(phones[0])$('m84CardPhone').value=phones[0].trim();if(sites[0])$('m84CardWeb').value=sites.find(x=>!emails.some(e=>e.includes(x)))||sites[0];const lines=t.split('\n').map(x=>x.trim()).filter(x=>x.length>2&&!/@|www\.|https?:|\d{4}/i.test(x));if(lines[0]&&!$('m84CardCompany').value)$('m84CardCompany').value=lines[0];$('m84OCRStatus').textContent='OCR tamamlandı. Firma ve kişi adları karışmış olabilir; kaydetmeden önce mutlaka kontrol edin.';}
- window.mars84ReadCard=async()=>{if(!cardImage){alert('Önce kartvizit fotoğrafı ekleyin.');return;}$('m84OCRStatus').textContent='OCR yükleniyor…';try{if(!window.Tesseract){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}const result=await window.Tesseract.recognize(cardImage,'eng');parseText(result.data.text||'');}catch(err){$('m84OCRStatus').textContent='OCR yüklenemedi. İnternet bağlantısını kontrol edin; bilgileri manuel de kaydedebilirsiniz.';}};
- window.mars84ClearCard=()=>{for(const id of ['m84CardCompany','m84CardPerson','m84CardTitle','m84CardPhone','m84CardEmail','m84CardWeb','m84CardCountry','m84CardCity','m84CardAddress','m84CardNote'])$(id).value='';$('m84Photo').value='';$('m84CameraPhoto').value='';$('m84PhotoPreview').style.display='none';const picked=$('m84ImagePicked');if(picked)picked.textContent='Henüz fotoğraf seçilmedi.';cardImage='';};
- window.mars84SaveCard=()=>{const f=$('m84CardFair').value;const company=$('m84CardCompany').value.trim();if(!company){alert('Firma adı girilmeli.');return;}let x={id:'card_'+Date.now(),fairId:f,createdAt:new Date().toISOString()};for(let [k,id] of Object.entries({company:'m84CardCompany',person:'m84CardPerson',title:'m84CardTitle',phone:'m84CardPhone',email:'m84CardEmail',website:'m84CardWeb',country:'m84CardCountry',city:'m84CardCity',address:'m84CardAddress',note:'m84CardNote'}))x[k]=$(id).value.trim();x.photo=cardImage;const rows=read(ck);rows.push(x);try{write(ck,rows)}catch{alert('Telefon depolama alanı dolu olabilir. Fotoğrafı küçültüp tekrar deneyin.');return;}mars84ClearCard();mars84RenderCards();alert('Kartvizit kaydedildi. Yeni firmalar müşteri listesine aktarılır; aynı isimli mevcut kayıtlar değiştirilmez.');};
- window.mars84RenderCards=()=>{let fairMap=Object.fromEntries(read(fk).map(x=>[x.id,x.name]));$('m84CardsList').innerHTML=read(ck).slice().reverse().map(x=>'<div class="m84Card"><strong>'+E(x.company)+'</strong><div class="m84Meta">'+E(fairMap[x.fairId]||'Fuar seçilmedi')+' · '+E(x.person)+' · '+E(x.phone)+'</div><div>'+E(x.email)+'</div><div class="m84Actions"><button class="m84Btn light" onclick="mars84DeleteCard(\''+E(x.id)+'\')">Sil</button></div></div>').join('')||'<div class="m84Empty">Henüz kartvizit eklenmedi.</div>'};
+  cardImage='';cardImageFile=null;cardImageBusy=true;
+  const label=$('m84ImagePicked');if(label)label.textContent='Fotoğraf hazırlanıyor…';
+  try{if(f.size>25*1024*1024)throw Error('25 MB üzerindeki görselleri telefon galerisinden daha küçük seç.');
+    const blob=await imgToJpeg(f,1900,.80);
+    cardImage=await readCardFile(blob);cardImageFile=blob;
+    $('m84PhotoPreview').src=cardImage;$('m84PhotoPreview').style.display='block';
+    if(label)label.textContent='Seçildi: '+f.name+' · OCR için '+Math.round(blob.size/1024)+' KB olarak hazırlandı.';
+    if($('m84OCRStatus'))$('m84OCRStatus').textContent='Fotoğraf hazır. “Kartviziti Oku” ile bilgileri ayır.';
+  }catch(err){cardImage='';cardImageFile=null;input.value='';if(label)label.textContent='Görsel hazırlanamadı: '+err.message;}
+  finally{cardImageBusy=false;}
+ };
+ window.mars84ReadCard=async()=>{
+  if(cardImageBusy){$('m84OCRStatus').textContent='Fotoğraf hazırlanıyor; hemen ardından tekrar dene.';return;}
+  if(!cardImage){alert('Önce kartvizit fotoğrafı ekle.');return;}
+  if(cardOcrBusy)return;cardOcrBusy=true;
+  $('m84OCRStatus').textContent='Kartvizit okunuyor…';
+  try{
+    if(!window.Tesseract){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
+    let result;
+    try{result=await window.Tesseract.recognize(cardImage,'eng+tur');}
+    catch(err){console.warn('Çok dilli OCR başarısız; İngilizce deneniyor',err);result=await window.Tesseract.recognize(cardImage,'eng');}
+    const raw=(result?.data?.text||'').trim();
+    if($('m84OCRRaw'))$('m84OCRRaw').value=raw;
+    if(raw)parseText(raw);else $('m84OCRStatus').textContent='Yazı okunamadı. Kartviziti daha aydınlık ve düz fotoğraflayarak dene.';
+  }catch(err){$('m84OCRStatus').textContent='OCR çalıştırılamadı: '+err.message+'. Alanları elle doldurabilirsin.';}
+  finally{cardOcrBusy=false;}
+ };
+ window.mars84ClearCard=()=>{
+   for(const id of ['m84CardCompany','m84CardPerson','m84CardTitle','m84CardPhone','m84CardEmail','m84CardWeb','m84CardCountry','m84CardCity','m84CardAddress','m84CardNote','m84OCRRaw'])if($(id))$(id).value='';
+   $('m84Photo').value='';$('m84CameraPhoto').value='';$('m84PhotoPreview').style.display='none';
+   const picked=$('m84ImagePicked');if(picked)picked.textContent='Henüz fotoğraf seçilmedi.';
+   cardImage='';cardImageFile=null;cardImageBusy=false;
+ };
+ window.mars84SaveCard=async()=>{
+   const f=$('m84CardFair').value,company=$('m84CardCompany').value.trim();
+   if(!company){alert('Firma adı girilmeli.');return false;}
+   if(cardImageBusy){alert('Fotoğraf hazırlanırken kaydetme.');return false;}
+   const x={id:'card_'+Date.now()+'_'+Math.random().toString(16).slice(2,7),fairId:f,createdAt:new Date().toISOString()};
+   for(const [k,id] of Object.entries({company:'m84CardCompany',person:'m84CardPerson',title:'m84CardTitle',phone:'m84CardPhone',email:'m84CardEmail',website:'m84CardWeb',country:'m84CardCountry',city:'m84CardCity',address:'m84CardAddress',note:'m84CardNote'}))x[k]=$(id).value.trim();
+   // Avoid multi-MB Base64 photos in localStorage; save only compact metadata.
+   let storedLocally=false,storedInCloud=false,photoIssue='';
+   if(cardImageFile){
+     try{await putPhoto(x.id,cardImageFile);x.photoLocalId=x.id;storedLocally=true;}catch(err){photoIssue+=' Yerel fotoğraf: '+err.message;}
+     try{const path=await uploadCardPhotoIfAvailable(x.id,cardImageFile);
+       if(path){x.photoPath=path;storedInCloud=true;}
+     }catch(err){console.warn('Fotoğraf buluta yüklenemedi',err);photoIssue+=' Bulut fotoğrafı: '+err.message;}
+   }
+   let rows=read(ck);
+   try{write(ck,[...rows,x]);}
+   catch(err){
+     // Preserve all legacy images first, then retry metadata-only write.
+     rows=await migrateLegacyCardPhotos();
+     try{write(ck,[...rows,x]);}
+     catch(err2){alert('Kartvizit kaydedilemedi. Mevcut kayıtlar korunuyor. Önce “Tam Yedek (JSON) İndir” ile yedek al. Hata: '+err2.message);return false;}
+   }
+   const hadPhoto=!!cardImageFile;
+   mars84ClearCard();mars84RenderCards();
+   const status=hadPhoto?(storedInCloud?'Fotoğraf özel buluta yüklendi.':storedLocally?'Fotoğraf sadece bu cihazda saklandı; bulut yüklemesi doğrulanmadı.':'Fotoğraf saklanamadı, metin bilgileri kaydedildi.'):'Fotoğraf seçilmedi.';
+   alert('Kartvizit bilgileri kaydedildi. '+status+(photoIssue?' Ayrıntı: '+photoIssue:''));
+   return true;
+ };
+ window.mars84RenderCards=()=>{let fairMap=Object.fromEntries(read(fk).map(x=>[x.id,x.name]));$('m84CardsList').innerHTML=read(ck).slice().reverse().map(x=>'<div class="m84Card"><strong>'+E(x.company)+'</strong><div class="m84Meta">'+E(fairMap[x.fairId]||'Fuar seçilmedi')+' · '+E(x.person)+' · '+E(x.phone)+'</div><div>'+E(x.email)+'</div><div class="m84Actions">'+((x.photo||x.photoLocalId||x.photoPath)?'<button type="button" class="m84Btn light" onclick="mars915ShowCardPhoto(\''+E(x.id)+'\')">📷 Fotoğrafı Gör</button>':'')+'<button class="m84Btn light" onclick="mars84DeleteCard(\''+E(x.id)+'\')">Sil</button></div></div>').join('')||'<div class="m84Empty">Henüz kartvizit eklenmedi.</div>'};
  window.mars84DeleteCard=id=>{if(!confirm('Kartvizit silinsin mi?'))return;write(ck,read(ck).filter(x=>x.id!==id));mars84RenderCards()};
  function boot(){options($('m84Country'),'Tüm Ülkeler');options($('m84AddCountry'));fairOptions();const r=$('rCountry');r?.addEventListener('change',()=>setTimeout(()=>fairOptions(),0));}
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{boot();setTimeout(()=>migrateLegacyCardPhotos().catch(console.warn),2000)});else{boot();setTimeout(()=>migrateLegacyCardPhotos().catch(console.warn),2000)}
 })();
 </script>
 
@@ -6760,11 +6944,12 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
     if(typeof window.mars84SaveCard!=='function'||window.__mars89CardPatch)return;
     window.__mars89CardPatch=true;
     const old=window.mars84SaveCard;
-    window.mars84SaveCard=function(){
+    window.mars84SaveCard=async function(){
       const company=document.getElementById('m84CardCompany')?.value?.trim();
       const card={company,person:document.getElementById('m84CardPerson')?.value?.trim(),title:document.getElementById('m84CardTitle')?.value?.trim(),phone:document.getElementById('m84CardPhone')?.value?.trim(),email:document.getElementById('m84CardEmail')?.value?.trim(),website:document.getElementById('m84CardWeb')?.value?.trim(),country:document.getElementById('m84CardCountry')?.value?.trim(),city:document.getElementById('m84CardCity')?.value?.trim(),address:document.getElementById('m84CardAddress')?.value?.trim(),note:document.getElementById('m84CardNote')?.value?.trim()};
       const before=JSON.parse(localStorage.getItem('mars_crm_fair_cards_v1')||'[]').length;
-      old.apply(this,arguments);
+      const saved=await old.apply(this,arguments);
+      if(saved!==true)return false;
       const after=JSON.parse(localStorage.getItem('mars_crm_fair_cards_v1')||'[]').length;
       if(after<=before||!card.company)return;
       try{
@@ -6916,7 +7101,7 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
   function countSummary(fair) {
     const id=fair.id;
     return {cards:cards(id).length, hotels:visibleEvents(id,'hotel').length,
-      expenses:visibleEvents(id,'expense').length, files:visibleEvents(id,'file').length};
+      expenses:visibleEvents(id,'expense').length, cars:visibleEvents(id,'car').length, files:visibleEvents(id,'file').length};
   }
   function button(label,attr,cl='m84Btn light') { return '<button type="button" class="'+cl+'" '+attr+'>'+label+'</button>'; }
   function breadcrumbs() {
@@ -6951,14 +7136,14 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
   function innerTextRow(value){ return escape(value||'—'); }
   function cardsPanel(f) {
     const list=cards(f.id);
-    return '<details class="m90FolderSection" open><summary>🪪 Kartvizitler <span>'+list.length+' kayıt</span></summary><div class="m90PanelBody">'+
+    return '<details id="m916Section_cards" class="m90FolderSection"><summary>🪪 Kartvizitler <span>'+list.length+' kayıt</span></summary><div class="m90PanelBody">'+
       '<p class="m90Hint">Fuar sırasında okunan kartvizitler, seçili fuar ile ilişkilendirilerek burada gösterilir.</p>'+button('+ Kartvizit Ekle','data-add-card="'+escape(f.id)+'"')+
       (list.length?'<div class="m90RowList">'+list.map(c=>'<div class="m90Row"><strong>'+innerTextRow(c.company)+'</strong><small>'+innerTextRow(c.person)+' · '+innerTextRow(c.phone)+' · '+innerTextRow(c.email)+'</small></div>').join('')+'</div>':'<div class="m90Empty">Bu fuara ait kartvizit bulunmuyor.</div>')+'</div></details>';
   }
   function removeBtn(event){ return button('Sil','data-remove="'+escape(event.id)+'"','m90MiniDanger'); }
   function hotelPanel(f) {
     const list=visibleEvents(f.id,'hotel');
-    return '<details class="m90FolderSection" open><summary>🏨 Otel / Konaklama <span>'+list.length+' kayıt</span></summary><div class="m90PanelBody">'+
+    return '<details id="m916Section_hotel" class="m90FolderSection"><summary>🏨 Otel / Konaklama <span>'+list.length+' kayıt</span></summary><div class="m90PanelBody">'+
       '<form class="m90Form" id="m90HotelForm"><div class="m90Field"><label>Otel adı *</label><input name="hotelName" required placeholder="Örn. Hotel Milano"></div>'+ 
       '<div class="m90Field"><label>Şehir</label><input name="city" value="'+escape(f.city||'')+'"></div>'+ 
       '<div class="m90Field"><label>Giriş tarihi</label><input name="checkIn" type="date"></div><div class="m90Field"><label>Çıkış tarihi</label><input name="checkOut" type="date"></div>'+ 
@@ -6974,7 +7159,7 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     const list=visibleEvents(f.id,'expense');
     const sums={}; list.forEach(x=>{const key=x.currency||'EUR';sums[key]=(sums[key]||0)+(Number(x.amount)||0)});
     const badges=Object.keys(sums).sort().map(c=>'<span class="m90Amount">'+money(sums[c],c)+'</span>').join('');
-    return '<details class="m90FolderSection" open><summary>🧾 Harcamalar / Fişler <span>'+list.length+' kayıt</span></summary><div class="m90PanelBody">'+
+    return '<details id="m916Section_expense" class="m90FolderSection"><summary>🧾 Harcamalar / Fişler <span>'+list.length+' kayıt</span></summary><div class="m90PanelBody">'+
       '<p class="m90Hint">Fiş tutarını gir; fiş görselini veya faturasını aşağıdaki Belgeler bölümünden ayrıca yükle. Farklı para birimleri ayrı toplanır.</p>'+ 
       '<div class="m90Totals">'+(badges||'<span class="m90Hint">Henüz harcama bulunmuyor.</span>')+'</div>'+ 
       '<form class="m90Form" id="m90ExpenseForm"><div class="m90Field"><label>Tarih *</label><input name="date" type="date" required value="'+new Date().toISOString().slice(0,10)+'"></div>'+ 
@@ -6985,9 +7170,20 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       '<div class="m90Field wide"><label>Açıklama</label><textarea name="note" rows="2"></textarea></div><button type="submit" class="m84Btn">+ Harcama Kaydet</button></form>'+ 
       (list.length?'<div class="m90RowList">'+list.map(x=>'<div class="m90Row"><div><strong>'+innerTextRow(x.category)+' · '+money(x.amount,x.currency)+'</strong><small>'+dateLabel(x.date)+' · '+innerTextRow(x.paymentType)+' · Fiş: '+innerTextRow(x.receiptNo)+'</small><small>'+innerTextRow(x.note)+'</small></div>'+removeBtn(x)+'</div>').join('')+'</div>':'')+'</div></details>';
   }
+  function carPanel(f) {
+    const list=visibleEvents(f.id,'car');
+    return '<details id="m916Section_car" class="m90FolderSection"><summary>🚗 Araç / Kiralama <span>'+list.length+' kayıt</span></summary><div class="m90PanelBody">'+
+    '<form class="m90Form" id="m916CarForm"><div class="m90Field"><label>Araç / Kiralama Firması *</label><input name="company" required placeholder="Araç veya firma adı"></div>'+
+    '<div class="m90Field"><label>Teslim yeri</label><input name="location" placeholder="Havalimanı / otel"></div>'+
+    '<div class="m90Field"><label>Alış tarihi</label><input name="start" type="date"></div><div class="m90Field"><label>İade tarihi</label><input name="end" type="date"></div>'+
+    '<div class="m90Field"><label>Ücret</label><input name="amount" type="number" min="0" step="0.01" inputmode="decimal"></div>'+
+    '<div class="m90Field"><label>Para birimi</label><select name="currency"><option>EUR</option><option>USD</option><option>TRY</option><option>GBP</option></select></div>'+
+    '<div class="m90Field wide"><label>Plaka / rezervasyon no / not</label><textarea name="note" rows="2"></textarea></div><button type="submit" class="m84Btn">+ Araç Kaydet</button></form>'+
+    (list.length?'<div class="m90RowList">'+list.map(x=>'<div class="m90Row"><div><strong>'+innerTextRow(x.company)+'</strong><small>'+dateLabel(x.start)+' – '+dateLabel(x.end)+' · '+innerTextRow(x.location)+'</small><small>'+(x.amount?money(x.amount,x.currency)+' · ':'')+innerTextRow(x.note)+'</small></div>'+removeBtn(x)+'</div>').join('')+'</div>':'<div class="m90Empty">Bu fuar için henüz araç kaydı yok.</div>')+'</div></details>';
+  }
   function filesPanel(f) {
     const list=visibleEvents(f.id,'file');
-    return '<details class="m90FolderSection" open><summary>📎 Dosyalar / Fiş Fotoğrafları <span>'+list.length+' belge</span></summary><div class="m90PanelBody">'+
+    return '<details id="m916Section_files" class="m90FolderSection"><summary>📎 Dosyalar / Fiş Fotoğrafları <span>'+list.length+' belge</span></summary><div class="m90PanelBody">'+
       '<div class="m90Notice">Dosyalar, yalnızca yetkili kullanıcı tarafından okunabilen özel Supabase <strong>fair-documents</strong> alanına yüklenir. Bunun için paketteki SQL kurulumunu bir kez çalıştırmalısın.</div>'+ 
       '<form class="m90Form" id="m90DocumentForm"><div class="m90Field"><label>Belge türü</label><select name="docType"><option value="receipt">Fiş / Fatura</option><option value="hotel">Otel rezervasyonu</option><option value="ticket">Uçak / Ulaşım bileti</option><option value="photo">Fotoğraf</option><option value="other">Diğer PDF / Excel / Belge</option></select></div>'+ 
       '<div class="m90Field"><label>Belge *</label><input type="file" name="uploadFile" required accept="image/*,.pdf,.xls,.xlsx,.doc,.docx,.txt"></div>'+ 
@@ -6997,17 +7193,18 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
   }
   function notesPanel(f) {
     const list=visibleEvents(f.id,'note');
-    return '<details class="m90FolderSection"><summary>📝 Fuar Notları <span>'+list.length+' not</span></summary><div class="m90PanelBody">'+
+    return '<details id="m916Section_notes" class="m90FolderSection"><summary>📝 Fuar Notları <span>'+list.length+' not</span></summary><div class="m90PanelBody">'+
       '<form id="m90NoteForm" class="m90Form"><div class="m90Field wide"><label>Fuar görüşme notu</label><textarea name="note" required rows="3" placeholder="Fuardan alınan bilgiler, aksiyonlar..."></textarea></div><button type="submit" class="m84Btn">+ Notu Kaydet</button></form>'+ 
       (list.length?'<div class="m90RowList">'+list.map(x=>'<div class="m90Row"><div><strong>'+escape(dateLabel(x.createdAt))+'</strong><small>'+escape(x.note)+'</small></div>'+removeBtn(x)+'</div>').join('')+'</div>':'')+'</div></details>';
   }
   function detail(f) {
     const s=countSummary(f);
-    return '<div class="m90DetailIntro"><div><h3>📁 '+escape(f.name)+'</h3><p>'+escape(f.country)+' · '+escape(f.city)+' · '+dateLabel(f.start)+' – '+dateLabel(f.end)+'</p></div>'+ 
-      button('Seyahat Planı Oluştur','data-plan-fair="'+escape(f.id)+'"')+'</div>'+ 
-      '<div class="m90Stats"><span>'+s.cards+' kartvizit</span><span>'+s.hotels+' konaklama</span><span>'+s.expenses+' harcama</span><span>'+s.files+' belge</span></div>'+ 
-      cardsPanel(f)+hotelPanel(f)+expensePanel(f)+filesPanel(f)+notesPanel(f)+ 
-      '<p class="m90Hint">Fuar arşivindeki konaklama ve harcama kayıtları ilgili fuara bağlı tutulur; seyahat harcama raporuyla otomatik birleştirilmez. Fiş görselleri ayrı özel dosya alanında saklanır.</p>';
+    const cells=[['cards','🪪','Kartvizitler',s.cards],['hotel','🏨','Otel / Konaklama',s.hotels],['car','🚗','Araç / Kiralama',s.cars],['expense','🧾','Fiş / Harcamalar',s.expenses],['files','📎','Belgeler / PDF',s.files],['notes','📝','Fuar Notları',visibleEvents(f.id,'note').length]];
+    return '<div class="m90DetailIntro"><div><h3>📁 '+escape(f.name)+'</h3><p>'+escape(f.country)+' · '+escape(f.city)+' · '+dateLabel(f.start)+' – '+dateLabel(f.end)+'</p></div>'+button('Seyahat Planı Oluştur','data-plan-fair="'+escape(f.id)+'"')+'</div>'+
+      '<div class="m916FairModules">'+cells.map(c=>'<button type="button" class="m916FairModule" data-open-section="'+c[0]+'"><span class="m916FairEmoji">'+c[1]+'</span><strong>'+c[2]+'</strong><small>'+c[3]+' kayıt</small><span class="m916FairArrow">›</span></button>').join('')+'</div>'+
+      '<div class="m916FairHint">İşlem yapmak için ilgili klasöre dokun. Her fuarın bilgileri kendi dosyasında tutulur.</div>'+
+      cardsPanel(f)+hotelPanel(f)+carPanel(f)+expensePanel(f)+filesPanel(f)+notesPanel(f)+
+      '<p class="m90Hint">Fuar masrafları seyahat masraflarından ayrı tutulur. Fiş görselleri ve belgeler özel Storage alanında saklanır.</p>';
   }
   function render() {
     const root=$('m84Archive');if(!root||root.hidden) return;
@@ -7102,6 +7299,13 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       setTimeout(()=>URL.revokeObjectURL(url),3000);
       return;
     }
+    if(btn.hasAttribute('data-open-section')){
+      const id='m916Section_'+btn.dataset.openSection;
+      const section=$(id); if(section){
+        document.querySelectorAll('#m84Archive .m90FolderSection').forEach(el=>{if(el!==section)el.open=false;});
+        section.open=true; section.scrollIntoView({behavior:'smooth',block:'start'});
+      }return;
+    }
     if(btn.hasAttribute('data-level')){
       const level=btn.dataset.level;
       if(level==='countries')route={country:null,year:null,fairId:null};
@@ -7130,6 +7334,10 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     if(form.id==='m90HotelForm'){
       if(fd.get('checkIn')&&fd.get('checkOut')&&fd.get('checkOut')<fd.get('checkIn')){alert('Otel çıkış tarihi girişten önce olamaz.');return;}
       emit(route.fairId,'hotel',Object.fromEntries(['hotelName','city','checkIn','checkOut','bookingRef','address','note'].map(k=>[k,text(fd.get(k)).trim()])));
+    } else if(form.id==='m916CarForm'){
+      if(fd.get('start')&&fd.get('end')&&fd.get('end')<fd.get('start')){alert('Araç iade tarihi alış tarihinden önce olamaz.');return;}
+      const amount=text(fd.get('amount')).trim();if(amount && (!Number.isFinite(Number(amount))||Number(amount)<0)){alert('Araç ücretini kontrol et.');return;}
+      emit(route.fairId,'car',{company:text(fd.get('company')).trim(),location:text(fd.get('location')).trim(),start:text(fd.get('start')),end:text(fd.get('end')),amount:amount?Number(amount):0,currency:text(fd.get('currency')),note:text(fd.get('note')).trim()});
     } else if(form.id==='m90ExpenseForm'){
       const amount=Number(fd.get('amount'));if(!Number.isFinite(amount)||amount<=0){alert('Tutarı kontrol et.');return;}
       emit(route.fairId,'expense',{date:text(fd.get('date')),category:text(fd.get('category')),amount,currency:text(fd.get('currency')),paymentType:text(fd.get('paymentType')),receiptNo:text(fd.get('receiptNo')).trim(),note:text(fd.get('note')).trim()});
@@ -7179,5 +7387,97 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
   setTimeout(()=>sync().catch(()=>{}),3500);
 })();
 
+</script>
+
+<style id="marsV916MainStyle">
+/* Approved global dashboard -- homepage is distinct from full company list */
+body:not(.m904Home) .m904Dashboard{display:none!important}
+body.m904Home .m904Dashboard{display:block!important}
+body.m904Home main>.cards,body.m904Home main>.crmFilters,body.m904Home main>.tableWrap,body.m904Home main>p.small{display:none!important}
+body.m904Home #mars80Mobile{display:none!important}
+.m904Dashboard{max-width:1280px!important;margin:0 auto 20px!important}
+.m904Kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px!important;margin:0 0 15px!important}
+.m904Kpi{border-radius:16px!important;box-shadow:0 6px 20px #18334a08!important;min-height:96px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.m904Kpi b{font-size:29px;line-height:1.1}.m904Kpi span{font-size:13px!important}
+.m904Box{padding:19px!important;border-radius:16px!important}.m916HeaderRow{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:13px}.m916HeaderRow h2{margin:0!important}
+.m916TextLink{border:0;background:transparent;color:#137467;font-weight:800;cursor:pointer;padding:5px 0;text-align:right;font-size:12px}
+.m916SearchBox .m904Search{background:#f9fbfd!important}.m904Filters select{border:1px solid #e1e8ea!important}.m904Filters button{cursor:pointer}
+.m904Table{border-collapse:collapse;width:100%}.m904Table th{text-align:left}.m904Table td{border-bottom:1px solid #edf2f5}.m904Table tbody tr:hover{background:#f4faf8}.m904Table tbody tr{cursor:pointer}
+.m916Quick{display:none}.m916TodayPanel{display:none}.m916MobileExtras{display:none}.m916MobileTitle{display:none}
+.m916Activity{display:grid;gap:7px}.m916ActivityItem{display:flex;gap:13px;align-items:center;padding:8px 0;border-bottom:1px solid #edf2f5;font-size:13px}.m916ActivityItem time{width:55px;color:#527284;font-weight:800}.m916ActivityItem strong{flex:1;color:#21434c}.m916Empty{color:#7b9099;font-size:13px;padding:9px 0}
+.m916FairModules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:15px 0}.m916FairModule{min-height:126px;display:flex;flex-direction:column;align-items:flex-start;gap:9px;position:relative;text-align:left;padding:18px;border:1px solid #dce7e9;border-radius:15px;background:#fff;cursor:pointer;color:#1d3c48;box-shadow:0 5px 15px #182f3b0a}.m916FairModule:hover{border-color:#83bbad;background:#f6fbf9}.m916FairEmoji{font-size:28px}.m916FairModule strong{font-size:15px}.m916FairModule small{color:#6e858e;font-size:12px}.m916FairArrow{position:absolute;right:15px;top:17px;font-size:25px;color:#89a3aa}.m916FairHint{background:#eff7f4;color:#42685f;font-size:12px;border-radius:10px;padding:13px;margin:7px 0 12px}
+#m84Archive .m90FolderSection{scroll-margin-top:110px}
+@media(min-width:761px){.m80BottomBar{display:none!important} .m916FairModules{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){
+  body.m904Home .m904Dashboard{margin:0 0 90px!important}
+  body.m904Home main{padding:11px 12px 14px!important}
+  .m916MobileTitle{display:flex;flex-direction:column;gap:5px;padding:2px 4px 12px}
+  .m916MobileTitle strong{font-size:23px;color:#193e42}.m916MobileTitle span{font-size:12px;color:#6b8791}
+  .m904Kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px!important}
+  .m904Kpi{min-height:88px;padding:14px!important}
+  .m904Box{padding:15px!important;margin-bottom:12px!important}
+  .m916Quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:13px}
+  .m916Quick button{min-width:0;min-height:67px;background:#eef4f3;border:1px solid #dae5e6;border-radius:12px;color:#224b52;padding:8px 5px;font-size:12px;font-weight:800}
+  .m916Quick button.m916QuickPrimary{background:#176d60;color:#fff}
+  .m904Filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .m904Filters button{grid-column:1/-1}.m904Filters select{min-width:0;width:100%}
+  .m916CompanyBox{display:none}
+  .m916TodayPanel,.m916MobileExtras{display:block}
+  .m904LowGrid{grid-template-columns:1fr}
+  .m916FairModules{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.m916FairModule{min-height:119px;padding:13px}.m916FairModule strong{font-size:13px}.m916FairEmoji{font-size:26px}
+  .m80BottomBar{display:grid!important;z-index:9999}
+}
+@media(min-width:761px){header .top{max-width:none}}
+</style>
+<script id="marsV916NavigationAndHomeLogic">
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const readCompanies=()=>{try{return typeof companies!=='undefined'&&Array.isArray(companies)?companies:[]}catch{return []}};
+const readTrips=()=>{try{return typeof readTripArchive==='function'?readTripArchive():[]}catch{return []}};
+const clean=s=>String(s||'').toLocaleLowerCase('tr');
+const escText=(s)=>String(s||'');
+const fmtDate=x=>{if(!x)return '—';try{return new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'short',year:'numeric'}).format(new Date(String(x).slice(0,10)+'T12:00:00'))}catch{return String(x)}};
+function paintHome(){
+ const cs=readCompanies(),trips=readTrips();
+ const put=(id,text)=>{const e=$(id);if(e)e.textContent=text};
+ put('m904Firms',cs.length);put('m904Potential',cs.filter(x=>['A+','A'].includes(x.potential)).length);
+ put('m904Countries',new Set(cs.map(x=>x.country).filter(Boolean)).size);put('m904Trips',trips.length);
+ const country=$('m904Country');if(!country)return;
+ const prev=country.value;
+ const countries=[...new Set(cs.map(x=>x.country).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr'));
+ if(country.dataset.items!==JSON.stringify(countries)){
+   country.replaceChildren(new Option('Tüm Ülkeler',''),...countries.map(x=>new Option(x,x)));
+   country.dataset.items=JSON.stringify(countries);country.value=countries.includes(prev)?prev:'';
+ }
+ const query=clean($('m904Search')?.value),pot=$('m904Pot')?.value||'';
+ const matches=cs.filter(x=>(!country.value||x.country===country.value)&&(!pot||x.potential===pot)&&(!query||clean([x.company,x.city,x.email,x.phone].join(' ')).includes(query)));
+ const body=$('m904FirmRows');if(body){body.replaceChildren();matches.slice(0,6).forEach(x=>{
+   const row=document.createElement('tr');[x.company||'',x.country||'',x.potential||'',x.lastContact||'—'].forEach((val,i)=>{const cell=document.createElement('td');cell.textContent=val;if(i===3)cell.className='m904DesktopOnly';row.appendChild(cell)});
+   row.onclick=()=>{if(typeof openEdit==='function')openEdit(x.id)};body.appendChild(row);
+ });if(!matches.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=4;td.textContent='Filtreye uygun firma bulunamadı.';tr.appendChild(td);body.appendChild(tr)}}
+ put('m904FirmHint',matches.length+' firma bulundu · İlk '+Math.min(matches.length,6)+' kayıt gösteriliyor.');
+ const recent=$('m904RecentTrips');if(recent){recent.replaceChildren();trips.slice().sort((a,b)=>String(b.from||'').localeCompare(String(a.from||''))).slice(0,3).forEach(t=>{const btn=document.createElement('button');btn.type='button';btn.textContent='📁 '+(t.country||'Seyahat')+' · '+fmtDate(t.from);btn.onclick=()=>window.marsV903GoArchive?.();recent.appendChild(btn)});if(!recent.children.length){const div=document.createElement('div');div.className='m916Empty';div.textContent='Henüz seyahat arşivi kaydı bulunmuyor.';recent.appendChild(div)}}
+ const today=new Date(),localDay=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
+ const schedule=trips.flatMap(t=>(t.schedule||[]).filter(r=>r.date===localDay));
+ const plan=$('m904Today');if(plan){plan.replaceChildren();schedule.slice(0,6).forEach(p=>{const div=document.createElement('div');div.className='m916ActivityItem';const time=document.createElement('time');time.textContent=p.time||'—';const strong=document.createElement('strong');strong.textContent=p.company||'Firma ziyareti';div.append(time,strong);plan.appendChild(div)});if(!schedule.length){const p=document.createElement('div');p.className='m916Empty';p.textContent='Bugün için planlı ziyaret yok. Seyahat Planı üzerinden oluşturabilirsin.';plan.appendChild(p)}}
+ const hotels=$('m916Hotels');if(hotels){hotels.replaceChildren();const map=new Set();trips.slice().sort((a,b)=>String(b.from||'').localeCompare(String(a.from||''))).forEach(t=>{if(!t.hotelName||map.has(clean(t.hotelName)))return;map.add(clean(t.hotelName));if(map.size>3)return;const b=document.createElement('button');b.textContent='🏨 '+t.hotelName+' · '+(t.country||'');b.onclick=()=>window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(t.hotelName+' '+t.country),'_blank','noopener');hotels.appendChild(b)});if(!hotels.children.length){const p=document.createElement('div');p.className='m916Empty';p.textContent='Henüz kayıtlı otel bulunmuyor.';hotels.appendChild(p)}}
+}
+window.marsV904Update=paintHome;
+const activate=id=>window.marsV903SetActive?.(id);
+window.marsV903GoHome=function(){document.body.classList.add('m904Home');activate('menuHomeBtn');paintHome();window.scrollTo({top:0,behavior:'instant'})};
+window.marsV903GoCompanies=function(){document.body.classList.remove('m904Home');activate('menuCompaniesBtn'); if(typeof render==='function')render();window.scrollTo({top:0,behavior:'instant'});};
+window.marsV916ShowFirms=function(){window.marsV903GoCompanies()};
+window.marsV916TodayFirms=function(){document.body.classList.remove('m904Home');activate('menuCompaniesBtn');if(typeof window.mars80TodayList==='function')window.mars80TodayList();};
+const existingFair=window.mars84OpenFair;
+window.mars84OpenFair=function(){if(typeof existingFair==='function'){existingFair();if($('mars84Back')?.style.display==='block'&&typeof window.m90OpenFairFolder==='function'){window.m90OpenFairFolder();}const tabs=$('m84TabArchive');const first=$('m84TabCalendar');if(tabs&&first&&tabs.parentElement===first.parentElement)tabs.parentElement.insertBefore(tabs,first)}};
+const originalFairRoute=window.marsV903GoFair;
+window.marsV903GoFair=function(){activate('menuFairBtn');window.mars84OpenFair()};
+const loginHome=()=>{if(!$('m904Dashboard'))return;window.marsV903GoHome()};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loginHome,{once:true});else loginHome();
+window.addEventListener('pageshow',()=>{if(document.body.classList.contains('m904Home'))paintHome()});
+// Existing CRM mutations may occur after cloud sync; refresh display without touching stored records.
+window.addEventListener('focus',()=>{if(document.body.classList.contains('m904Home'))paintHome()});
+})();
 </script>
 </body>
