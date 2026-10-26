@@ -7501,8 +7501,9 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       '<div class="m918EventMain"><div class="m918Overline">FUAR İŞLEMLERİ</div>'+
       '<div class="m918ActionsGrid">'+
       button('📊 <strong>Güncel Fuar Excel</strong><small>Kartvizitler + harcamalar + rapor</small>','data-export-report="'+escape(f.id)+'"','m918Action m918ActionPrimary')+
-      button('📷 <strong>Fiş Ekle / Gör ('+receiptCount+')</strong><small>Fotoğraf / PDF · Fişler burada açılır</small>','data-service-doc="receipt"','m918Action')+
-      button('🪪 <strong>Kartvizitler ('+n.cards+')</strong><small>+ Kartvizit Ekle · Kamera / Galeri / OCR</small>','data-add-card="'+escape(f.id)+'"','m918Action m923CardAction')+'</div>'+receiptDock+
+      button('📷 <strong>Fiş Ekle</strong><small>Tarih · Tutar · Fotoğraf / PDF</small>','data-fair-receipt-open','m918Action')+
+      button('🧾 <strong>Fişler / Harcamalar ('+n.expenses+')</strong><small>Kayıtları görüntüle · Fişleri PDF Al</small>','data-fair-receipt-manager','m918Action')+
+      button('🪪 <strong>Kartvizitler ('+n.cards+')</strong><small>+ Kartvizit Ekle · Kamera / Galeri / OCR</small>','data-add-card="'+escape(f.id)+'"','m918Action m923CardAction')+'</div>'+
       '<div class="m921DocsTitle"><div class="m918Overline">FUAR BELGELERİ VE KAYITLAR</div><label class="m919People">Kişi sayısı <input type="number" min="1" max="50" inputmode="numeric" data-person-count="1" value="'+people+'"></label></div>'+
       cardsArea+
       '<div class="m918AutoNote"><b>Fuar harcamaları rapora otomatik eklenir.</b><span>Kartvizit ve belgelerin kayıtları ilgili fuarın Excel raporunda görünür; seyahat dosyalarıyla karışmaz.</span></div>'+
@@ -7591,9 +7592,9 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       try{raw=(await window.Tesseract.recognize(file,'eng+tur')).data.text||'';}
       catch {raw=(await window.Tesseract.recognize(file,'eng')).data.text||'';}
     }
-    if(!raw.trim())return {amount:null,currency:'',reason:'Belgede okunabilir metin bulunamadı'};
+    if(!raw.trim())return {amount:null,currency:'',reason:'Belgede okunabilir metin bulunamadı',rawText:''};
     if(typeof analyzeTravelPdfText!=='function')throw Error('Toplam tutar analiz motoruna erişilemiyor.');
-    return analyzeTravelPdfText(raw);
+    return {...analyzeTravelPdfText(raw),rawText:raw};
   }
   async function readFairDocument(form){
     const gallery=form.elements.namedItem('uploadFile'),camera=form.elements.namedItem('cameraFile');
@@ -7627,7 +7628,7 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     if(amountRaw){
       const amount=Number(amountRaw);
       if(!Number.isFinite(amount) || amount<=0)throw Error('Fiş yüklendi fakat tutar geçersiz. Fuar dosyasında harcamayı elle gir.');
-      const expense=emit(fairId,'expense',{date:text(fd.get('receiptDate')),category:({'hotel':'Otel','ticket':'Ulaşım / uçak bileti','car':'Araç / Kiralama','receipt':'Fiş / fatura','photo':'Fotoğraf ekli harcama','other':'Belge ekli harcama'}[ev.docType]||'Fuar gideri'),amount,
+      const expense=emit(fairId,'expense',{date:text(fd.get('receiptDate')),category:(ev.docType==='receipt'&&text(fd.get('receiptCategory')).trim())?text(fd.get('receiptCategory')).trim():({'hotel':'Otel','ticket':'Ulaşım / uçak bileti','car':'Araç / Kiralama','receipt':'Fiş / fatura','photo':'Fotoğraf ekli harcama','other':'Belge ekli harcama'}[ev.docType]||'Fuar gideri'),amount,
         currency:text(fd.get('receiptCurrency')),paymentType:text(fd.get('receiptPayment')),
         receiptNo:text(fd.get('receiptNo')).trim(),note:text(fd.get('note')).trim(),attachmentId:ev.id});
       if(!expense)throw Error('Fiş belgesi yüklendi ancak tutar rapora eklenemedi. Kontrol et.');
@@ -7664,9 +7665,173 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       setTimeout(()=>URL.revokeObjectURL(obj),180000);
     }catch(err){if(win&&!win.closed)win.close();alert('Belge görüntülenemedi: '+err.message);}
   }
+  // v90.24 — Travel-style Fair Receipt entry, expense ledger and printable receipt PDF.
+  // Data stays associated with the specific fair ID, not the trip expense store.
+  function fairReceiptUi(){
+    let back=document.getElementById('m924ReceiptBack');
+    if(back)return back;
+    back=document.createElement('div');back.id='m924ReceiptBack';back.className='m924Overlay';back.hidden=true;
+    back.innerHTML=`<div class="m924Modal" role="dialog" aria-modal="true" aria-labelledby="m924ReceiptTitle">
+      <h2 id="m924ReceiptTitle">Fiş / Harcama Ekle</h2>
+      <form id="m924ReceiptForm"><input type="hidden" name="docType" value="receipt"><div class="m924Fields">
+      <label>Tarih<input name="receiptDate" type="date" required></label>
+      <label>Açıklama<select name="receiptCategory"><option>YEMEK</option><option>BENZİN</option><option>OTOPARK</option><option>OTOBAN</option><option>OTEL</option><option>TAKSİ</option><option>ARAÇ KİRALAMA</option><option>KAHVE</option><option>FUAR GİDERİ</option><option>DİĞER</option></select></label>
+      <label>Fiş / Fatura No<input name="receiptNo" autocomplete="off"></label>
+      <label>Para Birimi<select name="receiptCurrency"><option>EUR</option><option>USD</option><option>TRY</option><option>ALL</option><option>BAM</option><option>RSD</option><option>MKD</option><option>BGN</option><option>RON</option><option>GBP</option><option>CHF</option></select></label>
+      <label>Tutar<input name="receiptAmount" inputmode="decimal" required placeholder="0,00"></label>
+      <label>Ödeme Şekli<input name="receiptPayment" placeholder="Otomatik algılanacak veya elle gir"></label>
+      <label>Not<input name="note" placeholder="İsteğe bağlı"></label><span></span>
+      </div><div class="m924Upload">
+      <strong>Fiş Fotoğrafı / PDF</strong><label class="m924File">📎 Dosya / Galeriden Seç<input name="uploadFile" type="file" accept="image/*,.pdf,application/pdf"></label>
+      <label class="m924File">📷 Fotoğraf Çek<input name="cameraFile" type="file" accept="image/*" capture="environment"></label>
+      <p class="m924Hint">OCR tarih, tutar, para birimi, fiş no ve ödeme şeklini okumaya çalışır. Kaydetmeden önce kontrol et. Belge olmadan da harcama ekleyebilirsin.</p>
+      <div class="m924Status" role="status">Belge seçildiğinde otomatik okuma başlayacak.</div></div>
+      <div class="m924Buttons"><button type="button" data-m924-close class="m84Btn light">Kapat</button><button type="submit" class="m84Btn" data-m924-save>Kaydet</button></div></form></div>`;
+    document.body.appendChild(back);
+    back.addEventListener('click',e=>{if(e.target===back||e.target.closest('[data-m924-close]'))closeFairReceipt();});
+    back.querySelector('#m924ReceiptForm').addEventListener('change',e=>{
+      if(!e.target.matches('input[type="file"]'))return;
+      const form=e.currentTarget,other=e.target.name==='uploadFile'?form.elements.namedItem('cameraFile'):form.elements.namedItem('uploadFile');if(other)other.value='';
+      const file=e.target.files?.[0];if(file){form.__ocrTask=readFairReceiptOCR(form,file);}
+    });
+    back.querySelector('#m924ReceiptForm').addEventListener('submit',saveFairReceipt);
+    return back;
+  }
+  function openFairReceipt(){
+    if(!route.fairId)return;
+    const back=fairReceiptUi(), form=back.querySelector('form');form.reset();form.__ocrTask=null;
+    form.elements.namedItem('receiptDate').value=new Date().toISOString().slice(0,10);
+    back.querySelector('.m924Status').textContent='Fiş fotoğrafını/PDF dosyanı seç, OCR alanları önerecek.';
+    back.hidden=false;document.body.classList.add('m924ModalVisible');
+  }
+  function closeFairReceipt(){const el=document.getElementById('m924ReceiptBack');if(el)el.hidden=true;document.body.classList.remove('m924ModalVisible');}
+  function parseFairReceiptMeta(raw){
+    const t=String(raw||''),dated=t.match(/(?:TAR[Iİ]H|DATE)\s*[:#.-]?\s*(\d{1,2})[.\/-](\d{1,2})[.\/-](20\d{2})/i)||t.match(/\b(\d{1,2})[.\/-](\d{1,2})[.\/-](20\d{2})\b/);
+    const date=dated?`${dated[3]}-${dated[2].padStart(2,'0')}-${dated[1].padStart(2,'0')}`:'';
+    const no=t.match(/(?:F[Iİ]Ş|FATURA|FIS|RECEIPT|INVOICE)\s*(?:NO|NUMARASI|NUMBER|#|NR)?\s*[:#-]\s*([A-Z0-9\/-]{3,35})/i);
+    const card=t.match(/(?:KRED[Iİ]\s*KARTI|CARD|POS|MASTERCARD|VISA)[\s\S]{0,55}?(?:\*{2,}|X{2,}|\d{2})(\d{2})(?!\d)/i);
+    const cash=/\b(NAK[Iİ]T|CASH)\b/i.test(t);
+    return {date,number:no?.[1]||'',payment:card?'KREDİ KARTI · '+card[1]:(cash?'NAKİT':'')};
+  }
+  async function readFairReceiptOCR(form,file){
+    const status=form.querySelector('.m924Status');status.textContent='Belge okunuyor…';
+    try{
+      const found=await ocrFairFile(file),meta=parseFairReceiptMeta(found.rawText);
+      const amt=form.elements.namedItem('receiptAmount'),curr=form.elements.namedItem('receiptCurrency');
+      if(found.amount!=null&&Number(found.amount)>0){amt.value=Number(found.amount).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+      if(found.currency&&[...curr.options].some(o=>o.value===found.currency))curr.value=found.currency;
+      if(meta.date && !Number.isNaN(Date.parse(meta.date)))form.elements.namedItem('receiptDate').value=meta.date;
+      if(meta.number)form.elements.namedItem('receiptNo').value=meta.number;
+      if(meta.payment)form.elements.namedItem('receiptPayment').value=meta.payment;
+      status.textContent=found.amount?'Önerilen tutar: '+money(found.amount,found.currency||curr.value)+'. Kaydetmeden önce kontrol et.':'Belgede tutar bulunamadı. Tutarı elle girebilirsin.';
+    }catch(err){status.textContent='OCR okunamadı: '+err.message+'. Bilgileri elle girebilirsin.';}
+  }
+  function fairReceiptAmount(input){
+    let v=String(input||'').replace(/\s/g,'');
+    if(v.includes(',')&&v.includes('.'))v=v.lastIndexOf(',')>v.lastIndexOf('.')?v.replace(/\./g,'').replace(',','.'):v.replace(/,/g,'');
+    else if(v.includes(','))v=v.replace(',','.');
+    else if(/^\d{1,3}(?:\.\d{3})+$/.test(v))v=v.replace(/\./g,'');
+    return Number(v);
+  }
+  async function saveFairReceipt(e){
+    e.preventDefault();const form=e.currentTarget,btn=form.querySelector('[data-m924-save]');
+    if(btn.disabled)return;
+    btn.disabled=true;btn.textContent='Kaydediliyor…';
+    try{
+      if(form.__ocrTask)await form.__ocrTask;
+      const amount=fairReceiptAmount(form.elements.namedItem('receiptAmount').value);
+      if(!Number.isFinite(amount)||amount<=0)throw Error('Tutarı kontrol et.');
+      const fd=new FormData(form),chosen=fd.get('uploadFile')?.size?fd.get('uploadFile'):fd.get('cameraFile');
+      if(chosen instanceof File&&chosen.size){
+        // Reuse the same private Storage and linked expense pathway as other fair documents.
+        // FormData's number parser expects a decimal point, not a localized string.
+        form.elements.namedItem('receiptAmount').value=String(amount);
+        const ev=await uploadFile(route.fairId,form);
+        if(!ev)throw Error('Fiş kaydı doğrulanamadı.');
+      }else{
+        if(!emit(route.fairId,'expense',{date:text(fd.get('receiptDate')),category:text(fd.get('receiptCategory')),
+          currency:text(fd.get('receiptCurrency')),amount,paymentType:text(fd.get('receiptPayment')),
+          receiptNo:text(fd.get('receiptNo')).trim(),note:text(fd.get('note')).trim()}))throw Error('Fiş kayıt edilemedi.');
+      }
+      closeFairReceipt();render();
+      alert('Fiş kaydedildi. Fişler / Harcamalar bölümünde görünecek.');
+    }catch(err){alert('Fiş kaydedilemedi: '+err.message);}
+    finally{btn.disabled=false;btn.textContent='Kaydet';}
+  }
+  function fairExpenseUi(){
+    let back=document.getElementById('m924ManagerBack');if(back)return back;
+    back=document.createElement('div');back.id='m924ManagerBack';back.className='m924Overlay';back.hidden=true;
+    back.innerHTML='<div class="m924Modal m924Wide" role="dialog" aria-modal="true" aria-labelledby="m924ManagerTitle"><div class="m924Head"><div><h2 id="m924ManagerTitle">Fişler / Harcamalar</h2><p id="m924ManagerSubtitle"></p></div><button class="m84Btn light" data-m924-manager-close>Kapat</button></div><div id="m924ManagerBody"></div></div>';
+    document.body.appendChild(back);
+    back.addEventListener('click',async e=>{
+      if(e.target===back||e.target.closest('[data-m924-manager-close]')){back.hidden=true;return;}
+      const b=e.target.closest('button');if(!b)return;
+      if(b.hasAttribute('data-m924-remove')){
+        const expense=visibleEvents(route.fairId,'expense').find(x=>x.id===b.dataset.m924Remove);if(!expense)return;
+        if(!confirm('Fiş / harcama kaydını silmek istiyor musun?'))return;
+        if(expense.attachmentId)emit(route.fairId,'delete',{targetId:expense.attachmentId});
+        emit(route.fairId,'delete',{targetId:expense.id});openFairExpenseManager();
+      }else if(b.hasAttribute('data-m924-view'))await previewFairFile(b.dataset.m924View);
+      else if(b.hasAttribute('data-m924-export'))await exportFairReceiptsPdf();
+      else if(b.hasAttribute('data-m924-new')){back.hidden=true;openFairReceipt();}
+    });
+    return back;
+  }
+  function openFairExpenseManager(){
+    if(!route.fairId)return;const f=fairById(route.fairId),rows=visibleEvents(route.fairId,'expense'), files=visibleEvents(route.fairId,'file');
+    const lookup=new Map(files.map(x=>[x.id,x]));
+    const back=fairExpenseUi();back.querySelector('#m924ManagerSubtitle').textContent=(f?.name||'')+' · '+rows.length+' harcama kaydı';
+    const totals={};rows.forEach(x=>totals[x.currency||'EUR']=(totals[x.currency||'EUR']||0)+Number(x.amount||0));
+    back.querySelector('#m924ManagerBody').innerHTML='<div class="m924ManagerToolbar"><div>'+Object.entries(totals).map(([c,v])=>'<b>'+money(v,c)+'</b>').join(' · ')+'</div><div>'+button('+ Fiş Ekle','data-m924-new','m84Btn light')+button('Fişleri PDF Al','data-m924-export','m84Btn')+'</div></div>'+
+      (rows.length?'<div class="m924TableWrap"><table><thead><tr><th>Tarih</th><th>Fiş / Fatura No</th><th>Ödeme</th><th>Açıklama</th><th>Tutar</th><th>Para Birimi</th><th>Not</th><th>Fiş</th><th>İşlem</th></tr></thead><tbody>'+rows.map(x=>{
+        const file=lookup.get(x.attachmentId);return '<tr><td>'+escape(dateLabel(x.date))+'</td><td>'+escape(x.receiptNo||'')+'</td><td>'+escape(x.paymentType||'')+'</td><td><b>'+escape(x.category||'')+'</b></td><td>'+escape(new Intl.NumberFormat('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(x.amount)||0))+'</td><td>'+escape(x.currency||'')+'</td><td>'+escape(x.note||'')+'</td><td>'+(file?button('Fişi Gör','data-m924-view="'+escape(file.id)+'"','m84Btn light'):'—')+'</td><td>'+button('Sil','data-m924-remove="'+escape(x.id)+'"','m90MiniDanger')+'</td></tr>';}).join('')+'</tbody></table></div>':'<div class="m90Empty">Henüz fiş / harcama kaydı yok.</div>');
+    back.hidden=false;
+  }
+  async function fairBlob(file){
+    const s=await ensureCloudSession();if(!s?.access_token)throw Error('Bulut oturumunu aç.');
+    const url=marsSupabaseUrl()+'/storage/v1/object/authenticated/'+encodeURIComponent(file.bucket)+'/'+file.path.split('/').map(encodeURIComponent).join('/');
+    const resp=await fetch(url,{headers:cloudHeaders(s.access_token)});if(!resp.ok)throw Error('Dosya okunamadı: HTTP '+resp.status);
+    return resp.blob();
+  }
+  async function fairPrintImage(file){
+    const blob=await fairBlob(file);
+    if(file.mime==='application/pdf'||/\.pdf$/i.test(file.filename||'')){
+      if(!window.pdfjsLib)return '';
+      const data=new Uint8Array(await blob.arrayBuffer());
+      const pdf=await window.pdfjsLib.getDocument({data}).promise;
+      const page=await pdf.getPage(1),view=page.getViewport({scale:1.5}),canvas=document.createElement('canvas');
+      const ratio=Math.min(1,1200/Math.max(view.width,view.height));canvas.width=Math.ceil(view.width*ratio);canvas.height=Math.ceil(view.height*ratio);
+      await page.render({canvasContext:canvas.getContext('2d'),viewport:page.getViewport({scale:1.5*ratio})}).promise;
+      const uri=canvas.toDataURL('image/jpeg',.8);pdf.destroy?.();return uri;
+    }
+    return await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob);});
+  }
+  async function exportFairReceiptsPdf(){
+    const fairId=route.fairId,rows=visibleEvents(fairId,'expense'),files=visibleEvents(fairId,'file');
+    const docs=new Map(files.map(f=>[f.id,f]));
+    const withFiles=rows.filter(x=>docs.has(x.attachmentId));
+    if(!withFiles.length){alert('PDF oluşturmak için en az bir fiş fotoğrafı/PDF belgesi yüklenmiş olmalı.');return;}
+    // Opening the window synchronously avoids popup blockers after cloud calls.
+    const win=window.open('about:blank','_blank');if(!win){alert('PDF önizlemesi engellendi. Tarayıcıda açılır pencereye izin ver.');return;}
+    win.document.body.textContent='Fuar fişleri PDF baskısı hazırlanıyor…';
+    try{
+      const prepared=[];for(const expense of withFiles){
+        const file=docs.get(expense.attachmentId);let uri='';try{uri=await fairPrintImage(file);}catch(err){console.warn('Fiş görseli okunamadı:',err);}
+        prepared.push({expense,file,uri});
+      }
+      const fair=fairById(fairId);const cards=prepared.map(({expense:x,file,uri},i)=>`<div class="rc"><div class="rt"><strong>Fiş ${i+1} / ${prepared.length}</strong><b>${money(x.amount,x.currency)}</b></div><div class="rb"><div class="meta">${[['Tarih',dateLabel(x.date)],['Fiş / Fatura No',x.receiptNo],['Ödeme',x.paymentType],['Açıklama',x.category],['Not',x.note]].map(([k,v])=>`<div><label>${escape(k)}</label><span>${escape(v||'—')}</span></div>`).join('')}</div><div class="scan">${uri?`<img src="${uri}">`:'<p>Görsel önizlemesi oluşturulamadı. Ek: '+escape(file.filename)+'</p>'}</div></div></div>`);
+      const pages=[];for(let i=0;i<cards.length;i+=2)pages.push(`<section class="page"><header><strong>MARS ELEVATOR</strong><div>Fuar Fiş / Harcama PDF</div><small>${escape(fair?.name||'Fuar')} · ${escape(fair?.country||'')} · Sayfa ${Math.floor(i/2)+1}/${Math.ceil(cards.length/2)}</small></header><div class="cards">${cards[i]}${cards[i+1]||'<div class="rc empty"></div>'}</div></section>`);
+      const html='<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Fuar Fişleri PDF</title><style>'+`@page{size:A4 portrait;margin:10mm}*{box-sizing:border-box}body{margin:0;background:#f4f6f7;color:#192f39;font-family:Arial,sans-serif}.page{width:190mm;min-height:275mm;background:white;padding:5mm;break-after:page;display:flex;flex-direction:column;gap:4mm;margin:0 auto 10mm}.page:last-child{break-after:auto}header{display:flex;justify-content:space-between;border-bottom:1px solid #ccd9db;gap:8px;padding-bottom:3mm;align-items:center}header strong{font-size:15px}header div,header small{font-size:10px}.cards{display:grid;grid-template-rows:1fr 1fr;gap:4mm;flex:1;min-height:0}.rc{border:1px solid #d0dada;border-radius:8px;padding:4mm;min-height:0;display:flex;flex-direction:column}.rt{display:flex;justify-content:space-between;gap:8px;font-size:12px;border-bottom:1px solid #e5eded;padding-bottom:3mm}.rb{display:grid;grid-template-columns:58mm 1fr;gap:4mm;min-height:0;flex:1;padding-top:3mm}.meta{background:#f6f8f9;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:6px;overflow:hidden}.meta>div{display:grid;gap:2px}.meta label{font-size:9px;color:#6e7b81;font-weight:700}.meta span{font-size:11px;overflow-wrap:anywhere}.scan{display:flex;align-items:center;justify-content:center;border:1px solid #e1e8ea;border-radius:7px;overflow:hidden;min-height:0;padding:4px}.scan img{max-width:100%;max-height:100%;object-fit:contain}.scan p{font-size:11px;line-height:1.5}.empty{border-style:dashed}@media print{body{background:white}.page{margin:0;min-height:277mm;padding:0}}`+'</style></head><body>'+pages.join('')+'</body></html>';
+      win.document.open();win.document.write(html);win.document.close();
+      win.focus();Promise.all(Array.from(win.document.images).map(img=>img.complete?Promise.resolve():new Promise(ok=>{img.onload=ok;img.onerror=ok;}))).then(()=>setTimeout(()=>{try{win.print();}catch(err){}},350));
+    }catch(err){win.document.body.textContent='PDF oluşturulamadı: '+err.message;alert('Fiş PDF oluşturulamadı: '+err.message);}
+  }
+
   const docRoot=$('m84Archive');
   docRoot?.addEventListener('click',async e=>{
     const btn=e.target.closest('button');if(!btn) return;
+    if(btn.hasAttribute('data-fair-receipt-open')){openFairReceipt();return;}
+    if(btn.hasAttribute('data-fair-receipt-manager')){openFairExpenseManager();return;}
     if(btn.hasAttribute('data-edit-fair')){window.mars84EditFair?.(btn.dataset.editFair);return;}
     if(btn.hasAttribute('data-delete-fair')){deleteFair(btn.dataset.deleteFair);return;}
     if(btn.hasAttribute('data-close-workspace')){$('m919Workspace').hidden=true;document.querySelectorAll('#m84Archive .m90FolderSection').forEach(el=>el.open=false);return;}
@@ -8201,4 +8366,11 @@ body.m918FairActive #mars84Back,body.m918FairActive #mars84Back[hidden]{display:
 })();
 </script>
 
+<style id="m924FairReceiptStyle">
+.m924Overlay{position:fixed;inset:0;z-index:2147483500;background:rgba(19,28,34,.62);display:flex;justify-content:center;align-items:center;padding:15px;overflow:auto}
+.m924Overlay[hidden]{display:none!important}.m924Modal{width:min(950px,100%);max-height:calc(100dvh - 30px);overflow:auto;background:#fff;border-radius:20px;padding:22px;color:#1c3743;box-shadow:0 15px 60px #061b2d44}.m924Modal h2{margin:2px 0 23px;font-size:26px}.m924Fields{display:grid;grid-template-columns:1fr 1fr;gap:15px 40px}
+.m924Fields label{display:flex;flex-direction:column;gap:6px;font-size:15px}.m924Fields input,.m924Fields select{border:1px solid #ccdcdf;background:#fff;border-radius:11px;padding:13px;font:inherit;color:#18343d;min-width:0;width:100%;height:52px}
+.m924Upload{border:1px dashed #bad6ce;border-radius:16px;background:#fbfefc;padding:18px;margin-top:18px}.m924File{display:inline-grid;gap:7px;margin:12px 8px 4px 0;border:1px solid #d2e3df;border-radius:12px;background:#ecf7f3;padding:12px;color:#155848;font-size:13px;font-weight:700}.m924File input{max-width:265px;color:#19373d}.m924Hint{font-size:12px;color:#71828c;line-height:1.7;margin:10px 0}.m924Status{background:#f1f6f8;border-radius:10px;padding:10px;font-size:13px;color:#526e7b}.m924Buttons{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.m924Buttons button{min-width:84px}.m924Wide{width:min(1150px,100%)}.m924Head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.m924Head h2{margin-bottom:3px}.m924Head p{margin:0 0 10px;font-size:12px;color:#75858b}.m924ManagerToolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0}.m924ManagerToolbar>div:last-child{display:flex;gap:9px}.m924TableWrap{overflow:auto;max-height:60dvh;border:1px solid #dae6e9;border-radius:10px}.m924TableWrap table{width:100%;border-collapse:collapse;min-width:940px;font-size:13px}.m924TableWrap th,.m924TableWrap td{padding:11px;text-align:left;border-bottom:1px solid #e5ecee;vertical-align:middle}.m924TableWrap thead{background:#edf4f3;position:sticky;top:0;z-index:1}.m924TableWrap td button{white-space:nowrap}.m918ActionsGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}.m918ActionsGrid .m918Action{min-width:0}
+@media(max-width:1100px){.m918ActionsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}@media(max-width:620px){.m918ActionsGrid{grid-template-columns:1fr!important}.m924Fields{grid-template-columns:1fr;gap:12px}.m924Modal{padding:17px}.m924Modal h2{font-size:21px}.m924File{display:grid}.m924File input{max-width:100%}}
+</style>
 </body>
