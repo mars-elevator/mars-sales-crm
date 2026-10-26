@@ -7485,7 +7485,6 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       return '<div class="m921OldRecords"><small>Önceki kayıtlar ('+records.length+')</small>'+records.map(x=>'<div class="m921OldRow"><span>'+escape(x[name]||'Kayıt')+'</span>'+button('Sil','data-remove="'+escape(x.id)+'"','m90MiniDanger')+'</div>').join('')+'</div>';
     };
     const cardsArea='<div class="m918Services">'+
-      card('🪪','Kartvizitler','Kamera / galeri / OCR. Görüşmeler rapora aktarılır.',n.cards+' kartvizit','data-add-card="'+escape(f.id)+'"','+ Kartvizit Ekle')+
       card('🏨','Konaklama','PDF yükle veya fotoğraf çek; ödenen toplam otomatik okunur.',hotelCount+' kayıt','data-service-doc="hotel"','PDF / Fotoğraf Ekle','hotel',basicLegacy('hotel','hotelName'))+
       card('✈️','Uçak / Ulaşım','Bilet / PDF / fotoğraf. Ödenen toplam otomatik okunur.',getDocs('ticket')+' belge','data-service-doc="ticket"','PDF / Fotoğraf Ekle','ticket')+
       card('🚗','Araç / Kiralama','Kiralama PDF / fotoğraf. Ödenen toplam otomatik okunur.',carCount+' kayıt','data-service-doc="car"','PDF / Fotoğraf Ekle','car',basicLegacy('car','company'))+
@@ -7502,7 +7501,8 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       '<div class="m918EventMain"><div class="m918Overline">FUAR İŞLEMLERİ</div>'+
       '<div class="m918ActionsGrid">'+
       button('📊 <strong>Güncel Fuar Excel</strong><small>Kartvizitler + harcamalar + rapor</small>','data-export-report="'+escape(f.id)+'"','m918Action m918ActionPrimary')+
-      button('📷 <strong>Fiş Ekle / Gör ('+receiptCount+')</strong><small>Fotoğraf / PDF · Fişler burada açılır</small>','data-service-doc="receipt"','m918Action')+'</div>'+receiptDock+
+      button('📷 <strong>Fiş Ekle / Gör ('+receiptCount+')</strong><small>Fotoğraf / PDF · Fişler burada açılır</small>','data-service-doc="receipt"','m918Action')+
+      button('🪪 <strong>Kartvizitler ('+n.cards+')</strong><small>+ Kartvizit Ekle · Kamera / Galeri / OCR</small>','data-add-card="'+escape(f.id)+'"','m918Action m923CardAction')+'</div>'+receiptDock+
       '<div class="m921DocsTitle"><div class="m918Overline">FUAR BELGELERİ VE KAYITLAR</div><label class="m919People">Kişi sayısı <input type="number" min="1" max="50" inputmode="numeric" data-person-count="1" value="'+people+'"></label></div>'+
       cardsArea+
       '<div class="m918AutoNote"><b>Fuar harcamaları rapora otomatik eklenir.</b><span>Kartvizit ve belgelerin kayıtları ilgili fuarın Excel raporunda görünür; seyahat dosyalarıyla karışmaz.</span></div>'+
@@ -8035,7 +8035,12 @@ window.addEventListener('focus',()=>{if(document.body.classList.contains('m904Ho
 @media(max-width:540px){#mars84Back .m920InlineForm{grid-template-columns:1fr}#mars84Back .m920CardFile{flex-wrap:wrap}#mars84Back .m920CardFile>div{flex-basis:100%}}
 </style>
 <style id="m921FairCardsLikeTravel">
-#mars84Back .m918ActionsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+/* v90.23: Business cards belong to the upper fair actions, not the document boxes. */
+#mars84Back .m918ActionsGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#mars84Back .m923CardAction{background:#edf7f3;border-color:#d2e7df}
+#mars84Back .m923CardAction:hover{background:#e1f2eb;border-color:#9bcbb9}
+@media (max-width:1170px) and (min-width:761px){#mars84Back .m918ActionsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media (max-width:760px){#mars84Back .m918ActionsGrid{grid-template-columns:1fr!important}}
 #mars84Back .m921DocsTitle{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:10px 0}
 #mars84Back .m921DocsTitle .m918Overline{margin:14px 0 7px}
 #mars84Back .m921DocsTitle .m919People{margin:0}
