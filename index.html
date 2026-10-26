@@ -7396,18 +7396,20 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
   }
   window.m917ExportFairReport=exportFairReport;
   // One compact totals section below the cards. Individual documents remain inside their own card.
+  function fairPersonCount(fairId){
+    const raw=Number(visibleEvents(fairId,'person_count')[0]?.count)||1;
+    return Math.max(1,Math.min(50,Math.floor(raw)));
+  }
   function expenseOverview(f){
-    const costs=visibleEvents(f.id,'expense');
-    const people=Math.max(1,Number(visibleEvents(f.id,'person_count')[0]?.count)||1);
-    const sum=fairSums(f.id);
-    const chips=Object.keys(sum).sort().map(c=>'<strong class="m919SumChip">'+money(sum[c],c)+' <small>· Kişi başı '+money(sum[c]/people,c)+'</small></strong>').join('');
-    return '<section class="m919Overview"><div class="m919OverviewTop"><div><h3>🧾 Fuar Harcama Özeti</h3><p>'+costs.length+' harcama kaydı · Detaylı fişler yukarıdaki ilgili kutuların içindedir. Tutarlar fuar raporuna otomatik aktarılır.</p><label class="m919People">Kişi sayısı <input type="number" min="1" max="50" inputmode="numeric" data-person-count="1" value="'+people+'"></label></div><div class="m919Sums">'+(chips||'<span>Henüz harcama girilmedi</span>')+'</div></div></section>';
+    const costs=visibleEvents(f.id,'expense'), people=fairPersonCount(f.id), sum=fairSums(f.id);
+    const chips=Object.keys(sum).sort().map(c=>'<strong class="m919SumChip">'+money(sum[c],c)+' <small>· '+people+' kişi · Kişi başı '+money(sum[c]/people,c)+'</small></strong>').join('');
+    return '<section class="m919Overview m921Totals" aria-label="Fuar harcama özeti"><div class="m919OverviewTop"><div><h3>Fuar Harcama Toplamı</h3><p>'+costs.length+' harcama kaydı · Belgeler yukarıdaki ilgili kutularda saklanır. Tutarlar fuar Excel raporuna otomatik aktarılır.</p></div><div class="m919Sums">'+(chips||'<span>Henüz tutar girilmedi.</span>')+'</div></div></section>';
   }
   // Inline PDF/photo capture: nothing jumps to a workspace at the bottom of the page.
   function inlineDocForm(kind){
     const names={hotel:'Konaklama',ticket:'Uçak / Ulaşım',car:'Araç / Kiralama',receipt:'Fiş / Harcamalar'};
     return '<div class="m920InlineUpload" data-upload-kind="'+kind+'"'+(openDocKind===kind?'':' hidden')+'>'+
-      '<div class="m920InlineTitle"><strong>'+names[kind]+' · Belge ekle</strong>'+button('✕ Kapat','data-close-doc="'+kind+'"','m90MiniBtn')+'</div>'+
+      '<div class="m920InlineTitle"><strong>'+names[kind]+' · Belge ekle</strong>'+(kind==='receipt'?'':button('✕ Kapat','data-close-doc="'+kind+'"','m90MiniBtn'))+'</div>'+
       '<p class="m920Guidance">PDF seç veya fotoğraf çek. Toplam tutar otomatik bulunursa aşağıya yazılır; kaydetmeden önce kontrol et.</p>'+
       '<form class="m90Form m920InlineForm" data-inline-doc="'+kind+'">'+
       '<input type="hidden" name="docType" value="'+kind+'">'+
@@ -7425,47 +7427,60 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     const docs=visibleEvents(fairId,'file').filter(x=>x.docType===kind);
     if(!docs.length) return '';
     const expenses=visibleEvents(fairId,'expense');
-    const docIds=new Set(docs.map(x=>x.id));
+    const people=fairPersonCount(fairId);
+    const expenseMap=new Map(expenses.filter(x=>x.attachmentId).map(x=>[x.attachmentId,x]));
     const sums={};
-    expenses.filter(x=>docIds.has(x.attachmentId)).forEach(x=>{const c=x.currency||'EUR';sums[c]=(sums[c]||0)+(Number(x.amount)||0);});
-    const chips=Object.keys(sums).sort().map(c=>'<span class="m920DocTotal">'+money(sums[c],c)+'</span>').join('');
-    return '<div class="m920CardDocs"><div class="m920CardDocsHeader"><strong>Yüklenen belgeler ('+docs.length+')</strong>'+chips+'</div>'+docs.map(x=>'<div class="m920CardFile"><div><strong>📎 '+escape(x.filename||'Belge')+'</strong><small>'+escape(x.note||dateLabel(x.createdAt))+(x.amount?' · '+escape(money(x.amount,x.currency)):' · Tutar girilmedi')+'</small></div>'+button('İndir','data-download="'+escape(x.id)+'"','m90MiniBtn')+button('Sil','data-remove-file="'+escape(x.id)+'"','m90MiniDanger')+'</div>').join('')+'</div>';
+    docs.forEach(x=>{
+      const linked=expenseMap.get(x.id);
+      const amount=Number(linked?.amount||x.amount||0);
+      if(amount>0){const currency=linked?.currency||x.currency||'EUR';sums[currency]=(sums[currency]||0)+amount;}
+    });
+    const currencies=Object.keys(sums).sort();
+    const chips=currencies.map(c=>'<span class="m920DocTotal">Toplam: '+money(sums[c],c)+' <small>· Kişi başı ('+people+'): '+money(sums[c]/people,c)+'</small></span>').join('');
+    return '<div class="m920CardDocs"><div class="m920CardDocsHeader"><strong>Yüklenen belgeler ('+docs.length+')</strong>'+chips+'</div>'+docs.map(x=>{
+      const expense=expenseMap.get(x.id), amount=Number(expense?.amount||x.amount||0), currency=expense?.currency||x.currency||'EUR';
+      return '<div class="m920CardFile"><div><strong>'+escape(x.filename||'Belge')+'</strong><small>'+escape(dateLabel(x.createdAt))+(amount>0?' · '+money(amount,currency):' · Tutar girilmedi')+'</small></div><div class="m921FileActions">'+button('Gör','data-preview="'+escape(x.id)+'"','m90MiniBtn')+button('Sil','data-remove-file="'+escape(x.id)+'"','m90MiniDanger')+'</div></div>';
+    }).join('')+'</div>';
   }
   function detail(f) {
-    const n=countSummary(f);
-    const docRows=visibleEvents(f.id,'file');
-    const ticketCount=docRows.filter(x=>x.docType==='ticket').length;
-    const hotelCount=n.hotels+docRows.filter(x=>x.docType==='hotel').length;
-    const currencyTotals=fairSums(f.id);
-    const amountText=Object.entries(currencyTotals).map(([c,v])=>money(v,c)).join(' · ');
-    const card=(icon,title,desc,count,attr,buttonLabel,docType=null)=>
-      '<div class="m918ServiceCard'+(docType&&openDocKind===docType?' m920DocOpen':'')+'"'+(docType?' data-doc-card="'+docType+'"':'')+'><div class="m918ServiceHead"><span class="m918Icon">'+icon+'</span><div><strong>'+title+'</strong><p>'+desc+'</p></div></div><div class="m918ServiceFoot"><span class="m918ServiceCount">'+count+'</span>'+button(buttonLabel,attr,'m84Btn m918WideButton')+'</div>'+(docType?inlineDocForm(docType)+attachedDocumentRows(f.id,docType):'')+'</div>';
+    const n=countSummary(f),docRows=visibleEvents(f.id,'file'),people=fairPersonCount(f.id);
+    const getDocs=kind=>docRows.filter(x=>x.docType===kind).length;
+    const hotelCount=n.hotels+getDocs('hotel'),carCount=n.cars+getDocs('car');
+    const amountText=Object.entries(fairSums(f.id)).map(([c,v])=>money(v,c)).join(' · ');
+    const card=(icon,title,desc,count,attr,label,kind=null,legacy='')=>
+      '<div class="m918ServiceCard'+(kind&&openDocKind===kind?' m920DocOpen':'')+'"'+(kind?' data-doc-card="'+kind+'"':'')+'><div class="m918ServiceHead"><span class="m918Icon">'+icon+'</span><div><strong>'+title+'</strong><p>'+desc+'</p></div></div>'+
+      '<div class="m918ServiceCount">'+count+'</div>'+(legacy||'')+
+      (kind?attachedDocumentRows(f.id,kind)+inlineDocForm(kind):'')+
+      '<div class="m918ServiceFoot">'+button(label,attr,'m84Btn m918WideButton')+'</div></div>';
+    const basicLegacy=(eventType,name)=>{
+      const records=visibleEvents(f.id,eventType);if(!records.length)return '';
+      return '<div class="m921OldRecords"><small>Önceki kayıtlar ('+records.length+')</small>'+records.map(x=>'<div class="m921OldRow"><span>'+escape(x[name]||'Kayıt')+'</span>'+button('Sil','data-remove="'+escape(x.id)+'"','m90MiniDanger')+'</div>').join('')+'</div>';
+    };
+    const cardsArea='<div class="m918Services">'+
+      card('🪪','Kartvizitler','Kamera / galeri / OCR. Görüşmeler rapora aktarılır.',n.cards+' kartvizit','data-add-card="'+escape(f.id)+'"','+ Kartvizit Ekle')+
+      card('🏨','Konaklama','PDF yükle veya fotoğraf çek; ödenen toplam otomatik okunur.',hotelCount+' kayıt','data-service-doc="hotel"','PDF / Fotoğraf Ekle','hotel',basicLegacy('hotel','hotelName'))+
+      card('✈️','Uçak / Ulaşım','Bilet / PDF / fotoğraf. Ödenen toplam otomatik okunur.',getDocs('ticket')+' belge','data-service-doc="ticket"','PDF / Fotoğraf Ekle','ticket')+
+      card('🚗','Araç / Kiralama','Kiralama PDF / fotoğraf. Ödenen toplam otomatik okunur.',carCount+' kayıt','data-service-doc="car"','PDF / Fotoğraf Ekle','car',basicLegacy('car','company'))+
+      '</div>';
+    const receiptCount=getDocs('receipt');
+    const receiptDock='<section class="m921ReceiptDock'+(openDocKind==='receipt'?' m920DocOpen':'')+'" data-doc-card="receipt"'+(openDocKind==='receipt'?'':' hidden')+'><div class="m920InlineTitle"><strong>🧾 Fiş Ekle / Fişleri Gör</strong>'+button('✕ Kapat','data-close-doc="receipt"','m90MiniBtn')+'</div>'+attachedDocumentRows(f.id,'receipt')+inlineDocForm('receipt')+'</section>';
     return '<div class="m918EventBoard">'+
       '<aside class="m918EventInfo"><div class="m918EventDate">'+escape(dateLabel(f.start))+' – '+escape(dateLabel(f.end))+' <span class="m918Planned">Fuar</span></div>'+
       '<h3>'+escape(f.name)+'</h3><p>📍 '+escape(f.country||'Ülke yok')+' / '+escape(f.city||'Şehir yok')+'</p>'+
-      (f.venue?'<p>🏢 '+escape(f.venue)+'</p>':'')+
-      (f.address?'<p>🧭 '+escape(f.address)+'</p>':'')+
-      '<hr><div class="m918InfoStat"><span>🪪 Kartvizitler</span><b>'+n.cards+'</b></div><div class="m918InfoStat"><span>🧾 Fiş / Harcama</span><b>'+n.expenses+'</b></div><div class="m918InfoStat"><span>📎 Belgeler</span><b>'+n.files+'</b></div>'+
+      (f.venue?'<p>🏢 '+escape(f.venue)+'</p>':'')+(f.address?'<p>🧭 '+escape(f.address)+'</p>':'')+
+      '<hr><div class="m918InfoStat"><span>🪪 Kartvizitler</span><b>'+n.cards+'</b></div><div class="m918InfoStat"><span>🧾 Harcamalar</span><b>'+n.expenses+'</b></div><div class="m918InfoStat"><span>📎 Belgeler</span><b>'+n.files+'</b></div>'+
       (amountText?'<div class="m918Sum">Toplam harcama: <b>'+escape(amountText)+'</b></div>':'')+
       button('Fuar Bilgilerini Düzenle','data-edit-fair="'+escape(f.id)+'"','m84Btn light')+button('🗑 Fuarı Sil','data-delete-fair="'+escape(f.id)+'"','m84Btn light m919DeleteFair')+'</aside>'+
       '<div class="m918EventMain"><div class="m918Overline">FUAR İŞLEMLERİ</div>'+
       '<div class="m918ActionsGrid">'+
       button('📊 <strong>Güncel Fuar Excel</strong><small>Kartvizitler + harcamalar + rapor</small>','data-export-report="'+escape(f.id)+'"','m918Action m918ActionPrimary')+
-      button('📷 <strong>Fiş Ekle</strong><small>Fotoğraf / PDF ve otomatik tutar</small>','data-service-doc="receipt"','m918Action')+
-      button('📄 <strong>Fuar Sonrası Rapor</strong><small>Görüşmeler otomatik listelenir</small>','data-open-section="report"','m918Action')+'</div>'+
-      '<div class="m918Overline">FUAR BELGELERİ VE KAYITLAR</div>'+
-      '<div class="m918Services">'+
-      card('🪪','Kartvizitler','Kamera / galeri / OCR. Görüşmeler rapora aktarılır.',n.cards+' kartvizit','data-add-card="'+escape(f.id)+'"','+ Kartvizit Ekle')+
-      card('🏨','Konaklama','PDF yükle / fotoğraf çek. Tutar okunur.',hotelCount+' kayıt','data-service-doc="hotel"','PDF / Fotoğraf Ekle','hotel')+
-      card('✈️','Uçak / Ulaşım','Bilet / PDF / fotoğraf. Tutar okunur.',ticketCount+' belge','data-service-doc="ticket"','PDF / Fotoğraf Ekle','ticket')+
-      card('🚗','Araç / Kiralama','Kiralama PDF / fotoğraf. Tutar okunur.',(n.cars+docRows.filter(x=>x.docType==='car').length)+' kayıt','data-service-doc="car"','PDF / Fotoğraf Ekle','car')+
-      card('🧾','Fiş / Harcamalar','Fotoğraf / PDF oku, harcamaya ekle',n.expenses+' kayıt','data-service-doc="receipt"','Fiş / Fotoğraf Ekle','receipt')+
-      '</div>'+
-      '<div class="m918AutoNote"><b>Fuar raporu otomatik oluşturulur.</b><span>Bu fuara kaydettiğin kartvizitler ve harcamalar ilgili rapora aktarılır. Seyahat kayıtlarıyla karışmaz.</span></div>'+
+      button('📷 <strong>Fiş Ekle / Gör ('+receiptCount+')</strong><small>Fotoğraf / PDF · Fişler burada açılır</small>','data-service-doc="receipt"','m918Action')+'</div>'+receiptDock+
+      '<div class="m921DocsTitle"><div class="m918Overline">FUAR BELGELERİ VE KAYITLAR</div><label class="m919People">Kişi sayısı <input type="number" min="1" max="50" inputmode="numeric" data-person-count="1" value="'+people+'"></label></div>'+
+      cardsArea+
+      '<div class="m918AutoNote"><b>Fuar harcamaları rapora otomatik eklenir.</b><span>Kartvizit ve belgelerin kayıtları ilgili fuarın Excel raporunda görünür; seyahat dosyalarıyla karışmaz.</span></div>'+
       '<div class="m918ExtraActions">'+button('🗓️ Fuar Öncesi Plan','data-open-section="plan"')+
-      button('📄 Fuar Sonrası Rapor','data-open-section="report"')+
-      button('📝 Fuar Notları','data-open-section="notes"')+
-      button('⬇ Fuar Excel Raporu','data-export-report="'+escape(f.id)+'"')+'</div></div></div>'+
+      button('📄 Fuar Sonrası Rapor / Notlar','data-open-section="report"')+
+      button('📝 Fuar Notları','data-open-section="notes"')+'</div></div></div>'+
       '<section id="m919Workspace" class="m919Workspace" hidden><div class="m919WorkspaceHeader"><strong id="m919WorkspaceTitle">İşlem</strong>'+button('✕ Kapat','data-close-workspace','m84Btn light')+'</div><div class="m918ExpandableSections">'+reportPlan(f)+reportPost(f)+cardsPanel(f)+expensePanel(f)+hotelPanel(f)+carPanel(f)+notesPanel(f)+'</div></section>'+expenseOverview(f);
   }
   function render() {
@@ -7603,6 +7618,24 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     setTimeout(()=>URL.revokeObjectURL(obj),20000);
   }
 
+  async function previewFairFile(id){
+    const win=window.open('about:blank','_blank');
+    try{
+      const ev=readArray(KEY).find(e=>e.id===id && e.type==='file' && e.app===MARK);
+      if(!ev || ev.bucket!==BUCKET || !ev.path)throw Error('Bu belge bulunamadı.');
+      if(!win)throw Error('Tarayıcı yeni sekmeyi engelledi. PDF dosyasını cihazına indirerek açabilirsin.');
+      win.document.body.textContent='Belge açılıyor…';
+      const s=await ensureCloudSession();if(!s?.access_token)throw Error('Bulut oturumu yok.');
+      const url=marsSupabaseUrl()+'/storage/v1/object/authenticated/'+encodeURIComponent(ev.bucket)+'/'+ev.path.split('/').map(encodeURIComponent).join('/');
+      const resp=await fetch(url,{headers:cloudHeaders(s.access_token)});
+      if(!resp.ok)throw Error('Belge açılamadı: HTTP '+resp.status);
+      const blob=await resp.blob();
+      const mime=/pdf/i.test(ev.mime||'')?'application/pdf':/^image\//i.test(ev.mime||'')?ev.mime:'application/octet-stream';
+      const obj=URL.createObjectURL(new Blob([blob],{type:mime}));
+      win.location.href=obj;
+      setTimeout(()=>URL.revokeObjectURL(obj),180000);
+    }catch(err){if(win&&!win.closed)win.close();alert('Belge görüntülenemedi: '+err.message);}
+  }
   const docRoot=$('m84Archive');
   docRoot?.addEventListener('click',async e=>{
     const btn=e.target.closest('button');if(!btn) return;
@@ -7611,22 +7644,24 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     if(btn.hasAttribute('data-close-workspace')){$('m919Workspace').hidden=true;document.querySelectorAll('#m84Archive .m90FolderSection').forEach(el=>el.open=false);return;}
     if(btn.hasAttribute('data-service-doc')){
       const kind=btn.dataset.serviceDoc;
-      const card=docRoot.querySelector('.m918ServiceCard[data-doc-card="'+kind+'"]');
+      const card=docRoot.querySelector('[data-doc-card="'+kind+'"]');
       if(!card) return;
       const panel=card.querySelector('[data-upload-kind]');
       const shouldOpen=panel.hidden;
       // Open exactly where the user clicked. No window scrolling or detached bottom workspace.
-      docRoot.querySelectorAll('.m918ServiceCard[data-doc-card]').forEach(el=>{
+      docRoot.querySelectorAll('[data-doc-card]').forEach(el=>{
         const editor=el.querySelector('[data-upload-kind]');if(editor)editor.hidden=true;
         el.classList.remove('m920DocOpen');
+        if(el.matches('.m921ReceiptDock'))el.hidden=true;
       });
       panel.hidden=!shouldOpen;
+      if(card.matches('.m921ReceiptDock'))card.hidden=!shouldOpen;
       card.classList.toggle('m920DocOpen',shouldOpen);
       openDocKind=shouldOpen?kind:null;
       return;
     }
     if(btn.hasAttribute('data-close-doc')){
-      const card=btn.closest('[data-doc-card]');if(card){card.querySelector('[data-upload-kind]').hidden=true;card.classList.remove('m920DocOpen');}
+      const card=btn.closest('[data-doc-card]');if(card){card.querySelector('[data-upload-kind]').hidden=true;card.classList.remove('m920DocOpen');if(card.matches('.m921ReceiptDock'))card.hidden=true;}
       openDocKind=null;return;
     }
     if(btn.hasAttribute('data-remove-file')){
@@ -7671,6 +7706,9 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       const targetId=btn.dataset.remove;if(!confirm('Bu kayıt fuar dosyasından kaldırılsın mı?'))return;
       emit(route.fairId,'delete',{targetId});return;
     }
+    if(btn.hasAttribute('data-preview')){
+      btn.disabled=true;try{await previewFairFile(btn.dataset.preview);}finally{btn.disabled=false;}return;
+    }
     if(btn.hasAttribute('data-download')){
       btn.disabled=true;
       try{await downloadFile(btn.dataset.download);}catch(err){alert(err.message);}finally{btn.disabled=false;}
@@ -7714,8 +7752,8 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       const note=text(fd.get('note')).trim();if(!note){alert('Not boş olamaz.');return;}emit(route.fairId,'note',{note});
     } else if(form.matches('[data-inline-doc]')){
       const button=form.querySelector('button[type=submit]');button.disabled=true;button.textContent='Belge yükleniyor…';
-      try{if(form.__m919OCR)await form.__m919OCR;const kind=String(fd.get('docType')||'receipt');openDocKind=kind;await uploadFile(route.fairId,form);const target=docRoot.querySelector('.m918ServiceCard[data-doc-card="'+kind+'"] [data-ocr-status]');if(target)target.textContent='✓ Belge kaydedildi. Tutar varsa rapora otomatik eklendi. Yeni bir belge de yükleyebilirsin.';}
-      catch(err){const target=docRoot.querySelector('.m918ServiceCard[data-doc-card="'+(fd.get('docType')||'receipt')+'"] [data-ocr-status]');if(target)target.textContent='Belge yüklenemedi: '+err.message;alert('Belge yüklenemedi: '+err.message+'\n\nSupabase fair-documents bucket ve yetki kurulumunu kontrol et.');}
+      try{if(form.__m919OCR)await form.__m919OCR;const kind=String(fd.get('docType')||'receipt');openDocKind=kind;await uploadFile(route.fairId,form);const target=docRoot.querySelector('[data-doc-card="'+kind+'"] [data-ocr-status]');if(target)target.textContent='✓ Belge kaydedildi. Tutar varsa rapora otomatik eklendi. Yeni bir belge de yükleyebilirsin.';}
+      catch(err){const target=docRoot.querySelector('[data-doc-card="'+(fd.get('docType')||'receipt')+'"] [data-ocr-status]');if(target)target.textContent='Belge yüklenemedi: '+err.message;alert('Belge yüklenemedi: '+err.message+'\n\nSupabase fair-documents bucket ve yetki kurulumunu kontrol et.');}
       finally{ if(button.isConnected){button.disabled=false;button.textContent='✓ Belgeyi Bu Fuara Kaydet';} }
     }
   });
@@ -7917,7 +7955,7 @@ window.addEventListener('focus',()=>{if(document.body.classList.contains('m904Ho
 #mars84Back .m919DocItem strong{display:block;color:#1f4549;font-size:13px}
 #mars84Back .m919DocItem small{display:block;color:#67808c;font-size:11px;margin-top:5px}
 #mars84Back .m919Empty{font-size:12px;color:#748793;padding:13px;border:1px dashed #d9e3e6;border-radius:9px}
-#mars84Back .m919Pickers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#mars84Back .m919Pickers{display:grid;grid-template-columns:1fr;gap:10px}
 #mars84Back .m919Pickers label{border:1px solid #bfdad4;background:#eaf6f1;color:#165d52;border-radius:12px;padding:13px;font-weight:800;cursor:pointer}
 #mars84Back .m919Pickers input{margin-top:8px;max-width:100%;background:white;font-size:12px}
 #mars84Back .m919OCRStatus{background:#edf4f7;color:#2c5f68;padding:12px;border-radius:10px;font-size:13px;line-height:1.5}
@@ -7929,13 +7967,13 @@ window.addEventListener('focus',()=>{if(document.body.classList.contains('m904Ho
 
 
 <style id="m920InlineCardUploadStyle">
-#mars84Back .m918ServiceCard.m920DocOpen{grid-column:1/-1;border-color:#61ac97;background:#fcfffd;box-shadow:0 5px 22px #2b836418}
+#mars84Back .m918ServiceCard.m920DocOpen{border-color:#61ac97;background:#fcfffd;box-shadow:0 5px 22px #2b836418}
 #mars84Back .m920InlineUpload{display:block;margin-top:6px;border-top:1px solid #d7e6e0;padding-top:15px}
 #mars84Back .m920InlineUpload[hidden]{display:none!important}
 #mars84Back .m920InlineTitle{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
 #mars84Back .m920InlineTitle strong{font-size:15px;color:#195e50}
 #mars84Back .m920Guidance{margin:0 0 12px;color:#627b82;font-size:12px;line-height:1.55}
-#mars84Back .m920InlineForm{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px;align-items:end}
+#mars84Back .m920InlineForm{display:grid;grid-template-columns:1fr;gap:10px;align-items:end}
 #mars84Back .m920InlineForm .m90Field{min-width:0}
 #mars84Back .m920InlineForm .wide{grid-column:1/-1}
 #mars84Back .m920InlineForm input,#mars84Back .m920InlineForm select{box-sizing:border-box;width:100%;max-width:100%}
@@ -7950,6 +7988,33 @@ window.addEventListener('focus',()=>{if(document.body.classList.contains('m904Ho
 #mars84Back .m920CardFile button{flex-shrink:0}
 @media(max-width:780px){#mars84Back .m920InlineForm{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:540px){#mars84Back .m920InlineForm{grid-template-columns:1fr}#mars84Back .m920CardFile{flex-wrap:wrap}#mars84Back .m920CardFile>div{flex-basis:100%}}
+</style>
+<style id="m921FairCardsLikeTravel">
+#mars84Back .m918ActionsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#mars84Back .m921DocsTitle{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:10px 0}
+#mars84Back .m921DocsTitle .m918Overline{margin:14px 0 7px}
+#mars84Back .m921DocsTitle .m919People{margin:0}
+#mars84Back .m918ServiceCard{min-height:285px;gap:10px}
+#mars84Back .m918ServiceHead{flex:0 0 auto}
+#mars84Back .m918ServiceFoot{margin-top:auto}
+#mars84Back .m920CardDocs{padding-top:10px;margin-top:3px}
+#mars84Back .m920CardDocsHeader{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+#mars84Back .m920DocTotal{display:block;max-width:100%;line-height:1.4}
+#mars84Back .m920DocTotal small{display:block;font-size:11px;font-weight:500}
+#mars84Back .m921FileActions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+#mars84Back .m921FileActions button{padding:8px 10px;min-height:34px}
+#mars84Back .m921ReceiptDock{padding:15px;margin-bottom:18px;border:1px solid #b7d9cf;border-radius:13px;background:#fbfffd}
+#mars84Back .m921ReceiptDock[hidden]{display:none!important}
+#mars84Back .m921ReceiptDock .m920InlineUpload{display:block}
+#mars84Back .m921ReceiptDock .m920InlineForm{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#mars84Back .m921ReceiptDock .m919Pickers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+#mars84Back .m921OldRecords{border-top:1px solid #e6eeee;padding-top:8px;font-size:12px}
+#mars84Back .m921OldRecords>small{color:#65818a}
+#mars84Back .m921OldRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px}
+#mars84Back .m921OldRow span{overflow-wrap:anywhere;min-width:0}
+#mars84Back .m921Totals{margin-top:13px}
+@media(max-width:780px){#mars84Back .m921ReceiptDock .m920InlineForm{grid-template-columns:1fr 1fr}}
+@media(max-width:540px){#mars84Back .m921ReceiptDock .m920InlineForm,#mars84Back .m921ReceiptDock .m919Pickers{grid-template-columns:1fr}#mars84Back .m921FileActions{width:100%;justify-content:flex-end}}
 </style>
 <style id="m918FairPageStyle">
 /* v90.18: Fair archive is a CRM content page, never a modal. Existing data and event handlers are retained. */
