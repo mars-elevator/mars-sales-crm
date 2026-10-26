@@ -406,6 +406,14 @@ button.btn:not(.secondary),.m80Primary{background:#196d61!important;border-radiu
 .crmSideNav .sideStatus{border-radius:12px!important}
 @media(min-width:761px){main{padding-top:20px!important}}
 </style><style id="marsV904HomeStyle">
+/* v90.13: Bottom navigation belongs to phones only. The desktop already has a sidebar. */
+@media (min-width: 761px) {
+  .m80BottomBar { display: none !important; }
+}
+@media (max-width: 760px) {
+  .m80BottomBar { display: grid !important; }
+}
+
 @media(min-width:761px){body.m904Home .cards,body.m904Home .crmFilters,body.m904Home .tableWrap,body.m904Home main>.small{display:none!important}body.m904Home .m904Dashboard{display:block!important}}
 .m904Dashboard{display:none;max-width:1320px;margin:0 auto 24px;color:#173043}.m904Kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:2px 0 16px}.m904Kpi,.m904Box{border:1px solid #e1e8ed;background:#fff;border-radius:16px;box-shadow:0 3px 14px #102d390a}.m904Kpi{padding:18px}.m904Kpi b{font-size:29px;display:block;color:#132c3f}.m904Kpi span{font-size:12px;color:#70849a}.m904Box{padding:18px;margin-bottom:14px}.m904Box h2{font-size:18px;margin:0 0 15px;color:#132d40}.m904Search{width:100%;padding:15px;border:1px solid #dce5eb;border-radius:10px;font-size:15px}.m904Filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.m904Filters select,.m904Filters button,.m904Actions button{background:#edf4f1;color:#174939;border:0;border-radius:9px;padding:10px 12px;cursor:pointer;font-weight:650}.m904Table{width:100%;min-width:0}.m904Table th,.m904Table td{padding:12px 9px;font-size:13px}.m904Table th{position:static}.m904Table tr{cursor:pointer}.m904LowGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.m904Actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.m904Actions button:first-child{background:#216f61;color:white}.m904Feed{display:flex;flex-direction:column;gap:10px}.m904Feed button{border:0;background:#f5f8fa;border-radius:9px;padding:11px;text-align:left;color:#28475a;cursor:pointer}.m904Muted{color:#7990a0;font-size:13px}.m904MobileOnly{display:none}
 @media(max-width:760px){body.m904Home #mars80Mobile{display:none!important}body.m904Home main>.cards,body.m904Home main>.crmFilters,body.m904Home main>.tableWrap,body.m904Home main>.small{display:none!important}body.m904Home .m904Dashboard{display:block!important;margin:0 0 76px}.m904Kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.m904Kpi{padding:14px}.m904Kpi b{font-size:25px}.m904Box{padding:14px;margin-bottom:10px}.m904LowGrid{grid-template-columns:1fr}.m904DesktopOnly{display:none}.m904MobileOnly{display:block}.m904Table td:nth-child(3),.m904Table th:nth-child(3){display:none}body.m904Home main{padding:12px!important}body.m904Home .m80BottomBar{display:grid!important}}
@@ -6457,9 +6465,25 @@ window.m80RenderCountryPicker=function(query=''){
  const list=$('m80CountryPickerList'); if(!list) return;
  const current=$('m80FilterCountry')?.value||'';
  const rows=countryListItems(query);
- const allBtn='<button type="button" class="m80CountryOption '+(!current?'is-active':'')+'" onclick="m80PickCountry('')">Tüm Ülkeler<small>Ülke filtresini kaldır</small></button>';
- if(!rows.length){ list.innerHTML=allBtn+'<div class="m80CountryEmpty">Aramana uygun ülke bulunamadı.</div>'; return; }
- list.innerHTML=allBtn+rows.map(x=>'<button type="button" class="m80CountryOption '+(current===x?'is-active':'')+'" onclick="m80PickCountry('+JSON.stringify(x).replace(/"/g,'&quot;')+')">'+safe(x)+'</button>').join('');
+ list.replaceChildren();
+ const makeOption=(value,label,hint)=>{
+   const btn=document.createElement('button');
+   btn.type='button';
+   btn.className='m80CountryOption'+(current===value?' is-active':'');
+   btn.textContent=label;
+   if(hint){const sub=document.createElement('small');sub.textContent=hint;btn.appendChild(sub);}
+   btn.addEventListener('click',()=>window.m80PickCountry(value));
+   list.appendChild(btn);
+ };
+ makeOption('','Tüm Ülkeler','Ülke filtresini kaldır');
+ if(!rows.length){
+   const empty=document.createElement('div');
+   empty.className='m80CountryEmpty';
+   empty.textContent='Aramana uygun ülke bulunamadı.';
+   list.appendChild(empty);
+   return;
+ }
+ rows.forEach(x=>makeOption(x,x,''));
 };
 window.m80OpenCountryPicker=function(){
  const back=$('m80CountryPickerBack'), box=$('m80CountryPicker'), search=$('m80CountrySearch');
@@ -6607,15 +6631,30 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
 .m84ImagePicked{font-size:12px;color:#60747b}
 @media(max-width:650px){.m84ImageInputField{width:100%}.m84ImageChoices .m84ImageChoice{font-size:14px}}
 </style>
+
+<style id="m90FairArchiveStyle">
+#m84Archive{display:block}#m84Archive[hidden]{display:none!important}
+#m84Archive .m90ArchiveHeader{margin:8px 0 12px}#m84Archive .m90ArchiveHeader h3{margin:0;font-size:23px;color:#18363d}#m84Archive .m90ArchiveHeader p{color:#6d818a;font-size:13px;margin:6px 0 0}
+.m90Breadcrumb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;margin:12px 0 14px;color:#6f818a}.m90Crumb{background:transparent;border:0;color:#176d61;padding:5px 3px;font-weight:800;font-size:13px;cursor:pointer}.m90Breadcrumb strong{color:#18333b}
+.m90Sync{border:1px solid #d9e6e3;background:#eef7f3;border-radius:10px;color:#225d54;font-size:12px;line-height:1.5;padding:10px 12px;margin:9px 0 16px}
+.m90FolderGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:14px}.m90Folder{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-height:154px;border:1px solid #dce6ea;background:#fff;border-radius:15px;padding:19px;box-shadow:0 5px 19px #0d2a300a;text-align:left;cursor:pointer;color:#193640;font:inherit}.m90Folder:hover{border-color:#60a99a;box-shadow:0 8px 25px #124a4615}.m90FolderIcon{font-size:32px}.m90Folder strong{font-size:17px}.m90Folder small{font-size:12px;color:#69808a}.m90FolderStats{color:#236e60;font-size:12px;font-weight:750}
+.m90DetailIntro{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;background:#fff;border:1px solid #e2e9ec;border-radius:14px;padding:17px;margin-bottom:10px}.m90DetailIntro h3{font-size:21px;color:#153841;margin:0}.m90DetailIntro p{font-size:12px;color:#73848c;margin:5px 0 0}.m90Stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 15px}.m90Stats span{border-radius:12px;padding:13px;background:#e8f4f1;color:#20594f;text-align:center;font-weight:750;font-size:13px}
+.m90FolderSection{background:white;border:1px solid #dfe7ec;border-radius:14px;overflow:hidden;margin:12px 0;box-shadow:0 4px 15px #16343a08}.m90FolderSection summary{padding:16px 18px;background:#f8fbfc;font-weight:800;color:#203f48;font-size:17px;cursor:pointer;display:list-item;list-style-position:inside}.m90FolderSection summary span{float:right;background:#e8f2f0;color:#2d6b60;border-radius:99px;padding:4px 10px;font-size:12px}.m90PanelBody{padding:16px 18px}.m90Hint{font-size:12px;line-height:1.55;color:#637a83;margin:0 0 14px}.m90Notice{background:#edf7f6;padding:12px;border-radius:12px;color:#265d56;font-size:12px;line-height:1.6;margin-bottom:13px}
+.m90Form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:end;gap:13px;margin:14px 0}.m90Field{min-width:0;display:flex;flex-direction:column;gap:5px}.m90Field.wide{grid-column:1/-1}.m90Field label{font-size:12px;font-weight:800;color:#385c66}.m90Field input,.m90Field select,.m90Field textarea{min-width:0;width:100%;box-sizing:border-box;border:1px solid #cedbdf;border-radius:10px;background:#fff;color:#183640;font:inherit;font-size:14px;padding:10px;min-height:42px}.m90Form button[type=submit]{grid-column:1/-1;min-height:43px;justify-self:start}.m90RowList{display:grid;gap:8px;margin-top:16px}.m90Row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 13px;background:#fafcfd;border:1px solid #e1e9ed;border-radius:11px;overflow-wrap:anywhere}.m90Row strong{display:block;color:#19353e;font-size:14px}.m90Row small{display:block;color:#647882;line-height:1.5;font-size:12px;margin-top:4px}.m90MiniBtn,.m90MiniDanger{padding:9px 13px;border-radius:9px;border:1px solid #cddfe0;background:#e9f3f1;color:#216458;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;flex:0 0 auto}.m90MiniDanger{background:#fff1ef;color:#9e433b;border-color:#efccc7}.m90Empty{padding:13px;border:1px dashed #d3e0e4;border-radius:10px;background:#fcfefe;color:#6d838b;margin-top:12px;font-size:12px}.m90Totals{display:flex;gap:8px;flex-wrap:wrap}.m90Amount{padding:8px 12px;border-radius:99px;background:#e6f4ed;color:#1b745c;font-weight:800;font-size:13px}
+@media(max-width:650px){.m90FolderGrid{grid-template-columns:1fr 1fr;gap:9px}.m90Folder{min-height:137px;padding:13px}.m90Folder strong{font-size:14px}.m90FolderStats{font-size:11px}.m90Stats{grid-template-columns:repeat(2,1fr)}.m90Form{grid-template-columns:1fr}.m90Form button[type=submit]{width:100%;justify-self:stretch}.m90PanelBody{padding:13px}.m90DetailIntro h3{font-size:18px}.m90Row{align-items:flex-start}.m90ArchiveHeader h3{font-size:19px}}
+@media(max-width:380px){.m90FolderGrid{grid-template-columns:1fr}}
+</style>
+
 <div id="mars84Back" class="m84Back" role="dialog" aria-modal="true" aria-label="Fuar Yönetimi">
  <div class="m84App"><header class="m84Header"><div><h2>Fuar Yönetimi</h2><div style="font-size:12px;opacity:.85;margin-top:4px">Uluslararası fuarlar · adresler · kartvizitler · seyahat entegrasyonu</div></div><button class="m84Btn light" onclick="mars84CloseFair()">✕ Kapat</button></header>
- <div class="m84Body"><div class="m84Tabs"><button id="m84TabCalendar" class="m84Tab is-on" onclick="mars84Tab('calendar')">Fuar Takvimi</button><button id="m84TabAdd" class="m84Tab" onclick="mars84Tab('add')">+ Fuar Ekle</button><button id="m84TabCards" class="m84Tab" onclick="mars84Tab('cards')">Kartvizitler</button></div>
+ <div class="m84Body"><div class="m84Tabs"><button id="m84TabCalendar" class="m84Tab is-on" onclick="mars84Tab('calendar')">Fuar Takvimi</button><button id="m84TabAdd" class="m84Tab" onclick="mars84Tab('add')">+ Fuar Ekle</button><button id="m84TabCards" class="m84Tab" onclick="mars84Tab('cards')">Kartvizitler</button><button id="m84TabArchive" class="m84Tab" onclick="mars84Tab('archive')">📁 Fuar Arşivi</button></div>
  <section id="m84Calendar"><div class="m84Info">Fuarların tam adresi ve tarihleri doğrulanmadan kesin kayıt olarak gösterilmez. Yeni fuarları ekleyebilir, daha sonra doğrulayabilirsin. Google Maps butonu yalnızca kayıtlı adrese yönlendirir.</div><div class="m84Toolbar"><input id="m84Search" placeholder="Fuar adı, şehir, ülke ara…" oninput="mars84RenderFairs()"><select id="m84Country" onchange="mars84RenderFairs()"><option value="">Tüm Ülkeler</option></select><button class="m84Btn" onclick="mars84Tab('add')">+ Fuar Ekle</button></div><div id="m84Fairs" class="m84Rows"></div></section>
  <section id="m84Add" hidden><form id="m84FairForm" class="m84Form" onsubmit="mars84SaveFair(event)"><input type="hidden" id="m84EditId"><label>Fuar adı *<input id="m84Name" required></label><label>Ülke *<select id="m84AddCountry" required></select></label><label>Şehir *<input id="m84City" required></label><label>Fuar merkezi / salon<input id="m84Venue"></label><label>Başlangıç tarihi *<input type="date" id="m84Start" required></label><label>Bitiş tarihi *<input type="date" id="m84End" required></label><label class="full">Tam adres (sokak, bina, posta kodu, giriş) *<input id="m84Address" required></label><label>Resmî fuar sitesi<input type="url" id="m84Website" placeholder="https://..."></label><label>Adres doğrulama<select id="m84Verified"><option value="no">Doğrulanmadı</option><option value="yes">Resmî kaynaktan doğrulandı</option></select></label><label class="full">Not / salon-giriş bilgisi<textarea id="m84Note"></textarea></label><div class="m84Actions"><button type="submit" class="m84Btn">Fuarı Kaydet</button><button type="button" class="m84Btn light" onclick="mars84Tab('calendar')">Vazgeç</button></div></form></section>
  <section id="m84Cards" hidden><div class="m84Info">Ön/arka kartvizit fotoğrafı ekle. OCR, cihazın internet bağlantısıyla çalışır. Okunan alanları onaylamadan müşteri kaydı oluşmaz.</div><div class="m84Form"><label>Bağlı Fuar<select id="m84CardFair"></select></label><div class="m84ImageInputField"><strong>Kartvizit fotoğrafı</strong><div class="m84ImageChoices">
 <label for="m84CameraPhoto" class="m84ImageChoice m84ImageChoiceCamera">📷 Fotoğraf Çek<input type="file" id="m84CameraPhoto" accept="image/*" capture="environment" onchange="mars84CardImage(this)"></label>
 <label for="m84Photo" class="m84ImageChoice m84ImageChoiceGallery">🖼️ Galeriden Seç<input type="file" id="m84Photo" accept="image/*" onchange="mars84CardImage(this)"></label>
 </div><span id="m84ImagePicked" class="m84ImagePicked" role="status" aria-live="polite">Henüz fotoğraf seçilmedi.</span></div><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Telefon / WhatsApp<input id="m84CardPhone"></label><label>E-posta<input id="m84CardEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta">Kartvizit ekleyin.</div></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
+<section id="m84Archive" hidden aria-label="Fuar arşivi"></section>
  </div></div>
 </div>
 <script>
@@ -6823,5 +6862,322 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
  ['CSV dışa aktar',()=>direct(()=>{if(typeof exportCSV==='function')exportCSV();else throw Error('CSV işlevi yüklenemedi')})]
  ])};
 })();
+</script>
+<script id="m90FairArchiveLogic">
+/* MARS CRM v90.14 — Fuar Dosyaları.
+   Metadata: localStorage + owner-scoped Supabase mars_crm_sync_records (kind='fair').
+   Real files: private fair-documents Storage bucket after SQL setup.
+   Event-only records avoid overwriting entries created on other devices.
+*/
+(function () {
+  'use strict';
+  const KEY = 'mars_crm_fair_archive_v9014';
+  const FAIR_KEY = 'mars_crm_fairs_v1';
+  const CARD_KEY = 'mars_crm_fair_cards_v1';
+  const MARK = 'mars-fair-archive-v1';
+  const BUCKET = 'fair-documents';
+  const $ = (id) => document.getElementById(id);
+  const text = (x) => String(x ?? '');
+  const escape = (x) => text(x).replace(/[&<>"']/g, x => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[x]));
+  const readArray = (key) => { try { const data=JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(data)?data:[]; } catch { return []; } };
+  const newId = () => 'farchive_' + (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+'_'+Math.random().toString(36).slice(2)));
+  const dateLabel = (date) => date ? text(date).slice(0,10) : 'Tarih yok';
+  const validFair = (f) => f && f.id && f.name;
+  let route = {country:null,year:null,fairId:null};
+  let syncing = false;
+  let lastStatus = 'Fuar dosyaları: eşitleme kontrol edilmedi.';
+
+  function setStatus(str) {
+    lastStatus = str;
+    const el=$('m90FairSyncStatus'); if(el) el.textContent=str;
+  }
+  function saveEvents(events) {
+    localStorage.setItem(KEY, JSON.stringify(events));
+  }
+  function emit(fairId, type, fields={}) {
+    const event = {app:MARK, id:newId(), fairId, type, createdAt:new Date().toISOString(), ...fields};
+    const events=readArray(KEY);
+    events.push(event);
+    try { saveEvents(events); } catch(e) { alert('Kayıt cihazda saklanamadı: '+e.message); return null; }
+    setStatus('Kayıt cihazda saklandı. Buluta aktarım deneniyor…');
+    render();
+    sync().catch(err => setStatus('Bulut eşitleme hatası: '+err.message));
+    return event;
+  }
+  function visibleEvents(fairId, type) {
+    const events=readArray(KEY).filter(e => e && e.app===MARK);
+    const deleted=new Set(events.filter(e=>e.type==='delete' && e.targetId).map(e=>e.targetId));
+    return events.filter(e=>e.fairId===fairId && e.type===type && !deleted.has(e.id)).sort((a,b)=>text(b.createdAt).localeCompare(text(a.createdAt)));
+  }
+  function fairById(id) { return readArray(FAIR_KEY).find(f=>f.id===id); }
+  function cards(fairId) { return readArray(CARD_KEY).filter(c=>c.fairId===fairId); }
+  function fairs() { return readArray(FAIR_KEY).filter(validFair).sort((a,b)=>text(b.start).localeCompare(text(a.start))); }
+  function statusInfo() { return '<p id="m90FairSyncStatus" class="m90Sync">'+escape(lastStatus)+'</p>'; }
+  function countSummary(fair) {
+    const id=fair.id;
+    return {cards:cards(id).length, hotels:visibleEvents(id,'hotel').length,
+      expenses:visibleEvents(id,'expense').length, files:visibleEvents(id,'file').length};
+  }
+  function button(label,attr,cl='m84Btn light') { return '<button type="button" class="'+cl+'" '+attr+'>'+label+'</button>'; }
+  function breadcrumbs() {
+    const arr=[button('📁 Tüm Ülkeler','data-level="countries"','m90Crumb')];
+    if(route.country) arr.push('<span>›</span>'+button(escape(route.country),'data-level="years"','m90Crumb'));
+    if(route.year) arr.push('<span>›</span>'+button(escape(route.year),'data-level="fairs"','m90Crumb'));
+    if(route.fairId) { const f=fairById(route.fairId); arr.push('<span>›</span><strong>'+escape(f?.name||'Fuar')+'</strong>'); }
+    return '<nav class="m90Breadcrumb" aria-label="Fuar arşiv konumu">'+arr.join('')+'</nav>';
+  }
+  function renderCountries() {
+    const countries=[...new Set(fairs().map(f=>f.country||'Bilinmeyen Ülke'))].sort((a,b)=>a.localeCompare(b,'tr'));
+    if(!countries.length) return '<div class="m84Empty">Henüz kayıtlı fuar bulunmuyor. Önce “+ Fuar Ekle” bölümünden fuar kaydet.</div>';
+    return '<div class="m90FolderGrid">'+countries.map(country=>{
+      const rows=fairs().filter(f=>(f.country||'Bilinmeyen Ülke')===country);
+      return '<button type="button" class="m90Folder" data-country="'+escape(country)+'"><span class="m90FolderIcon">📁</span><strong>'+escape(country)+'</strong><small>'+rows.length+' fuar · '+new Set(rows.map(f=>text(f.start).slice(0,4)||'Tarihsiz')).size+' yıl klasörü</small></button>';
+    }).join('')+'</div>';
+  }
+  function renderYears() {
+    const years=[...new Set(fairs().filter(f=>(f.country||'Bilinmeyen Ülke')===route.country).map(f=>text(f.start).slice(0,4)||'Tarihsiz'))].sort((a,b)=>b.localeCompare(a));
+    return '<div class="m90FolderGrid">'+years.map(y=>{
+      const n=fairs().filter(f=>(f.country||'Bilinmeyen Ülke')===route.country && (text(f.start).slice(0,4)||'Tarihsiz')===y).length;
+      return '<button type="button" class="m90Folder" data-year="'+escape(y)+'"><span class="m90FolderIcon">📂</span><strong>'+escape(y)+'</strong><small>'+n+' fuar kaydı</small></button>';
+    }).join('')+'</div>';
+  }
+  function renderFairs() {
+    const rows=fairs().filter(f=>(f.country||'Bilinmeyen Ülke')===route.country && (text(f.start).slice(0,4)||'Tarihsiz')===route.year);
+    return '<div class="m90FolderGrid">'+rows.map(f=>{
+      const c=countSummary(f);
+      return '<button type="button" class="m90Folder" data-fair="'+escape(f.id)+'"><span class="m90FolderIcon">📁</span><strong>'+escape(f.name)+'</strong><small>'+escape(f.city||'')+' · '+escape(dateLabel(f.start))+'</small><span class="m90FolderStats">'+c.cards+' kartvizit · '+c.expenses+' harcama · '+c.files+' belge</span></button>';
+    }).join('')+'</div>';
+  }
+  function innerTextRow(value){ return escape(value||'—'); }
+  function cardsPanel(f) {
+    const list=cards(f.id);
+    return '<details class="m90FolderSection" open><summary>🪪 Kartvizitler <span>'+list.length+' kayıt</span></summary><div class="m90PanelBody">'+
+      '<p class="m90Hint">Fuar sırasında okunan kartvizitler, seçili fuar ile ilişkilendirilerek burada gösterilir.</p>'+button('+ Kartvizit Ekle','data-add-card="'+escape(f.id)+'"')+
+      (list.length?'<div class="m90RowList">'+list.map(c=>'<div class="m90Row"><strong>'+innerTextRow(c.company)+'</strong><small>'+innerTextRow(c.person)+' · '+innerTextRow(c.phone)+' · '+innerTextRow(c.email)+'</small></div>').join('')+'</div>':'<div class="m90Empty">Bu fuara ait kartvizit bulunmuyor.</div>')+'</div></details>';
+  }
+  function removeBtn(event){ return button('Sil','data-remove="'+escape(event.id)+'"','m90MiniDanger'); }
+  function hotelPanel(f) {
+    const list=visibleEvents(f.id,'hotel');
+    return '<details class="m90FolderSection" open><summary>🏨 Otel / Konaklama <span>'+list.length+' kayıt</span></summary><div class="m90PanelBody">'+
+      '<form class="m90Form" id="m90HotelForm"><div class="m90Field"><label>Otel adı *</label><input name="hotelName" required placeholder="Örn. Hotel Milano"></div>'+ 
+      '<div class="m90Field"><label>Şehir</label><input name="city" value="'+escape(f.city||'')+'"></div>'+ 
+      '<div class="m90Field"><label>Giriş tarihi</label><input name="checkIn" type="date"></div><div class="m90Field"><label>Çıkış tarihi</label><input name="checkOut" type="date"></div>'+ 
+      '<div class="m90Field"><label>Rezervasyon no</label><input name="bookingRef" placeholder="Referans"></div><div class="m90Field"><label>Adres</label><input name="address" placeholder="Otel adresi"></div>'+ 
+      '<div class="m90Field wide"><label>Konaklama notu</label><textarea name="note" rows="2"></textarea></div>'+ 
+      '<button class="m84Btn" type="submit">+ Konaklama Kaydet</button></form>'+ 
+      (list.length?'<div class="m90RowList">'+list.map(x=>'<div class="m90Row"><div><strong>'+innerTextRow(x.hotelName)+'</strong><small>'+innerTextRow(x.city)+' · '+dateLabel(x.checkIn)+' – '+dateLabel(x.checkOut)+'</small><small>'+innerTextRow(x.bookingRef)+' · '+innerTextRow(x.note)+'</small></div>'+removeBtn(x)+'</div>').join('')+'</div>':'<div class="m90Empty">Henüz konaklama kaydı yok.</div>')+'</div></details>';
+  }
+  function money(n, c) {
+    return new Intl.NumberFormat('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0)+' '+escape(c||'');
+  }
+  function expensePanel(f) {
+    const list=visibleEvents(f.id,'expense');
+    const sums={}; list.forEach(x=>{const key=x.currency||'EUR';sums[key]=(sums[key]||0)+(Number(x.amount)||0)});
+    const badges=Object.keys(sums).sort().map(c=>'<span class="m90Amount">'+money(sums[c],c)+'</span>').join('');
+    return '<details class="m90FolderSection" open><summary>🧾 Harcamalar / Fişler <span>'+list.length+' kayıt</span></summary><div class="m90PanelBody">'+
+      '<p class="m90Hint">Fiş tutarını gir; fiş görselini veya faturasını aşağıdaki Belgeler bölümünden ayrıca yükle. Farklı para birimleri ayrı toplanır.</p>'+ 
+      '<div class="m90Totals">'+(badges||'<span class="m90Hint">Henüz harcama bulunmuyor.</span>')+'</div>'+ 
+      '<form class="m90Form" id="m90ExpenseForm"><div class="m90Field"><label>Tarih *</label><input name="date" type="date" required value="'+new Date().toISOString().slice(0,10)+'"></div>'+ 
+      '<div class="m90Field"><label>Kategori *</label><select name="category"><option>Fuar katılımı</option><option>Otel</option><option>Uçak bileti</option><option>Ulaşım</option><option>Yemek</option><option>Yakıt</option><option>Diğer</option></select></div>'+ 
+      '<div class="m90Field"><label>Tutar *</label><input name="amount" required inputmode="decimal" type="number" min="0.01" step="0.01" placeholder="0.00"></div>'+ 
+      '<div class="m90Field"><label>Para birimi</label><select name="currency"><option>EUR</option><option>USD</option><option>TRY</option><option>GBP</option></select></div>'+ 
+      '<div class="m90Field"><label>Fiş / Fatura No</label><input name="receiptNo"></div><div class="m90Field"><label>Ödeme türü</label><select name="paymentType"><option>Kredi kartı</option><option>Nakit</option><option>Banka</option><option>Diğer</option></select></div>'+ 
+      '<div class="m90Field wide"><label>Açıklama</label><textarea name="note" rows="2"></textarea></div><button type="submit" class="m84Btn">+ Harcama Kaydet</button></form>'+ 
+      (list.length?'<div class="m90RowList">'+list.map(x=>'<div class="m90Row"><div><strong>'+innerTextRow(x.category)+' · '+money(x.amount,x.currency)+'</strong><small>'+dateLabel(x.date)+' · '+innerTextRow(x.paymentType)+' · Fiş: '+innerTextRow(x.receiptNo)+'</small><small>'+innerTextRow(x.note)+'</small></div>'+removeBtn(x)+'</div>').join('')+'</div>':'')+'</div></details>';
+  }
+  function filesPanel(f) {
+    const list=visibleEvents(f.id,'file');
+    return '<details class="m90FolderSection" open><summary>📎 Dosyalar / Fiş Fotoğrafları <span>'+list.length+' belge</span></summary><div class="m90PanelBody">'+
+      '<div class="m90Notice">Dosyalar, yalnızca yetkili kullanıcı tarafından okunabilen özel Supabase <strong>fair-documents</strong> alanına yüklenir. Bunun için paketteki SQL kurulumunu bir kez çalıştırmalısın.</div>'+ 
+      '<form class="m90Form" id="m90DocumentForm"><div class="m90Field"><label>Belge türü</label><select name="docType"><option value="receipt">Fiş / Fatura</option><option value="hotel">Otel rezervasyonu</option><option value="ticket">Uçak / Ulaşım bileti</option><option value="photo">Fotoğraf</option><option value="other">Diğer PDF / Excel / Belge</option></select></div>'+ 
+      '<div class="m90Field"><label>Belge *</label><input type="file" name="uploadFile" required accept="image/*,.pdf,.xls,.xlsx,.doc,.docx,.txt"></div>'+ 
+      '<div class="m90Field wide"><label>Belge açıklaması</label><input name="note" placeholder="Örn. Fuar otel faturası"></div>'+ 
+      '<button type="submit" class="m84Btn" id="m90UploadButton">↑ Belgeyi Güvenli Buluta Kaydet</button></form>'+ 
+      (list.length?'<div class="m90RowList">'+list.map(x=>'<div class="m90Row"><div><strong>'+innerTextRow(x.filename)+'</strong><small>'+innerTextRow(x.docType)+' · '+(x.size?(Math.round(x.size/1024)+' KB'):'')+'</small><small>'+innerTextRow(x.note)+'</small></div>'+button('İndir','data-download="'+escape(x.id)+'"','m90MiniBtn')+'</div>').join('')+'</div>':'<div class="m90Empty">Bu fuara ait dosya henüz eklenmedi.</div>')+'</div></details>';
+  }
+  function notesPanel(f) {
+    const list=visibleEvents(f.id,'note');
+    return '<details class="m90FolderSection"><summary>📝 Fuar Notları <span>'+list.length+' not</span></summary><div class="m90PanelBody">'+
+      '<form id="m90NoteForm" class="m90Form"><div class="m90Field wide"><label>Fuar görüşme notu</label><textarea name="note" required rows="3" placeholder="Fuardan alınan bilgiler, aksiyonlar..."></textarea></div><button type="submit" class="m84Btn">+ Notu Kaydet</button></form>'+ 
+      (list.length?'<div class="m90RowList">'+list.map(x=>'<div class="m90Row"><div><strong>'+escape(dateLabel(x.createdAt))+'</strong><small>'+escape(x.note)+'</small></div>'+removeBtn(x)+'</div>').join('')+'</div>':'')+'</div></details>';
+  }
+  function detail(f) {
+    const s=countSummary(f);
+    return '<div class="m90DetailIntro"><div><h3>📁 '+escape(f.name)+'</h3><p>'+escape(f.country)+' · '+escape(f.city)+' · '+dateLabel(f.start)+' – '+dateLabel(f.end)+'</p></div>'+ 
+      button('Seyahat Planı Oluştur','data-plan-fair="'+escape(f.id)+'"')+'</div>'+ 
+      '<div class="m90Stats"><span>'+s.cards+' kartvizit</span><span>'+s.hotels+' konaklama</span><span>'+s.expenses+' harcama</span><span>'+s.files+' belge</span></div>'+ 
+      cardsPanel(f)+hotelPanel(f)+expensePanel(f)+filesPanel(f)+notesPanel(f)+ 
+      '<p class="m90Hint">Fuar arşivindeki konaklama ve harcama kayıtları ilgili fuara bağlı tutulur; seyahat harcama raporuyla otomatik birleştirilmez. Fiş görselleri ayrı özel dosya alanında saklanır.</p>';
+  }
+  function render() {
+    const root=$('m84Archive');if(!root||root.hidden) return;
+    if(route.fairId && !fairById(route.fairId)) route.fairId=null;
+    let html='';
+    if(route.fairId) html=detail(fairById(route.fairId));
+    else if(route.year) html=renderFairs();
+    else if(route.country) html=renderYears();
+    else html=renderCountries();
+    root.innerHTML='<div class="m90ArchiveHeader"><h3>Fuar Arşivi</h3><p>Ülke → Yıl → Fuar → Kartvizitler, konaklamalar, harcamalar, belgeler</p><button type="button" class="m84Btn light" data-export-fairs>⬇ Fuar Verilerini Yedekle (JSON)</button></div>'+breadcrumbs()+statusInfo()+html;
+  }
+  function open(fairId) {
+    if(fairId){
+      const f=fairById(fairId);if(!f) return;
+      route={country:f.country||'Bilinmeyen Ülke',year:text(f.start).slice(0,4)||'Tarihsiz',fairId};
+    }else route={country:null,year:null,fairId:null};
+    window.mars84Tab('archive');
+    sync().then(render).catch(()=>{});
+  }
+  window.m90OpenFairFolder=open;
+
+  async function sync() {
+    if(syncing || !window.marsSecurityUnlocked) return;
+    if(typeof ensureCloudSession!=='function' || typeof cloudFetch!=='function') return;
+    const s=await ensureCloudSession(); if(!s?.user?.id) {setStatus('Fuar arşivi cihazda kayıtlı · Bulut oturumu yok.');return;}
+    syncing=true;
+    try{
+      const query='/rest/v1/mars_crm_sync_records?select=record_id,payload&kind=eq.fair&owner_id=eq.'+encodeURIComponent(s.user.id)+'&is_deleted=eq.false&limit=1000';
+      const rows=await cloudFetch(query,{headers:cloudHeaders(s.access_token)});
+      const events=readArray(KEY), byId=new Map(events.filter(e=>e&&e.id).map(e=>[e.id,e]));
+      const remote=new Set((rows||[]).map(row=>String(row.record_id)));
+      let inCount=0,upCount=0;
+      for(const row of (rows||[])){
+        const p=row.payload;if(!p || p.app!==MARK || !p.id || !p.fairId || byId.has(p.id)) continue;
+        events.push(p);byId.set(p.id,p);inCount++;
+      }
+      if(inCount) saveEvents(events);
+      for(const event of events){
+        if(event.app!==MARK || !event.id || remote.has(event.id)) continue;
+        try {
+          await cloudFetch('/rest/v1/mars_crm_sync_records',{
+            method:'POST',headers:cloudHeaders(s.access_token,{'Content-Type':'application/json','Prefer':'return=minimal'}),
+            body:JSON.stringify({owner_id:s.user.id,kind:'fair',record_id:event.id,payload:event,is_deleted:false})
+          });
+          remote.add(event.id);upCount++;
+        } catch(err) {
+          if(err.status===409){ remote.add(event.id);continue; }
+          throw err;
+        }
+      }
+      setStatus('Fuar dosyaları bulutla kontrol edildi · '+upCount+' gönderildi, '+inCount+' alındı.');
+      if(inCount) render();
+    } catch(err){
+      setStatus('Fuar dosyaları eşitlenemedi (cihazda korunuyor): '+err.message);
+      throw err;
+    } finally {syncing=false;}
+  }
+  window.m90FairArchiveSync=sync;
+
+  async function uploadFile(fairId, form) {
+    const fd=new FormData(form), file=fd.get('uploadFile');
+    if(!(file instanceof File) || !file.size) throw Error('Belge seçmelisin.');
+    if(file.size>25*1024*1024) throw Error('Bir dosya en fazla 25 MB olabilir.');
+    const session=await ensureCloudSession();
+    if(!session?.user?.id) throw Error('Bulut oturumu yok. Uygulamaya giriş yap.');
+    const safeName=file.name.replace(/[^A-Za-z0-9._-]/g,'_').slice(-85)||'belge';
+    const path=session.user.id+'/'+encodeURIComponent(fairId)+'/'+Date.now()+'_'+Math.random().toString(16).slice(2)+'_'+safeName;
+    await uploadStorageObject(BUCKET,path,file,file.type||'application/octet-stream',false);
+    const ev=emit(fairId,'file',{docType:text(fd.get('docType')),filename:file.name,mime:file.type||'application/octet-stream',size:file.size,note:text(fd.get('note')).trim(),bucket:BUCKET,path});
+    if(!ev) throw Error('Dosya buluta yüklendi ancak kayıt listesine eklenemedi. Tekrar yükleme yapmadan önce kontrol et.');
+    return ev;
+  }
+  async function downloadFile(id) {
+    const ev=readArray(KEY).find(e=>e.id===id&&e.type==='file'&&e.app===MARK);
+    if(!ev || ev.bucket!==BUCKET || !ev.path) return;
+    const s=await ensureCloudSession(); if(!s?.access_token) throw Error('Bulut oturumu yok.');
+    const url=marsSupabaseUrl()+'/storage/v1/object/authenticated/'+encodeURIComponent(ev.bucket)+'/'+ev.path.split('/').map(encodeURIComponent).join('/');
+    const resp=await fetch(url,{headers:cloudHeaders(s.access_token)});
+    if(!resp.ok) throw Error('Belge indirilemedi: HTTP '+resp.status+' (Storage yetkilerini kontrol et).');
+    const blob=await resp.blob(), obj=URL.createObjectURL(blob);
+    const link=document.createElement('a');link.href=obj;link.download=ev.filename||'fuar-belgesi';document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(obj),20000);
+  }
+
+  const docRoot=$('m84Archive');
+  docRoot?.addEventListener('click',async e=>{
+    const btn=e.target.closest('button');if(!btn) return;
+    if(btn.hasAttribute('data-export-fairs')){
+      const data={format:'mars-fair-archive-v9014',createdAt:new Date().toISOString(),fairs:readArray(FAIR_KEY),cards:readArray(CARD_KEY),archiveEvents:readArray(KEY),notice:'Belgelerin gerçek dosyaları bu JSON içinde bulunmaz; yalnızca özel Storage referansları kaydedilir.'};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}), url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download='MARS_FUAR_YEDEK_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
+      return;
+    }
+    if(btn.hasAttribute('data-level')){
+      const level=btn.dataset.level;
+      if(level==='countries')route={country:null,year:null,fairId:null};
+      if(level==='years'){route.year=null;route.fairId=null;}
+      if(level==='fairs')route.fairId=null;
+      render();return;
+    }
+    if(btn.hasAttribute('data-country')){route.country=btn.dataset.country;route.year=null;route.fairId=null;render();return;}
+    if(btn.hasAttribute('data-year')){route.year=btn.dataset.year;route.fairId=null;render();return;}
+    if(btn.hasAttribute('data-fair')){open(btn.dataset.fair);return;}
+    if(btn.hasAttribute('data-plan-fair')){window.mars84PlanFair?.(btn.dataset.planFair);return;}
+    if(btn.hasAttribute('data-add-card')){window.mars84Tab('cards');const p=$('m84CardFair');if(p)p.value=btn.dataset.addCard;return;}
+    if(btn.hasAttribute('data-remove')){
+      const targetId=btn.dataset.remove;if(!confirm('Bu kayıt fuar dosyasından kaldırılsın mı?'))return;
+      emit(route.fairId,'delete',{targetId});return;
+    }
+    if(btn.hasAttribute('data-download')){
+      btn.disabled=true;
+      try{await downloadFile(btn.dataset.download);}catch(err){alert(err.message);}finally{btn.disabled=false;}
+    }
+  });
+  docRoot?.addEventListener('submit',async e=>{
+    const form=e.target;if(!(form instanceof HTMLFormElement))return;
+    e.preventDefault();if(!route.fairId)return;
+    const fd=new FormData(form);
+    if(form.id==='m90HotelForm'){
+      if(fd.get('checkIn')&&fd.get('checkOut')&&fd.get('checkOut')<fd.get('checkIn')){alert('Otel çıkış tarihi girişten önce olamaz.');return;}
+      emit(route.fairId,'hotel',Object.fromEntries(['hotelName','city','checkIn','checkOut','bookingRef','address','note'].map(k=>[k,text(fd.get(k)).trim()])));
+    } else if(form.id==='m90ExpenseForm'){
+      const amount=Number(fd.get('amount'));if(!Number.isFinite(amount)||amount<=0){alert('Tutarı kontrol et.');return;}
+      emit(route.fairId,'expense',{date:text(fd.get('date')),category:text(fd.get('category')),amount,currency:text(fd.get('currency')),paymentType:text(fd.get('paymentType')),receiptNo:text(fd.get('receiptNo')).trim(),note:text(fd.get('note')).trim()});
+    } else if(form.id==='m90NoteForm'){
+      const note=text(fd.get('note')).trim();if(!note){alert('Not boş olamaz.');return;}emit(route.fairId,'note',{note});
+    } else if(form.id==='m90DocumentForm'){
+      const button=form.querySelector('button[type=submit]');button.disabled=true;button.textContent='Belge yükleniyor…';
+      try{await uploadFile(route.fairId,form);alert('Belge özel bulut depolama alanına yüklendi.');}
+      catch(err){alert('Belge yüklenemedi: '+err.message+'\n\nSupabase fair-documents bucket ve yetki kurulumunu kontrol et.');}
+      finally{ if(button.isConnected){button.disabled=false;button.textContent='↑ Belgeyi Güvenli Buluta Kaydet';} }
+    }
+  });
+
+  const previousTab=window.mars84Tab;
+  window.mars84Tab=function(mode){
+    if(mode==='archive'){
+      ['m84Calendar','m84Add','m84Cards'].forEach(id=>{const el=$(id);if(el)el.hidden=true;});
+      ['m84TabCalendar','m84TabAdd','m84TabCards'].forEach(id=>$(id)?.classList.remove('is-on'));
+      $('m84Archive').hidden=false;
+      $('m84TabArchive')?.classList.add('is-on');
+      render();return;
+    }
+    $('m84Archive').hidden=true;
+    $('m84TabArchive')?.classList.remove('is-on');
+    return previousTab(mode);
+  };
+  const priorRenderFairs=window.mars84RenderFairs;
+  window.mars84RenderFairs=function(){
+    priorRenderFairs();
+    const calendar=$('m84Fairs'); if(!calendar) return;
+    calendar.querySelectorAll('.m84Card').forEach((card, index)=>{
+      // Card order is obtained from the same active filters used by the calendar.
+      const q=text($('m84Search')?.value).toLocaleLowerCase('tr'), country=$('m84Country')?.value||'';
+      const listed=fairs().filter(f=>(!country||f.country===country)&&(!q||[f.name,f.city,f.country,f.venue].join(' ').toLocaleLowerCase('tr').includes(q))).sort((a,b)=>text(a.start).localeCompare(text(b.start)));
+      const item=listed[index];if(!item) return;
+      const actions=card.querySelector('.m84Actions');if(!actions || actions.querySelector('[data-folder]'))return;
+      const button=document.createElement('button');button.type='button';button.className='m84Btn';button.dataset.folder=item.id;button.textContent='📁 Fuar Dosyası';
+      button.addEventListener('click',()=>open(item.id));actions.prepend(button);
+    });
+  };
+
+  // Sync during authenticated use. Never remove local data when sync is unavailable.
+  setInterval(()=>{if(window.marsSecurityUnlocked && navigator.onLine) sync().catch(()=>{});},30000);
+  window.addEventListener('online',()=>sync().catch(()=>{}));
+  window.addEventListener('focus',()=>{if(window.marsSecurityUnlocked)sync().catch(()=>{});});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden && window.marsSecurityUnlocked)sync().catch(()=>{});});
+  setTimeout(()=>sync().catch(()=>{}),3500);
+})();
+
 </script>
 </body>
