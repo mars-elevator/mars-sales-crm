@@ -8798,4 +8798,163 @@ document.addEventListener('click',e=>{if(e.target.closest('#receiptSaveBtn,[data
 setInterval(()=>run(false),60000);setTimeout(()=>run(false),11000);
 })();
 </script>
+<script id="mars9028LiveSync">
+/* MARS CRM v90.28 — conservative two-way reconciliation.
+ * Private records belong to the authenticated Supabase user. Do not embed secrets.
+ * Never clear tables, storage buckets or local stores. */
+(function(){
+'use strict';
+if(window.__mars9028Installed)return;window.__mars9028Installed=true;
+const KINDS=[['companies','mars_crm_companies'],['fairs','mars_crm_fairs_v1'],['fair_cards','mars_crm_fair_cards_v1'],['trip_plans','mars_crm_trip_plans']];
+const EVENT_KEY='mars_crm_fair_archive_v9014',EXTRA='fair',B='fair-documents';
+let working=false, timer=null,lastTime=0,changedKeys=new Set(),errors=[],stats={};
+const $=x=>document.getElementById(x);
+const rd=k=>{try{const v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v:[]}catch{return []}};
+const write=(k,v)=>{localStorage.setItem(k,JSON.stringify(v));changedKeys.add(k);};
+const norm=s=>String(s||'').trim().toLocaleLowerCase('tr').replace(/\s+/g,' ');
+const sig=f=>[norm(f.name),norm(f.country),norm(f.city),String(f.start||'').slice(0,10)].join('|');
+const report=t=>{const el=$('mars9028Status');if(el){el.textContent=t;} const old=$('mars9027Log');if(old)old.textContent=t;};
+const iso=t=>{const n=Date.parse(t||'');return Number.isFinite(n)?n:0;};
+const edited=o=>Math.max(iso(o?.updatedAt),iso(o?.updated_at),iso(o?.modifiedAt),iso(o?.editedAt));
+const canonical=v=>JSON.stringify(v,(k,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.fromEntries(Object.entries(x).sort(([a],[b])=>a.localeCompare(b))):x);
+function fp(o){let h=2166136261;const s=canonical(o);for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return(h>>>0).toString(16);}
+const baseKey=kind=>'mars9028_synced_hashes_'+kind;
+function baselines(kind){try{return JSON.parse(localStorage.getItem(baseKey(kind))||'{}')}catch{return {}}}
+async function session(){if(!window.marsSecurityUnlocked)throw Error('Önce CRM girişini aç.');const s=await ensureCloudSession();if(!s?.user?.id||!s.access_token)throw Error('Supabase oturumu yok; aynı hesapla giriş yap.');if(!navigator.onLine)throw Error('İnternet bağlantısı yok.');return s;}
+async function req(s,method,path,data){return cloudFetch('/rest/v1/'+path,{method,headers:cloudHeaders(s.access_token,{'Content-Type':'application/json',...(method==='POST'?{'Prefer':'resolution=merge-duplicates,return=minimal'}:{})}),...(data===undefined?{}:{body:JSON.stringify(data)})});}
+async function rows(s,kind){let result=[],last='';for(let start=0;start<10000;start+=500){const chunk=await req(s,'GET','mars_crm_sync_records?select=record_id,payload,is_deleted&kind=eq.'+encodeURIComponent(kind)+'&owner_id=eq.'+encodeURIComponent(s.user.id)+'&order=record_id.asc&limit=500&offset='+start);if(!Array.isArray(chunk))throw Error(kind+' kayıtları okunamadı.');result=result.concat(chunk);if(chunk.length<500)return result.filter(r=>!r.is_deleted);last=chunk.at(-1)?.record_id;}throw Error(kind+' kaydında 10.000 sınırına ulaşıldı: hiçbir kayıt silinmedi.');}
+async function put(s,kind,id,payload){return req(s,'POST','mars_crm_sync_records?on_conflict=owner_id,kind,record_id',{owner_id:s.user.id,kind,record_id:String(id),payload,is_deleted:false});}
+async function backup(){const list=[...KINDS.map(x=>x[1]),EVENT_KEY,'mars_crm_local_expenses_v2','mars_crm_trip_archive_v1'];const data={createdAt:new Date().toISOString(),records:Object.fromEntries(list.map(k=>[k,localStorage.getItem(k)]))};const key='mars_crm_automatic_sync_backup_v28';return new Promise((resolve,reject)=>{const open=indexedDB.open(key,1);open.onupgradeneeded=()=>{if(!open.result.objectStoreNames.contains('snapshots'))open.result.createObjectStore('snapshots',{keyPath:'id'});};open.onerror=()=>reject(open.error);open.onsuccess=()=>{const db=open.result;const tx=db.transaction('snapshots','readwrite');tx.objectStore('snapshots').put({id:'latest-before-sync',...data});tx.oncomplete=()=>{db.close();resolve();};tx.onerror=()=>{db.close();reject(tx.error);};};});}
+let aliasMap=new Map(),safeToRekey=false;
+function applyAliases(){if(!aliasMap.size)return;
+ for(const key of ['mars_crm_fair_cards_v1',EVENT_KEY]){
+ const a=rd(key);let dirty=false;for(const x of a){if(x.fairId&&aliasMap.has(String(x.fairId))){x.fairId=aliasMap.get(String(x.fairId));dirty=true;}}if(dirty)write(key,a);
+ }
+}
+function safeAlias(a,b){return Object.entries(a).every(([k,v])=>{if(['id','createdAt','updatedAt','updated_at','modifiedAt'].includes(k))return true;if(v===null||v===undefined||v==='')return true;const remote=b[k];return remote!==null&&remote!==undefined&&remote!==''&&canonical(v)===canonical(remote);});}
+function combineFairs(local,remote){const bySig=new Map(remote.filter(x=>x?.id).map(x=>[sig(x),x]));const output=[];for(const x of local){const r=bySig.get(sig(x));if(safeToRekey&&r&&String(r.id)!==String(x.id)&&sig(x)!=='|||'&&safeAlias(x,r)){aliasMap.set(String(x.id),String(r.id));stats.mergedFairs=(stats.mergedFairs||0)+1;continue;}output.push(x);}if(aliasMap.size){write('mars_crm_fairs_v1',output);applyAliases();}return output;}
+async function syncKind(s,kind,key){const cloud=await rows(s,kind),remote=new Map(cloud.filter(r=>r.payload&&typeof r.payload==='object').map(r=>[String(r.record_id),r.payload]));
+ let local=rd(key);if(kind==='fairs')local=combineFairs(local,[...remote.values()]);
+ let byId=new Map(local.filter(x=>x?.id!=null).map(x=>[String(x.id),x]));let dirty=false,base=baselines(kind);const next={...base};
+ for(const [id,r] of remote){const l=byId.get(id);if(!l){local.push(r);byId.set(id,r);dirty=true;stats.down++;next[id]=fp(r);continue;}
+  const lh=fp(l),rh=fp(r),prev=base[id];if(lh===rh){next[id]=lh;continue;}
+  const lChanged=prev&&prev!==lh,rChanged=prev&&prev!==rh;
+  if(prev&&lChanged&&!rChanged){await put(s,kind,id,l);stats.up++;next[id]=lh;continue;}
+  if(prev&&!lChanged&&rChanged){Object.assign(l,r);dirty=true;stats.down++;next[id]=rh;continue;}
+  const lt=edited(l),rt=edited(r);
+  if(lt&&rt&&Math.abs(lt-rt)>2000){if(lt>rt){await put(s,kind,id,l);stats.up++;next[id]=lh;}else{Object.assign(l,r);dirty=true;stats.down++;next[id]=rh;}continue;}
+  // Without trustworthy revision information, preserve both current values and report the conflict.
+  stats.conflicts++;errors.push(kind+': '+id+' iki cihazda farklı. Yerel kayıt korunuyor.');
+ }
+ for(const [id,l] of byId){if(remote.has(id))continue;
+  // Do not create duplicate fair rows after a safe equivalence match.
+  if(kind==='fairs'&&aliasMap.has(id))continue;
+  const str=JSON.stringify(l);if(str.length>200000){stats.pending++;errors.push(kind+': '+id+' çok büyük kayıt; fotoğraf ayrı yüklenmeli.');continue;}
+  await put(s,kind,id,l);stats.up++;next[id]=fp(l);
+ }
+ if(dirty)write(key,local);
+ // update in-memory CRM collections after the stores have been safely persisted.
+ if(kind==='trip_plans'&&dirty)window.tripPlans=local;
+ if(kind==='companies'&&dirty&&typeof companies!=='undefined'&&Array.isArray(companies)){companies.splice(0,companies.length,...local);}
+ localStorage.setItem(baseKey(kind),JSON.stringify(next));
+ stats.details.push(kind+': cihaz='+local.length+' · bulut='+remote.size+(dirty?' · yeni kayıtlar alındı':''));
+}
+async function syncEvents(s){const cloud=await rows(s,EXTRA);const remote=new Map(cloud.filter(r=>r.payload&&r.payload.app==='mars-fair-archive-v1').map(r=>[String(r.record_id),r.payload]));
+ let local=rd(EVENT_KEY);const byId=new Map(local.filter(x=>x?.id&&x?.app==='mars-fair-archive-v1').map(x=>[String(x.id),x]));let dirty=false;
+ for(const [id,r] of remote){const old=byId.get(id);const canonicalFairId=aliasMap.get(String(r.fairId))||r.fairId;const incoming={...r,fairId:canonicalFairId};
+  if(!old){local.push(incoming);byId.set(id,incoming);dirty=true;stats.down++;}
+  else if(old.fairId!==canonicalFairId){old.fairId=canonicalFairId;dirty=true;}
+  else if(fp(old)!==fp(incoming)&&!aliasMap.size){stats.conflicts++;errors.push('Fuar kaydı '+id+' farklı sürüm: yerel kayıt korunuyor.');}
+ }
+ for(const [id,l] of byId){if(aliasMap.has(String(l.fairId))){l.fairId=aliasMap.get(String(l.fairId));dirty=true;}
+  const r=remote.get(id);if(r&&fp(r)===fp(l))continue;
+  if(r && !aliasMap.size){continue;}
+  await put(s,EXTRA,id,l);stats.up++;
+ }
+ if(dirty)write(EVENT_KEY,local);
+ stats.details.push('Fuar dosyası kayıtları: cihaz='+local.length+' · bulut='+remote.size);
+ const files=local.filter(e=>e?.app==='mars-fair-archive-v1'&&e.type==='file'&&e.path);
+ stats.fairFiles=files.length;
+ // Verify actual private document access on a sampled, limited number of files;
+ // an icon or file name alone is not proof of retrievability.
+ for(const e of files.slice(0,4)){
+  try{const url=marsSupabaseUrl()+'/storage/v1/object/authenticated/'+B+'/'+e.path.split('/').map(encodeURIComponent).join('/');
+   const resp=await fetch(url,{method:'GET',headers:cloudHeaders(s.access_token,{'Range':'bytes=0-0'})});
+   if(!resp.ok)throw Error('HTTP '+resp.status);
+   const body=await resp.blob();if(!body.size)throw Error('Boş dosya');stats.fairFilesChecked++;
+  }catch(e2){stats.pending++;errors.push('Fuar dosyası '+(e.filename||e.id)+' buluttan okunamadı: '+e2.message);}
+ }
+ if(files.length>4)stats.details.push('Fuar belgeleri: '+files.length+' kayıt; '+stats.fairFilesChecked+' dosyanın içeriği kontrol edildi, kalanları Gör ile doğrulanmalı.');
+}
+function refresh(){try{if(changedKeys.has('mars_crm_companies')&&typeof render==='function')render();}catch(e){console.warn('Ana sayfa güncelleme',e)}
+ try{window.mars84RenderFairs?.();window.mars84RenderCards?.();}catch(e){console.warn('Fuar ekranı',e)}
+ try{window.m90FairArchiveSync?.().catch(console.warn);}catch(e){}
+ try{if(changedKeys.has('mars_crm_trip_archive_v1')&&$('travelArchivePage')?.style.display==='block')window.renderTravelArchive?.();}catch(e){}
+ try{if(changedKeys.has('mars_crm_trip_plans'))window.mars80Refresh?.();}catch(e){}
+}
+async function run(){if(working)return;working=true;stats={up:0,down:0,filesUp:0,filesDown:0,conflicts:0,pending:0,mergedFairs:0,fairFiles:0,fairFilesChecked:0,details:[]};errors=[];changedKeys.clear();const b=$('mars9028SyncBtn');if(b)b.disabled=true;
+ report('Bulutla eşitleme başlıyor… kayıtlar korunuyor.');
+ try{
+  aliasMap=new Map();safeToRekey=false;
+  const s=await session();report('Hesap: '+s.user.id.slice(0,8)+'… · Kayıtlar karşılaştırılıyor.');
+  try{await backup();safeToRekey=true;}catch(err){safeToRekey=false;errors.push('Otomatik cihaz yedeği oluşturulamadı: '+err.message+'; mevcut fuar kimlikleri değiştirilmedi.');}
+  // First pull fair identities and metadata so that the event ledger and photos have parents.
+  await syncKind(s,'fairs','mars_crm_fairs_v1');
+  await syncKind(s,'companies','mars_crm_companies');
+  await syncKind(s,'fair_cards','mars_crm_fair_cards_v1');
+  await syncKind(s,'trip_plans','mars_crm_trip_plans');
+  await syncEvents(s);
+  // Reuse v27 media migration for travel receipt photos, archived PDFs, fair card images, and company photos.
+  // This phase separately validates byte access; it must not be mistaken for all-metadata sync.
+  const prior=window.__mars9028OriginalMediaSync;
+  if(typeof prior==='function'){
+   await prior();
+   const mediaText=$('mars9027Log')?.textContent||'';
+   const m=mediaText.match(/(\d+) kayıt gönderildi · (\d+) kayıt alındı · (\d+) dosya yüklendi · (\d+) dosya indirildi/);
+   if(m){stats.up+=Number(m[1]);stats.down+=Number(m[2]);stats.filesUp+=Number(m[3]);stats.filesDown+=Number(m[4]);}
+   if(/⛔|SENKRON TAMAMLANAMADI/.test(mediaText)){stats.pending++;errors.push('Seyahat/fiş görselleri yedeği tamamlanamadı: ayrıntı için Güvenli Yedekleme günlüğünü kontrol et.');}
+  }
+  refresh();lastTime=Date.now();
+  let text='Hesap: '+s.user.id.slice(0,8)+'…\n';
+  text+=stats.details.join('\n')+'\n';
+  text+='Toplam '+stats.up+' kayıt gönderildi · '+stats.down+' kayıt alındı · '+stats.filesUp+' medya yüklendi · '+stats.filesDown+' medya indirildi.\n';
+  text+='Fuar belgeleri: '+stats.fairFiles+' kayıt, '+stats.fairFilesChecked+' gerçek dosya açılışı denetlendi.\n';
+  text+=stats.conflicts+' kayıt çakışması · '+stats.pending+' doğrulanamayan kayıt/dosya.';
+  if(stats.mergedFairs)text+='\n'+stats.mergedFairs+' fuar, aynı ad/ülke/şehir/tarih eşleşmesiyle tek dosyada ilişkilendirildi.';
+  if(errors.length)text+='\n⚠️ '+errors.slice(0,12).join('\n⚠️ ');
+  text+='\n'+(errors.length?'⛔ Eksikler var. Belgelerin asıllarını sakla.':'✅ Metadata karşılaştırması tamamlandı. Telefon ve bilgisayarda Gör ile gerçek dosyaları açıp doğrula; yalnızca sayıları eşit olması tüm medyanın doğrulandığı anlamına gelmez.');
+  report(text);
+ }catch(e){report('⛔ EŞİTLEME TAMAMLANAMADI: '+(e.message||e)+'\nMevcut kayıtlar ve eski bulut verileri silinmedi.');}
+ finally{working=false;if(b)b.disabled=false;}
+}
+function schedule(){clearTimeout(timer);timer=setTimeout(run,4000);}
+function mount(){
+ const oldOpen=window.mars9027Open,oldSync=window.mars9027Sync;
+ if(typeof oldSync==='function')window.__mars9028OriginalMediaSync=oldSync;
+ // Make the formerly misleading "secure sync" action perform metadata+media reconciliation.
+ window.mars9027Sync=run;
+ window.mars9027Open=()=>{if(typeof oldOpen==='function'){
+  // Avoid old automatic sync being the final status text by replacing opener's old behavior.
+  const panel=$('mars9027SyncPanel');if(panel)panel.hidden=false;else oldOpen();
+ }run();};
+ for(const existing of ['mars9027Button','mars9027MobileButton']){const b=$(existing);if(b)b.onclick=()=>window.mars9027Open();}
+ const panel=$('mars9027SyncPanel')?.querySelector('.mars9027Dialog')||document.body;
+ const area=document.createElement('section');area.id='mars9028Area';area.style.cssText='margin:14px 0;padding:16px;border:2px solid #80b7a5;border-radius:14px;background:#f2faf6;color:#164b3d';
+ area.innerHTML='<strong>☁ Gerçek Telefon ↔ Masaüstü Eşitlemesi (v90.28)</strong><p style="margin:8px 0;font-size:13px">Fuar dosyaları, kartvizitler, firmalar, seyahat planları ve bağlantılı belgeleri kontrol eder. Aynı Supabase hesabını kullan. Eksik bir dosyanın aslı silinmez.</p><button id="mars9028SyncBtn" type="button" style="padding:12px 16px;background:#236b5e;color:#fff;border:0;border-radius:9px;font-weight:700">Şimdi İki Yönlü Eşitle</button><button id="mars9028CopyBtn" type="button" style="padding:12px;margin-left:6px;background:#f1f5f4;border:1px solid #b4c4be;border-radius:9px">Sonucu Kopyala</button><pre id="mars9028Status" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:35vh;overflow:auto;font:12px/1.5 system-ui"></pre>';
+ panel.prepend(area);
+ $('mars9028SyncBtn').addEventListener('click',run);$('mars9028CopyBtn').addEventListener('click',()=>{const t=$('mars9028Status').textContent;navigator.clipboard?.writeText?.(t).catch(()=>prompt('Sonuç:',t));});
+ const old=$('mars9027Now');if(old){old.textContent='İki Yönlü Eşitle';old.onclick=run;}
+ const sidebar=document.createElement('button');sidebar.type='button';sidebar.id='mars9028OpenBtn';sidebar.textContent='☁ İki Yönlü Eşitle';sidebar.className='sideItem sideDirect';sidebar.onclick=window.mars9027Open;
+ const menu=$('mars9027Button');if(menu?.parentElement)menu.parentElement.insertBefore(sidebar,menu.nextSibling);
+ document.addEventListener('click',e=>{if(e.target.closest('#receiptSaveBtn,[data-m924-save],#m84SaveCard,[data-save-fair],[data-save-card]'))schedule();},true);
+ window.addEventListener('online',schedule);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastTime>30000)schedule();});
+ setInterval(()=>{if(!document.hidden&&Date.now()-lastTime>20000)run();},45000);
+ setTimeout(run,7000);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
+window.mars9028Sync=run;
+})();
+
+</script>
 </body>
