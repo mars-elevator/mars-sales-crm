@@ -5367,12 +5367,15 @@ function forceInitialDataLoad(){
         </select>
       </label>
       <label>Tutar<br><input id="expenseAmount" inputmode="decimal" placeholder="0,00"></label>
-      <label>Ödeme Şekli<br><input id="expensePaymentType" placeholder="Otomatik algılanacak" readonly></label>
+      <label>Ödeme Şekli<br><select id="expensePaymentType"><option value="">Seçiniz / kontrol edin</option><option value="Kredi kartı">Kredi kartı</option><option value="Nakit">Nakit</option><option value="Banka">Banka havalesi</option><option value="Diğer">Diğer</option></select></label>
+      <label class="m929TravelCard">Kart adı / banka<br><input id="expenseCardAlias" autocomplete="off" maxlength="60" placeholder="Örn. Şirket kartı"></label>
+      <label class="m929TravelCard">Son 4 hane<br><input id="expenseCardLast4" maxlength="4" inputmode="numeric" placeholder="1234"></label>
       <label class="full">Not<br><input id="expenseNote"></label>
       <div class="full receiptUploadBox">
         <b>Fiş Fotoğrafı</b><br>
         <input id="receiptImage" type="file" accept="image/*" capture="environment" onchange="previewReceiptImage(this)">
-        <div class="small" style="margin-top:6px">Fotoğraf seçildiğinde sistem tarih, tutar, para birimi, fiş/fatura no ve ödeme şeklini otomatik okumaya çalışır. Kart ise son 2 haneyi, nakit ise NAKİT bilgisini yazar. Açıklamayı siz seçebilirsiniz.</div>
+        <div class="small" style="margin-top:6px">Fotoğraf seçildiğinde sistem tarih, tutar, para birimi, fiş/fatura no ve ödeme şeklini otomatik okumaya çalışır. Kartla ödeme varsa kartın adını/bankasını ve yalnızca son 4 hanesini kontrol et. Tam kart numarası/CVV kaydetme. Açıklamayı sen seçebilirsin.</div>
+        <div class="m929Review">Muhasebe için: genel toplam, para birimi, ödeme şekli ve kart adını kontrol edip kaydet.</div>
         <div id="receiptOcrStatus" style="margin-top:8px;padding:8px 10px;border-radius:9px;background:#f8fafc;border:1px solid #e5e7eb;font-size:12px;color:#64748b">
           Fiş fotoğrafı seçildiğinde otomatik okuma başlayacak. Öncelik: TOPLAM/TOTAL → FIYAT/PRICE → para birimli en yüksek tutar.
         </div>
@@ -5522,6 +5525,9 @@ function forceInitialDataLoad(){
     if(no) no.value='';
     if(note) note.value='';
     if(payment) payment.value='';
+    const cardAlias=document.getElementById('expenseCardAlias'),cardDigits=document.getElementById('expenseCardLast4');
+    if(cardAlias)cardAlias.value='';if(cardDigits)cardDigits.value='';
+    window.m929TravelCardFields?.();
     if(file) file.value='';
     if(preview){ preview.style.display='none'; preview.removeAttribute('src'); }
     setOcrRawText('');
@@ -5552,6 +5558,12 @@ function forceInitialDataLoad(){
 
       if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='Kaydediliyor...'; }
 
+      const method=document.getElementById('expensePaymentType')?.value||'';
+      const cardAlias=window.MarsReceiptAccuracy.safeAlias(document.getElementById('expenseCardAlias')?.value);
+      const cardLast4=window.MarsReceiptAccuracy.digits4(document.getElementById('expenseCardLast4')?.value);
+      if(!method)throw new Error('Ödeme şeklini seçmelisin.');
+      if(method==='Kredi kartı'&&!cardAlias&&!cardLast4)throw new Error('Kart adını veya son 4 hanesini gir.');
+      if(document.getElementById('expenseCardLast4')?.value.trim()&&!/^\d{2,4}$/.test(document.getElementById('expenseCardLast4').value.trim()))throw new Error('Kartın yalnızca son 2 veya 4 hanesini gir.');
       const file=document.getElementById('receiptImage')?.files?.[0]||null;
       const receiptFileKey=await saveReceiptFile(file,tripId);
 
@@ -5561,8 +5573,8 @@ function forceInitialDataLoad(){
         tripId,
         expenseDate:document.getElementById('expenseDate')?.value||'',
         receiptNo:document.getElementById('expenseReceiptNo')?.value||'',
-        paymentType:document.getElementById('expensePaymentType')?.value||'',
-        cardLast2:(document.getElementById('expensePaymentType')?.value.match(/(\d{2})\s*$/)||[])[1]||'',
+        paymentType:window.MarsReceiptAccuracy.paymentLabel(method,cardAlias,cardLast4),
+        paymentMethod:method,cardAlias,cardLast4,cardLast2:cardLast4.slice(-2),
         category:document.getElementById('expenseCategory')?.value||'DİĞER',
         amount,
         currency:document.getElementById('expenseCurrency')?.value||'EUR',
@@ -6074,7 +6086,11 @@ function forceInitialDataLoad(){
       const paymentEl=document.getElementById('expensePaymentType');
 
       if(dateEl && receiptDate?.iso) dateEl.value=receiptDate.iso;
-      if(paymentEl) paymentEl.value=cardInfo?.label || (cardInfo?.isCard?'KREDİ KARTI':(cardInfo?.isCash?'NAKİT':''));
+      const safe=window.MarsReceiptAccuracy.paymentInfo(combinedText);
+      if(paymentEl)paymentEl.value=safe.method==='Belirsiz'?'':safe.method;
+      const cardDigitsEl=document.getElementById('expenseCardLast4');
+      if(cardDigitsEl&&safe.last4)cardDigitsEl.value=safe.last4;
+      window.m929TravelCardFields?.();
       if(amountEl && amount?.value!=null){
         amountEl.value=Number(amount.value).toLocaleString('tr-TR',{
           minimumFractionDigits:2,
@@ -6107,7 +6123,7 @@ function forceInitialDataLoad(){
       else missing.push('tarih');
 
       if(cardInfo?.isCard){
-        found.push(cardInfo.label || 'KREDİ KARTI');
+        found.push('Ödeme: Kredi kartı (kart adını kontrol et)');
       }else if(cardInfo?.isCash){
         found.push('Ödeme: NAKİT');
       }
@@ -6854,6 +6870,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    if(/\b(lift|elevator|ascensor|asans[oö]r|d\.o\.o|sh\.?p\.?k|s\.?r\.?l\.?|ltd\.?|gmbh|a\.?ş\.?|inc\.?|group|company|sales|manager|director|engineer|ceo|tel|fax|email|website|industrial)\b/i.test(line))return -12;
    const words=line.split(/\s+/).filter(Boolean);if(words.length<2||words.length>4)return -8;
    if(!words.every(w=>/^[\p{L}][\p{L}'’-]+$/u.test(w)))return -5;
+   if(/\b(milano|rome|roma|tirana|prishtina|istanbul|ankara|albania|italia|kosovo|serbia|sales\s*office)\b/i.test(line))return -12;
    return 4+(words.every(w=>w[0]===w[0].toLocaleUpperCase('tr'))?2:0);
  }
  function parseText(text,reason='ocr'){
@@ -6865,7 +6882,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    const companyTag=rows.find(x=>/^(?:company|firma|kompani|societ[aà]|business|azienda)\s*[:\-]\s*\S/i.test(x));
    const personTag=rows.find(x=>/^(?:name|contact|person|yetkili|isim|ad soyad|nome|kontakt)\s*[:\-]\s*\S/i.test(x));
    const positions=rows.map((v,i)=>({v,i,score:companyScore(v,i)})).sort((a,b)=>b.score-a.score);
-   const company=companyTag?.replace(/^[^:–-]+[:–-]\s*/,'') || (positions[0]?.score>=3?positions[0].v:'');
+   const company=companyTag?.replace(/^[^:–-]+[:–-]\s*/,'') || (positions[0]?.score>=4?positions[0].v:'');
    const clean=rows.filter(x=>x!==company&&!/@|www\.|https?:|\b(?:tel|fax|phone|mobile|gsm|whatsapp|e-?mail)\b/i.test(x));
    const roles=/\b(manager|director|sales|representative|business development|marketing|ceo|owner|founder|engineer|president|general manager|account manager|commercial|administrator|responsabile|direttore|amministratore|y[oö]netici|m[uü]d[uü]r|sat[iı]ş)\b/i;
    const role=clean.find(x=>roles.test(x)&&x.length<85);
@@ -6874,7 +6891,12 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    let addr=rows.find(x=>/^(?:adres|address|indirizzo|street address)\s*[:\-]/i.test(x));
    if(addr)addr=addr.replace(/^[^:]+:\s*/,'');
    else {const ai=rows.findIndex(x=>looksLikeAddress(x)&&x!==company&&!/@|www\./.test(x));if(ai>=0){addr=rows[ai];
-       const next=rows[ai+1]||'';if(next&&!/@|www\.|https?:|\b(?:tel|fax|phone|mobile)\b/i.test(next)&&(/\d{4,6}|,|ital|alban|kosov|serb|tirana|milano|belgrad/i.test(next)||looksLikeAddress(next)))addr+=' '+next;
+       for(let j=ai+1;j<Math.min(rows.length,ai+3);j++){
+         const next=rows[j]||'';
+         if(!next||/@|www\.|https?:|\b(?:tel|fax|phone|mobile|e-?mail|sales|manager|director)\b/i.test(next))break;
+         if(/\d{4,6}|,|ital|alban|kosov|serb|tirana|milano|belgrad|germany|turkey/i.test(next)||looksLikeAddress(next))addr+=' '+next;
+         else break;
+       }
    }}
    const val={m84CardCompany:company,m84CardPerson:person,m84CardTitle:role||'',m84CardEmail:emails[0]||'',m84CardPhone:phones[0]||'',m84CardWeb:sites[0]||'',m84CardAddress:addr||''};
    const countryLine=rows.find(x=>/\b(italy|italia|albania|shqip[eë]ria|kosovo|kosova|serbia|srbija|romania|bosnia|t[uü]rkiye|turkey|germany|deutschland)\b/i.test(x));
@@ -6884,7 +6906,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    let filled=0;for(const [id,value] of Object.entries(val)){
      const input=$(id);if(input&&value&&(!input.value.trim()||reason==='reparse')){input.value=value;filled++;}
    }
-   const status=$('m84OCRStatus');if(status)status.textContent='OCR '+(reason==='reparse'?'yeniden değerlendirildi':'tamamlandı')+' · '+filled+' alan önerildi. Firma, yetkili ve adresi kontrol edip gerekirse düzelt.';
+   const status=$('m84OCRStatus');if(status)status.textContent='OCR '+(reason==='reparse'?'yeniden değerlendirildi':'tamamlandı')+' · '+filled+' alan önerildi. '+(!company?'⚠️ Firma bulunamadı; elle gir. ':'')+(!person?'⚠️ Yetkili bulunamadı; elle gir. ':'')+(!addr?'⚠️ Adres bulunamadı; elle gir. ':'')+'Firma, kişi ve adresi kartvizitle karşılaştır.';
    return val;
  }
  window.mars915ReparseOCR=()=>parseText($('m84OCRRaw')?.value||'','reparse');
@@ -6913,7 +6935,17 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
     let result;
     try{result=await window.Tesseract.recognize(cardImage,'eng+tur');}
     catch(err){console.warn('Çok dilli OCR başarısız; İngilizce deneniyor',err);result=await window.Tesseract.recognize(cardImage,'eng');}
-    const raw=(result?.data?.text||'').trim();
+    let raw=(result?.data?.text||'').trim();
+    // Low-contrast cards may have separate name/address text blocks. Try sparse text
+    // recognition once if the first pass returns too little; never overwrite handwritten edits.
+    if(raw.replace(/\s/g,'').length<48 || raw.split(/\r?\n/).filter(x=>x.trim()).length<3){
+      try{
+        $('m84OCRStatus').textContent='Kartvizit az okunabildi; farklı OCR düzeni deneniyor…';
+        const second=await window.Tesseract.recognize(cardImage,'eng+tur',{tessedit_pageseg_mode:'11'});
+        const extra=(second?.data?.text||'').trim();
+        if(extra.replace(/\s/g,'').length>raw.replace(/\s/g,'').length)raw=extra;
+      }catch(_ignored){}
+    }
     if($('m84OCRRaw'))$('m84OCRRaw').value=raw;
     if(raw)parseText(raw);else $('m84OCRStatus').textContent='Yazı okunamadı. Kartviziti daha aydınlık ve düz fotoğraflayarak dene.';
   }catch(err){$('m84OCRStatus').textContent='OCR çalıştırılamadı: '+err.message+'. Alanları elle doldurabilirsin.';}
@@ -7124,6 +7156,85 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
  ])};
 })();
 </script>
+<script id="marsV929AccuracyHelpers">
+(function(){
+  'use strict';
+  const normalize=s=>String(s||'').toLocaleUpperCase('tr-TR').replace(/İ/g,'I').replace(/Ş/g,'S').replace(/Ğ/g,'G').replace(/Ü/g,'U').replace(/Ö/g,'O').replace(/Ç/g,'C');
+  function amountToken(s){
+    let v=String(s||'').replace(/\s/g,'').replace(/[^\d.,]/g,'');
+    if(!v)return null;
+    const ci=v.lastIndexOf(','),di=v.lastIndexOf('.');
+    if(ci>=0 && di>=0){v=ci>di?v.replace(/\./g,'').replace(',','.'):v.replace(/,/g,'');}
+    else if(ci>=0){const n=v.length-ci-1;v=n===3?v.replace(/,/g,''):v.replace(',','.');}
+    else if(di>=0){const n=v.length-di-1;if(n===3)v=v.replace(/\./g,'');}
+    const n=Number(v);return Number.isFinite(n)&&n>0&&n<100000000?n:null;
+  }
+  const currencyDefs=[['EUR',/€|\bEUR\b|\bEURO\b/i],['TRY',/₺|\bTRY\b|\bTL\b/i],['USD',/\bUSD\b|\$/i],['GBP',/£|\bGBP\b/i],['CHF',/\bCHF\b/i],['ALL',/\bALL\b|\bLEK\b/i],['BAM',/\bBAM\b|\bKM\b/i],['RSD',/\bRSD\b/i],['MKD',/\bMKD\b/i],['RON',/\bRON\b|\bLEI\b/i],['BGN',/\bBGN\b/i]];
+  function currencyOf(s){return currencyDefs.find(([,r])=>r.test(s))?.[0]||'';}
+  function readTotal(text){
+    const rows=String(text||'').split(/\r?\n/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
+    const picks=[];
+    const main=/\bGENEL\s*TOPLAM\b|\bGRAND\s*TOTAL\b|\bTOTAL\s*PAID\b|\bAMOUNT\s*PAID\b|\bODENECEK\b|\bODENEN\s*TUTAR\b|\bTOTAL\s*DUE\b|\bTUTAR\s*TOPLAMI\b|\bTOTALE\s*PAGATO\b/;
+    const total=/\bTOPLAM\b|\bTOTAL\b|\bTOTALE\b|\bUKUPNO\b|\bGESAMT\b|\bSHUMA\b|\bSUMA\b|\bTOTALI\b|\bTUTAR\b/;
+    const bad=/\bKDV\b|\bVAT\b|\bTAX\b|\bPDV\b|\bVERGI\b|\bARA\s*TOPLAM\b|\bSUB\s*TOTAL\b|\bSUBTOTAL\b|\bBAKIYE\b|\bCHANGE\b|\bPARA\s*USTU\b|\bINDIRIM\b|\bDISCOUNT\b|\bTAXES\b|\bTIP\b/;
+    const tokenRe=/(?<![\d\/.:-])\d{1,3}(?:[.,\s]\d{3})+(?:[.,]\d{2})?(?![\d\/.:-])|(?<![\d\/.:-])\d{1,7}[.,]\d{2}(?![\d\/.:-])/g;
+    rows.forEach((line,i)=>{
+      const ul=normalize(line),mainLabel=main.test(ul),totalLabel=total.test(ul);
+      if(bad.test(ul)&&!mainLabel)return;
+      const date=/\b\d{1,2}[\/.-]\d{1,2}[\/.-](?:20)?\d{2}\b/.test(line);
+      const times=/\b\d{1,2}:\d{2}\b/.test(line);
+      if((date||times)&&!mainLabel&&!totalLabel)return;
+      const tokens=[...line.matchAll(tokenRe)].map(x=>({text:x[0],value:amountToken(x[0])})).filter(x=>x.value!=null);
+      if(!tokens.length)return;
+      const code=currencyOf(line)||currencyOf(rows[i-1]||'')||currencyOf(rows[i+1]||'');
+      const score=(mainLabel?100:totalLabel?82:0)+(code?12:0)+(i>rows.length/2?3:0);
+      if(score<12)return;
+      tokens.forEach((t,k)=>picks.push({amount:t.value,currency:code,score:score+(k===tokens.length-1?1:0),line,index:i,reason:mainLabel?'Genel toplam':totalLabel?'Toplam':'Para birimli tutar'}));
+    });
+    picks.sort((a,b)=>b.score-a.score||b.index-a.index);
+    const best=picks[0];if(!best)return {amount:null,currency:'',confidence:'low',reason:'Güvenilir genel toplam bulunamadı'};
+    const alternatives=picks.filter(x=>x.score>=best.score-2&&(Math.abs(x.amount-best.amount)>0.009|| (x.currency&&best.currency&&x.currency!==best.currency)));
+    const ambiguous=alternatives.length>0;
+    return {...best,confidence:ambiguous?'low':best.score>=85?'high':'medium',ambiguous,alternatives:alternatives.slice(0,3).map(x=>({amount:x.amount,currency:x.currency}))};
+  }
+  function last4(text){
+    const lines=String(text||'').split(/\r?\n/);
+    const hint=/(?:CARD|CREDIT|DEBIT|KART|VISA|MASTER|PAN|HESAP|ACCOUNT)/i;
+    // A masked number is evidence, whereas an unmasked 16-digit number must NEVER be stored.
+    for(let i=0;i<lines.length;i++){
+      const nearby=lines.slice(Math.max(0,i-2),Math.min(lines.length,i+3)).join(' ');
+      if(!hint.test(nearby))continue;
+      const m=lines[i].match(/(?:[*xX•#]{2,}[\s-]*)+(\d{4})\b/)
+        ||lines[i].match(/(?:[*xX•#]{2,}[\s-]*)+(\d{2})\b/);
+      if(m)return m[1];
+    }
+    return '';
+  }
+  function paymentInfo(text){
+    const u=normalize(text),card=/\bKREDI\s*KART|\bCARD\b|\bVISA\b|\bMASTERCARD\b|\bEFTPOS\b|\bPOS\s*(?:SALE|ISLEM)/.test(u);
+    const cash=/\bNAKIT\b|\bCASH\b|\bCONTANTI\b|\bGOTOVINA\b/.test(u);
+    return {method:card?'Kredi kartı':cash?'Nakit':'Belirsiz',last4:card?last4(text):'',alias:''};
+  }
+  const digits4=s=>String(s||'').replace(/\D/g,'').slice(-4);
+  const safeAlias=s=>String(s||'').trim().slice(0,60).replace(/\b\d{5,}\b/g,'[gizlendi]');
+  function paymentLabel(method,alias,last){
+    const type=String(method||'Belirsiz'),name=safeAlias(alias),digits=digits4(last);
+    if(type!=='Kredi kartı')return type;
+    return ['Kredi kartı',name,(digits?'•••• '+digits:'')].filter(Boolean).join(' · ');
+  }
+  window.MarsReceiptAccuracy={readTotal,paymentInfo,last4,paymentLabel,digits4,safeAlias,amountToken};
+})();
+</script>
+<script id="marsV929TravelCardControls">
+(function(){
+  function update(){const field=document.getElementById('expensePaymentType');
+    const card=field?.value==='Kredi kartı';document.querySelectorAll('.m929TravelCard').forEach(el=>{el.hidden=!card;});}
+  window.m929TravelCardFields=update;
+  document.addEventListener('change',e=>{if(e.target?.id==='expensePaymentType')update();});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update);else update();
+})();
+</script>
+<style id="marsV929AccuracyStyle">.m929TravelCard[hidden]{display:none!important}.m929CardOnly{display:none}.m924Fields .m929CardOnly{flex-direction:column;gap:6px}.m929Review{color:#945f17;font-size:12px;line-height:1.5}</style>
 <script id="m90FairArchiveLogic">
 /* MARS CRM v90.14 — Fuar Dosyaları.
    Metadata: localStorage + owner-scoped Supabase mars_crm_sync_records (kind='fair').
@@ -7614,7 +7725,7 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       '<input type="hidden" name="receiptAmount" value="">'+
       '<select name="receiptCurrency"><option>EUR</option><option>USD</option><option>TRY</option><option>GBP</option><option>ALL</option><option>BAM</option><option>RSD</option><option>RON</option><option>CHF</option></select>'+ 
       '<input type="hidden" name="receiptDate" value="'+new Date().toISOString().slice(0,10)+'">'+
-      '<input type="hidden" name="receiptNo"><input type="hidden" name="receiptPayment" value="Kredi kartı">'+
+      '<input type="hidden" name="receiptNo"><input type="hidden" name="receiptPayment" value="Belirsiz"><input type="hidden" name="receiptCardAlias"><input type="hidden" name="receiptCardLast4">'+
       '<input type="hidden" name="note"><span data-ocr-status hidden></span></form>'+ 
       '<div class="m922UploadState" data-upload-status="'+kind+'" aria-live="polite" hidden></div>';
   }
@@ -7802,10 +7913,18 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     const status=form.querySelector('[data-ocr-status]');if(status)status.textContent='Belge okunuyor… PDF metni / fotoğraf OCR analiz ediliyor.';
     try{
       const result=await ocrFairFile(selected);
+      const check=window.MarsReceiptAccuracy.readTotal(result.rawText||'');
       const amount=form.elements.namedItem('receiptAmount'),currency=form.elements.namedItem('receiptCurrency');
-      if(result.amount&&Number.isFinite(Number(result.amount))){amount.value=String(result.amount);if(result.currency && [...currency.options].some(o=>o.value===result.currency))currency.value=result.currency;
-        if(status)status.textContent='Önerilen tutar: '+money(result.amount,result.currency||currency.value)+' · '+(result.reason||'').slice(0,95)+' — Kaydetmeden önce fişle karşılaştır.';
-      }else if(status)status.textContent='Tutar bulunamadı. Tutar ve para birimini elle girebilirsin; belge yine saklanabilir.';
+      const suggested=check.amount!=null?check:result;
+      const payment=window.MarsReceiptAccuracy.paymentInfo(result.rawText||'');
+      const payInput=form.elements.namedItem('receiptPayment'),lastInput=form.elements.namedItem('receiptCardLast4');
+      if(payInput)payInput.value=payment.method;
+      if(lastInput)lastInput.value=payment.last4;
+      if(suggested.amount && Number.isFinite(Number(suggested.amount)) && !check.ambiguous){
+        amount.value=String(suggested.amount);
+        if(suggested.currency && [...currency.options].some(o=>o.value===suggested.currency))currency.value=suggested.currency;
+        if(status)status.textContent='Önerilen tutar: '+money(suggested.amount,suggested.currency||currency.value)+' · '+(check.reason||result.reason||'OCR')+' — tutarı ve hangi kartla ödendiğini harcamalardan kontrol et.';
+      }else if(status)status.textContent=check.ambiguous?'⚠️ Birden fazla olası tutar var. Belge saklanacak, tutarı elle düzeltmelisin.':'Tutar bulunamadı. Belge saklanabilir; harcama için tutarı ayrıca gir.';
     }catch(err){if(status)status.textContent='Otomatik okuma tamamlanamadı: '+err.message+' · Tutarı elle girebilirsin.';}
   }
   async function uploadFile(fairId, form) {
@@ -7828,7 +7947,8 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       const amount=Number(amountRaw);
       if(!Number.isFinite(amount) || amount<=0)throw Error('Fiş yüklendi fakat tutar geçersiz. Fuar dosyasında harcamayı elle gir.');
       const expense=emit(fairId,'expense',{date:text(fd.get('receiptDate')),category:(ev.docType==='receipt'&&text(fd.get('receiptCategory')).trim())?text(fd.get('receiptCategory')).trim():({'hotel':'Otel','ticket':'Ulaşım / uçak bileti','car':'Araç / Kiralama','receipt':'Fiş / fatura','photo':'Fotoğraf ekli harcama','other':'Belge ekli harcama'}[ev.docType]||'Fuar gideri'),amount,
-        currency:text(fd.get('receiptCurrency')),paymentType:text(fd.get('receiptPayment')),
+        currency:text(fd.get('receiptCurrency')),paymentType:window.MarsReceiptAccuracy.paymentLabel(text(fd.get('receiptPayment')),text(fd.get('receiptCardAlias')),text(fd.get('receiptCardLast4'))),
+        paymentMethod:text(fd.get('receiptPayment')),cardAlias:window.MarsReceiptAccuracy.safeAlias(fd.get('receiptCardAlias')),cardLast4:window.MarsReceiptAccuracy.digits4(fd.get('receiptCardLast4')),
         receiptNo:text(fd.get('receiptNo')).trim(),note:text(fd.get('note')).trim(),attachmentId:ev.id});
       if(!expense)throw Error('Fiş belgesi yüklendi ancak tutar rapora eklenemedi. Kontrol et.');
     }
@@ -7878,12 +7998,14 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       <label>Fiş / Fatura No<input name="receiptNo" autocomplete="off"></label>
       <label>Para Birimi<select name="receiptCurrency"><option>EUR</option><option>USD</option><option>TRY</option><option>ALL</option><option>BAM</option><option>RSD</option><option>MKD</option><option>BGN</option><option>RON</option><option>GBP</option><option>CHF</option></select></label>
       <label>Tutar<input name="receiptAmount" inputmode="decimal" required placeholder="0,00"></label>
-      <label>Ödeme Şekli<input name="receiptPayment" placeholder="Otomatik algılanacak veya elle gir"></label>
+      <label>Ödeme Şekli<select name="receiptPayment"><option value="Belirsiz">Seçiniz / kontrol edin</option><option value="Kredi kartı">Kredi kartı</option><option value="Nakit">Nakit</option><option value="Banka">Banka havalesi</option><option value="Diğer">Diğer</option></select></label>
+      <label class="m929CardOnly">Kart adı / banka (sen belirle)<input name="receiptCardAlias" autocomplete="off" maxlength="60" placeholder="Örn. Şirket kartı / Banka adı"></label>
+      <label class="m929CardOnly">Kartın yalnızca son 4 hanesi<input name="receiptCardLast4" inputmode="numeric" maxlength="4" pattern="[0-9]{2,4}" placeholder="1234 (tam kart numarası değil)"></label>
       <label>Not<input name="note" placeholder="İsteğe bağlı"></label><span></span>
       </div><div class="m924Upload">
       <strong>Fiş Fotoğrafı / PDF</strong><label class="m924File">📎 Dosya / Galeriden Seç<input name="uploadFile" type="file" accept="image/*,.pdf,application/pdf"></label>
       <label class="m924File">📷 Fotoğraf Çek<input name="cameraFile" type="file" accept="image/*" capture="environment"></label>
-      <p class="m924Hint">OCR tarih, tutar, para birimi, fiş no ve ödeme şeklini okumaya çalışır. Kaydetmeden önce kontrol et. Belge olmadan da harcama ekleyebilirsin.</p>
+      <p class="m924Hint">OCR yalnızca tutar önerir; fişteki <b>ödenecek toplam</b> ve para birimini kontrol et. Kartın ait olduğu bankayı/adı sen seç; yalnızca son 4 haneyi sakla. Tam kart numarası/CVV yazma.</p>
       <div class="m924Status" role="status">Belge seçildiğinde otomatik okuma başlayacak.</div></div>
       <div class="m924Buttons"><button type="button" data-m924-close class="m84Btn light">Kapat</button><button type="submit" class="m84Btn" data-m924-save>Kaydet</button></div></form></div>`;
     document.body.appendChild(back);
@@ -7893,6 +8015,7 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       const form=e.currentTarget,other=e.target.name==='uploadFile'?form.elements.namedItem('cameraFile'):form.elements.namedItem('uploadFile');if(other)other.value='';
       const file=e.target.files?.[0];if(file){form.__ocrTask=readFairReceiptOCR(form,file);}
     });
+    back.querySelector('#m924ReceiptForm').addEventListener('change',e=>{if(e.target.name==='receiptPayment')updateFairCardFields(back.querySelector('form'));});
     back.querySelector('#m924ReceiptForm').addEventListener('submit',saveFairReceipt);
     return back;
   }
@@ -7901,28 +8024,40 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     const back=fairReceiptUi(), form=back.querySelector('form');form.reset();form.__ocrTask=null;
     form.elements.namedItem('receiptDate').value=new Date().toISOString().slice(0,10);
     back.querySelector('.m924Status').textContent='Fiş fotoğrafını/PDF dosyanı seç, OCR alanları önerecek.';
+    updateFairCardFields(form);
     back.hidden=false;document.body.classList.add('m924ModalVisible');
   }
   function closeFairReceipt(){const el=document.getElementById('m924ReceiptBack');if(el)el.hidden=true;document.body.classList.remove('m924ModalVisible');}
+  function updateFairCardFields(form){
+    const isCard=form.elements.namedItem('receiptPayment')?.value==='Kredi kartı';
+    form.querySelectorAll('.m929CardOnly').forEach(el=>{el.style.display=isCard?'flex':'none';});
+  }
   function parseFairReceiptMeta(raw){
     const t=String(raw||''),dated=t.match(/(?:TAR[Iİ]H|DATE)\s*[:#.-]?\s*(\d{1,2})[.\/-](\d{1,2})[.\/-](20\d{2})/i)||t.match(/\b(\d{1,2})[.\/-](\d{1,2})[.\/-](20\d{2})\b/);
     const date=dated?`${dated[3]}-${dated[2].padStart(2,'0')}-${dated[1].padStart(2,'0')}`:'';
     const no=t.match(/(?:F[Iİ]Ş|FATURA|FIS|RECEIPT|INVOICE)\s*(?:NO|NUMARASI|NUMBER|#|NR)?\s*[:#-]\s*([A-Z0-9\/-]{3,35})/i);
-    const card=t.match(/(?:KRED[Iİ]\s*KARTI|CARD|POS|MASTERCARD|VISA)[\s\S]{0,55}?(?:\*{2,}|X{2,}|\d{2})(\d{2})(?!\d)/i);
-    const cash=/\b(NAK[Iİ]T|CASH)\b/i.test(t);
-    return {date,number:no?.[1]||'',payment:card?'KREDİ KARTI · '+card[1]:(cash?'NAKİT':'')};
+    return {date,number:no?.[1]||'',payment:window.MarsReceiptAccuracy.paymentInfo(t)};
   }
   async function readFairReceiptOCR(form,file){
-    const status=form.querySelector('.m924Status');status.textContent='Belge okunuyor…';
+    const status=form.querySelector('.m924Status');status.textContent='Belge OCR ile okunuyor…';
     try{
-      const found=await ocrFairFile(file),meta=parseFairReceiptMeta(found.rawText);
+      const found=await ocrFairFile(file),raw=found.rawText||'',meta=parseFairReceiptMeta(raw),check=window.MarsReceiptAccuracy.readTotal(raw);
       const amt=form.elements.namedItem('receiptAmount'),curr=form.elements.namedItem('receiptCurrency');
-      if(found.amount!=null&&Number(found.amount)>0){amt.value=Number(found.amount).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-      if(found.currency&&[...curr.options].some(o=>o.value===found.currency))curr.value=found.currency;
+      // Prefer explicit payable total. Never silently choose an ambiguous VAT/subtotal candidate.
+      const amountResult=check.amount!=null?check:found;
+      if(amountResult.amount!=null && !check.ambiguous){
+        amt.value=Number(amountResult.amount).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      }else{amt.value='';}
+      const currency=amountResult.currency||found.currency||'';
+      if(currency&&[...curr.options].some(o=>o.value===currency))curr.value=currency;
       if(meta.date && !Number.isNaN(Date.parse(meta.date)))form.elements.namedItem('receiptDate').value=meta.date;
       if(meta.number)form.elements.namedItem('receiptNo').value=meta.number;
-      if(meta.payment)form.elements.namedItem('receiptPayment').value=meta.payment;
-      status.textContent=found.amount?'Önerilen tutar: '+money(found.amount,found.currency||curr.value)+'. Kaydetmeden önce kontrol et.':'Belgede tutar bulunamadı. Tutarı elle girebilirsin.';
+      if(meta.payment.method!=='Belirsiz')form.elements.namedItem('receiptPayment').value=meta.payment.method;
+      const suffix=form.elements.namedItem('receiptCardLast4');if(meta.payment.last4)suffix.value=meta.payment.last4;
+      updateFairCardFields(form);
+      status.textContent=check.ambiguous?'⚠️ Birden fazla olası toplam var. Fişteki ÖDENECEK TUTAR’ı elle doğrula.':
+        amountResult.amount!=null?'OCR önerisi: '+money(amountResult.amount,curr.value)+' ('+(check.reason||found.reason||'tahmini')+'). Kart adı ve toplamı kontrol et.':
+        '⚠️ Tutar bulunamadı. Ödenecek toplamı elle gir; yanlış tahmin kaydedilmeyecek.';
     }catch(err){status.textContent='OCR okunamadı: '+err.message+'. Bilgileri elle girebilirsin.';}
   }
   function fairReceiptAmount(input){
@@ -7941,6 +8076,9 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       const amount=fairReceiptAmount(form.elements.namedItem('receiptAmount').value);
       if(!Number.isFinite(amount)||amount<=0)throw Error('Tutarı kontrol et.');
       const fd=new FormData(form),chosen=fd.get('uploadFile')?.size?fd.get('uploadFile'):fd.get('cameraFile');
+      if(String(fd.get('receiptPayment'))==='Belirsiz')throw Error('Ödeme şeklini seçmelisin.');
+      if(String(fd.get('receiptPayment'))==='Kredi kartı' && !String(fd.get('receiptCardAlias')||'').trim() && !String(fd.get('receiptCardLast4')||'').trim())throw Error('Hangi kredi kartı? Kart adı veya son 4 hanesini yaz.');
+      if(String(fd.get('receiptCardLast4')||'') && !/^\d{2,4}$/.test(String(fd.get('receiptCardLast4'))))throw Error('Kartın yalnızca son 2 veya 4 hanesini yaz.');
       if(chosen instanceof File&&chosen.size){
         // Reuse the same private Storage and linked expense pathway as other fair documents.
         // FormData's number parser expects a decimal point, not a localized string.
@@ -7949,7 +8087,8 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
         if(!ev)throw Error('Fiş kaydı doğrulanamadı.');
       }else{
         if(!emit(route.fairId,'expense',{date:text(fd.get('receiptDate')),category:text(fd.get('receiptCategory')),
-          currency:text(fd.get('receiptCurrency')),amount,paymentType:text(fd.get('receiptPayment')),
+          currency:text(fd.get('receiptCurrency')),amount,paymentType:window.MarsReceiptAccuracy.paymentLabel(text(fd.get('receiptPayment')),text(fd.get('receiptCardAlias')),text(fd.get('receiptCardLast4'))),
+          paymentMethod:text(fd.get('receiptPayment')),cardAlias:window.MarsReceiptAccuracy.safeAlias(fd.get('receiptCardAlias')),cardLast4:window.MarsReceiptAccuracy.digits4(fd.get('receiptCardLast4')),
           receiptNo:text(fd.get('receiptNo')).trim(),note:text(fd.get('note')).trim()}))throw Error('Fiş kayıt edilemedi.');
       }
       closeFairReceipt();render();
