@@ -2903,7 +2903,8 @@ async function exportTripReceiptsPdf(tripId){
     .scan-image{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;filter:contrast(1.04) brightness(1.02);box-shadow:0 1px 5px rgba(0,0,0,.08)}
     .hint{display:none}
     @media print{body{background:#fff}.scan-page{border:none;margin:0 auto;padding:0;width:auto;min-height:auto}}
-  </style></head><body>
+  </style><style id="marsV931AutoOCRStyle">.m931AutoLang{display:block;font-size:12px;color:#286b60;background:#eaf6f3;border-radius:8px;padding:7px 10px;margin:8px 0;line-height:1.4}</style>
+</head><body>
   ${pagesHtmlText}
   <script>
     window.onload=function(){ setTimeout(function(){ try{ window.print(); }catch(e){} }, 500); };
@@ -5372,12 +5373,14 @@ function forceInitialDataLoad(){
       <label class="m929TravelCard">Son 4 hane<br><input id="expenseCardLast4" maxlength="4" inputmode="numeric" placeholder="1234"></label>
       <label class="full">Not<br><input id="expenseNote"></label>
       <div class="full receiptUploadBox">
-        <b>Fiş Fotoğrafı</b><br>
+        <b>Fiş Fotoğrafı / Otomatik OCR</b><br>
+        <div class="m931AutoLang" role="note">🌐 Fişin dili otomatik algılanır; dil seçmen gerekmez.</div>
+
         <input id="receiptImage" type="file" accept="image/*" capture="environment" onchange="previewReceiptImage(this)">
         <div class="small" style="margin-top:6px">Fotoğraf seçildiğinde sistem tarih, tutar, para birimi, fiş/fatura no ve ödeme şeklini otomatik okumaya çalışır. Kartla ödeme varsa kartın adını/bankasını ve yalnızca son 4 hanesini kontrol et. Tam kart numarası/CVV kaydetme. Açıklamayı sen seçebilirsin.</div>
         <div class="m929Review">Muhasebe için: genel toplam, para birimi, ödeme şekli ve kart adını kontrol edip kaydet.</div>
         <div id="receiptOcrStatus" style="margin-top:8px;padding:8px 10px;border-radius:9px;background:#f8fafc;border:1px solid #e5e7eb;font-size:12px;color:#64748b">
-          Fiş fotoğrafı seçildiğinde otomatik okuma başlayacak. Öncelik: TOPLAM/TOTAL → FIYAT/PRICE → para birimli en yüksek tutar.
+          Fotoğrafı yükle; CRM dili, tarihi, genel toplamı, fiş numarasını ve ödemeyi otomatik okuyacak. Sonucu kontrol et.
         </div>
         <details id="receiptOcrDetails" style="display:none;margin-top:7px">
           <summary style="cursor:pointer;font-size:12px;color:#64748b">Okunan fiş metnini göster</summary>
@@ -6013,135 +6016,32 @@ function forceInitialDataLoad(){
     }
   }
   async function autoReadReceipt(file){
-    if(!file) return;
-
+    if(!file)return;
     const saveBtn=document.getElementById('receiptSaveBtn');
-    if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='Fiş okunuyor...';}
-    setOcrRawText('');
-    setOcrStatus('Fiş okunuyor... Türkçe + İngilizce OCR kullanılıyor.','info');
-
+    if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='Fiş okunuyor…';}
+    setOcrRawText('');setOcrStatus('Fişin dili otomatik algılanıyor…');
     try{
-      if(!window.Tesseract || typeof window.Tesseract.recognize!=='function'){
-        throw new Error('OCR motoru yüklenemedi. İnternet bağlantısını kontrol edin.');
-      }
-
-      const sources=await prepareReceiptCanvases(file);
-
-      const runOcr=async(source,label)=>{
-        const result=await window.Tesseract.recognize(
-          source,
-          'tur+eng',
-          {
-            logger:function(m){
-              if(m && m.status==='recognizing text' && typeof m.progress==='number'){
-                setOcrStatus(label+' okunuyor... %'+Math.round(m.progress*100),'info');
-              }else if(m?.status){
-                setOcrStatus(label+' hazırlanıyor: '+m.status,'info');
-              }
-            }
-          },
-          {
-            tessedit_pageseg_mode:'6',
-            preserve_interword_spaces:'1'
-          }
-        );
-        return result?.data?.text||'';
-      };
-
-      let text1=await runOcr(sources.enhanced,'Fiş');
-      let amount=detectTotalAmount(text1);
-      let currencyInfo=detectCurrency(text1);
-      let receiptNo=detectReceiptNo(text1);
-      let receiptDate=detectReceiptDate(text1);
-      let cardInfo=detectCardPayment(text1);
-
-      // If the critical fields are still weak, do a second high-contrast pass.
-      let text2='';
-      if(!receiptNo || !amount?.value || !receiptDate?.iso || (currencyInfo?.source==='seyahat ülkesi') || ((cardInfo?.isCard && !cardInfo?.last2) || (!cardInfo?.isCard && !cardInfo?.isCash))){
-        setOcrStatus('İkinci okuma yapılıyor; fiş no / para birimi netleştiriliyor...','info');
-        text2=await runOcr(sources.binary,'Fiş (yüksek kontrast)');
-        const combined=text1+'\n'+text2;
-        const a2=detectTotalAmount(combined);
-        const c2=detectCurrency(combined);
-        const r2=detectReceiptNo(combined);
-        const d2=detectReceiptDate(combined);
-        const p2=detectCardPayment(combined);
-
-        if(a2?.value!=null && (!amount?.value || (a2.score||0)>(amount.score||0))) amount=a2;
-        if(c2?.source==='fiş metni' || currencyInfo?.source!=='fiş metni') currencyInfo=c2;
-        if(r2) receiptNo=r2;
-        if(d2?.iso && (!receiptDate?.iso || (d2.score||0)>(receiptDate.score||0))) receiptDate=d2;
-        if((p2?.isCard || p2?.isCash) &&
-           ((!cardInfo?.isCard && !cardInfo?.isCash) || (p2.confidence||0)>(cardInfo.confidence||0))){
-          cardInfo=p2;
-        }
-      }
-
-      const combinedText=text2 ? (text1+'\n\n--- YÜKSEK KONTRAST İKİNCİ OKUMA ---\n'+text2) : text1;
-      setOcrRawText(combinedText);
-
-      const amountEl=document.getElementById('expenseAmount');
-      const noEl=document.getElementById('expenseReceiptNo');
-      const dateEl=document.getElementById('expenseDate');
-      const paymentEl=document.getElementById('expensePaymentType');
-
-      if(dateEl && receiptDate?.iso) dateEl.value=receiptDate.iso;
-      const safe=window.MarsReceiptAccuracy.paymentInfo(combinedText);
-      if(paymentEl)paymentEl.value=safe.method==='Belirsiz'?'':safe.method;
-      const cardDigitsEl=document.getElementById('expenseCardLast4');
-      if(cardDigitsEl&&safe.last4)cardDigitsEl.value=safe.last4;
+      const country=document.getElementById('receiptTripId')?.value?.split('|')[0]||'';
+      const mode='auto';
+      const result=await window.MarsGlobalReceiptOCR.recognize(file,mode,country,msg=>setOcrStatus(msg));
+      const meta=result.meta;
+      setOcrRawText(meta.text);
+      if(meta.date)document.getElementById('expenseDate').value=meta.date;
+      if(meta.receiptNo)document.getElementById('expenseReceiptNo').value=meta.receiptNo;
+      if(meta.amount!=null&&!meta.ambiguous){document.getElementById('expenseAmount').value=Number(meta.amount).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+      else document.getElementById('expenseAmount').value='';
+      if(meta.currency)ensureCurrencyOption(meta.currency);
+      const p=document.getElementById('expensePaymentType');if(p)p.value=meta.payment==='Belirsiz'?'':meta.payment;
+      if(meta.last4)document.getElementById('expenseCardLast4').value=meta.last4;
       window.m929TravelCardFields?.();
-      if(amountEl && amount?.value!=null){
-        amountEl.value=Number(amount.value).toLocaleString('tr-TR',{
-          minimumFractionDigits:2,
-          maximumFractionDigits:2
-        });
-      }
-
-      const currency=currencyInfo?.code||'';
-      ensureCurrencyOption(currency);
-      if(noEl && receiptNo) noEl.value=receiptNo;
-
-      const found=[];
-      const missing=[];
-
-      if(amount?.value!=null){
-        found.push('Tutar: '+Number(amount.value).toLocaleString('tr-TR',{
-          minimumFractionDigits:2,maximumFractionDigits:2
-        }));
-      }else missing.push('tutar');
-
-      if(currency){
-        found.push('Para birimi: '+currency+
-          (currencyInfo?.source ? ' ('+currencyInfo.source+')' : ''));
-      }else missing.push('para birimi');
-
-      if(receiptNo) found.push('Fiş/Fatura No: '+receiptNo);
-      else missing.push('fiş/fatura no');
-
-      if(receiptDate?.iso) found.push('Tarih: '+receiptDate.iso.split('-').reverse().join('.'));
-      else missing.push('tarih');
-
-      if(cardInfo?.isCard){
-        found.push('Ödeme: Kredi kartı (kart adını kontrol et)');
-      }else if(cardInfo?.isCash){
-        found.push('Ödeme: NAKİT');
-      }
-
-      if(!missing.length){
-        setOcrStatus('Otomatik okundu — '+found.join(' • '),'ok');
-      }else{
-        setOcrStatus('Kısmen okundu — '+found.join(' • ')+
-          (missing.length?' | Bulunamadı: '+missing.join(', '):''),'warn');
-      }
-    }catch(err){
-      console.error('Fiş OCR hatası',err);
-      setOcrStatus('Fiş otomatik okunamadı: '+(err?.message||err)+
-        '. Alanları elle düzeltebilirsiniz.','error');
-    }finally{
-      if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='Kaydet';}
-    }
+      const ok=[meta.amount!=null&&!meta.ambiguous?'Tutar '+meta.amount+' '+(meta.currency||''):'',meta.date?'Tarih '+meta.date:'',meta.receiptNo?'Fiş No '+meta.receiptNo:'',meta.payment!=='Belirsiz'?'Ödeme '+meta.payment:''].filter(Boolean);
+      const missing=[meta.amount==null||meta.ambiguous?'toplam':'',!meta.date?'tarih':'',!meta.receiptNo?'fiş no':'',meta.payment==='Belirsiz'?'ödeme şekli':''].filter(Boolean);
+      setOcrStatus((missing.length?'⚠️ Kısmen okundu':'Okundu')+' · '+ok.join(' · ')+(missing.length?' | Kontrol et: '+missing.join(', '):'')+' · '+result.profile,'warn');
+    }catch(err){setOcrStatus('OCR okunamadı: '+err.message+'. Alanları elle doldurabilirsin.','error');}
+    finally{if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='Kaydet';}}
   }
+
+  // OCR dili kullanıcı müdahalesi olmadan otomatik seçilir.
 
   function previewFile(input){
     const file=input?.files?.[0];
@@ -6762,7 +6662,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
  <section id="m84Cards" hidden><button type="button" class="m84Btn light" onclick="mars84Tab('archive')">← Fuar Dosyasına Dön</button><div class="m84Info">Kartviziti kamerayla çek veya galeriden seç. Görsel küçültülerek ayrı saklanır; büyük fotoğraf müşteri kaydını engellemez. OCR önerilerini kontrol edip onayla.</div><div class="m84Form"><label>Bağlı Fuar<select id="m84CardFair"></select></label><div class="m84ImageInputField"><strong>Kartvizit fotoğrafı</strong><div class="m84ImageChoices">
 <label for="m84CameraPhoto" class="m84ImageChoice m84ImageChoiceCamera">📷 Fotoğraf Çek<input type="file" id="m84CameraPhoto" accept="image/*" capture="environment" onchange="mars84CardImage(this)"></label>
 <label for="m84Photo" class="m84ImageChoice m84ImageChoiceGallery">🖼️ Galeriden Seç<input type="file" id="m84Photo" accept="image/*" onchange="mars84CardImage(this)"></label>
-</div><span id="m84ImagePicked" class="m84ImagePicked" role="status" aria-live="polite">Henüz fotoğraf seçilmedi.</span></div><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Telefon / WhatsApp<input id="m84CardPhone"></label><label>E-posta<input id="m84CardEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta" role="status" aria-live="polite">Kartvizit ekleyin.</div></label><label class="full">OCR tarafından okunan metin (düzeltilebilir)<textarea id="m84OCRRaw" rows="5" spellcheck="false" placeholder="Fotoğraf okunduktan sonra bulunan yazılar burada görünecek. Gerekirse düzeltip yeniden ayırabilirsin."></textarea><button class="m84Btn light" type="button" onclick="mars915ReparseOCR()">↻ Metinden Alanları Yeniden Ayır</button></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
+</div><span class="m931AutoLang">🌐 Kartvizit dili otomatik algılanır.</span><span id="m84ImagePicked" class="m84ImagePicked" role="status" aria-live="polite">Henüz fotoğraf seçilmedi.</span></div><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Telefon / WhatsApp<input id="m84CardPhone"></label><label>E-posta<input id="m84CardEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta" role="status" aria-live="polite">Kartvizit ekleyin.</div></label><label class="full">OCR tarafından okunan metin (düzeltilebilir)<textarea id="m84OCRRaw" rows="5" spellcheck="false" placeholder="Fotoğraf okunduktan sonra bulunan yazılar burada görünecek. Gerekirse düzeltip yeniden ayırabilirsin."></textarea><button class="m84Btn light" type="button" onclick="mars915ReparseOCR()">↻ Metinden Alanları Yeniden Ayır</button></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
 <section id="m84Archive" hidden aria-label="Fuar arşivi"></section>
  </div></div>
 </section>
@@ -6856,11 +6756,12 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
      overlay.appendChild(image);overlay.appendChild(close);document.body.appendChild(overlay);
    }catch(err){alert('Fotoğraf açılamadı: '+err.message);}
  };
- function normLine(line){return String(line||'').replace(/[|]+/g,' ').replace(/\s+/g,' ').trim();}
- function looksLikeAddress(v){return /\b(via|viale|piazza|corso|strada|street|st\.?|road|rd\.?|avenue|ave\.?|boulevard|blvd\.?|rruga|rr\.?|ulitsa|ul\.?|sokak|sk\.?|cadde|caddesi|mahalle|mah\.?|no\.?[: ]\d+|floor|kat|apt\.?|building|postcode|postal|zip|address|adres|indirizzo|sede|localit[aà]|zona industriale)\b/i.test(v)||/\b\d{4,6}\s+[\p{L}]{3,}/iu.test(v);}
+ function normLine(line){return String(window.MarsGlobalReceiptOCR?.d?.(line)||line||'').replace(/[|]+/g,' ').replace(/\s+/g,' ').trim();}
+ function looksLikeAddress(v){return /\b(via|viale|piazza|corso|strada|street|st\.?|road|rd\.?|avenue|ave\.?|boulevard|blvd\.?|rruga|rr\.?|ulitsa|ul\.?|sokak|sk\.?|cadde|caddesi|mahalle|mah\.?|no\.?[: ]\d+|floor|kat|apt\.?|building|postcode|postal|zip|address|adres|indirizzo|sede|localit[aà]|zona industriale)\b/i.test(v)||/شارع|طريق|حي |مدينة|العنوان|العنوان البريدي|صندوق بريد|ص\.\s*ب|بناية|مبنى/.test(v)||/\b\d{4,6}\s+[\p{L}]{3,}/iu.test(v);}
  function companyScore(line,pos){let score=pos<3?2:0;
    if(/\b(lift|elevator|ascensor|asans[oö]r|d\.o\.o|sh\.?p\.?k|s\.?r\.?l\.?|ltd\.?|gmbh|a\.?ş\.?|s\.?p\.?a\.?|inc\.?|company|group|holding|engineering|technology|industr|elettric|sistemi|solutions|construction|trade)\b/i.test(line))score+=8;
    if(/^[^a-z]{3,}$/u.test(line)&&/[\p{L}]/u.test(line))score+=3;
+   if(/شركة|مؤسسة|مصاعد|للمصاعد|للتجارة|الصناعة|مصنع/.test(line))score+=8;
    if(looksLikeAddress(line))score-=8;
    if(/\d{5,}|@|www\.|https?:|\+\d/.test(line))score-=9;
    if(/\b(manager|director|engineer|sales|ceo|owner|marketing|commercial|telephone|tel|fax|mobile|email|e-mail)\b/i.test(line))score-=8;
@@ -6879,8 +6780,8 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    const emails=[...full.matchAll(/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/gi)].map(m=>m[0]);
    const phones=[...full.matchAll(/(?:\+|00)?\d[\d\s().\-]{7,}\d/g)].map(m=>m[0].trim()).filter(x=>x.replace(/\D/g,'').length>=9);
    const sites=[...full.matchAll(/(?:https?:\/\/)?(?:www\.)?[\w.-]+\.(?:com|net|org|al|de|it|rs|ba|tr|eu|me|co|io|uk|hr|xk|ro)(?:\.[a-z]{2})?/gi)].map(m=>m[0]).filter(x=>!x.includes('@')&&!emails.some(e=>e.includes(x)));
-   const companyTag=rows.find(x=>/^(?:company|firma|kompani|societ[aà]|business|azienda)\s*[:\-]\s*\S/i.test(x));
-   const personTag=rows.find(x=>/^(?:name|contact|person|yetkili|isim|ad soyad|nome|kontakt)\s*[:\-]\s*\S/i.test(x));
+   const companyTag=rows.find(x=>/^(?:اسم الشركة|الشركة|شركة|المؤسسة|company|firma|kompani|societ[aà]|business|azienda)\s*[:\-]\s*\S/i.test(x));
+   const personTag=rows.find(x=>/^(?:الاسم|اسم المسؤول|المسؤول|اسم الشخص|name|contact|person|yetkili|isim|ad soyad|nome|kontakt)\s*[:\-]\s*\S/i.test(x));
    const positions=rows.map((v,i)=>({v,i,score:companyScore(v,i)})).sort((a,b)=>b.score-a.score);
    const company=companyTag?.replace(/^[^:–-]+[:–-]\s*/,'') || (positions[0]?.score>=4?positions[0].v:'');
    const clean=rows.filter(x=>x!==company&&!/@|www\.|https?:|\b(?:tel|fax|phone|mobile|gsm|whatsapp|e-?mail)\b/i.test(x));
@@ -6888,7 +6789,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    const role=clean.find(x=>roles.test(x)&&x.length<85);
    let person=personTag?.replace(/^[^:–-]+[:–-]\s*/,'')||'';
    if(!person){const cands=clean.filter(x=>x!==role).map((v,i)=>({v,score:personScore(v),i})).sort((a,b)=>b.score-a.score);if(cands[0]?.score>=5)person=cands[0].v;}
-   let addr=rows.find(x=>/^(?:adres|address|indirizzo|street address)\s*[:\-]/i.test(x));
+   let addr=rows.find(x=>/^(?:العنوان|عنوان|adres|address|indirizzo|street address)\s*[:\-]/i.test(x));
    if(addr)addr=addr.replace(/^[^:]+:\s*/,'');
    else {const ai=rows.findIndex(x=>looksLikeAddress(x)&&x!==company&&!/@|www\./.test(x));if(ai>=0){addr=rows[ai];
        for(let j=ai+1;j<Math.min(rows.length,ai+3);j++){
@@ -6933,17 +6834,19 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
   try{
     if(!window.Tesseract){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
     let result;
-    try{result=await window.Tesseract.recognize(cardImage,'eng+tur');}
-    catch(err){console.warn('Çok dilli OCR başarısız; İngilizce deneniyor',err);result=await window.Tesseract.recognize(cardImage,'eng');}
+    const profile='auto';
+    const decoded=await window.MarsGlobalReceiptOCR.recognize(cardImage,profile,$('m84CardCountry')?.value||'',msg=>{$('m84OCRStatus').textContent=msg;},'card');
+    result={data:{text:decoded.text}};
     let raw=(result?.data?.text||'').trim();
     // Low-contrast cards may have separate name/address text blocks. Try sparse text
     // recognition once if the first pass returns too little; never overwrite handwritten edits.
     if(raw.replace(/\s/g,'').length<48 || raw.split(/\r?\n/).filter(x=>x.trim()).length<3){
       try{
-        $('m84OCRStatus').textContent='Kartvizit az okunabildi; farklı OCR düzeni deneniyor…';
-        const second=await window.Tesseract.recognize(cardImage,'eng+tur',{tessedit_pageseg_mode:'11'});
+        $('m84OCRStatus').textContent='Kartvizitte ek alanlar kontrol ediliyor…';
+        const mode=(decoded.profile||'latin').split(' ')[0];
+        const second=await window.Tesseract.recognize(cardImage,window.MarsGlobalReceiptOCR.langs(mode,$('m84CardCountry')?.value||'').join('+'),{tessedit_pageseg_mode:'11'});
         const extra=(second?.data?.text||'').trim();
-        if(extra.replace(/\s/g,'').length>raw.replace(/\s/g,'').length)raw=extra;
+        if(window.MarsGlobalReceiptOCR.quality(extra,'card')>window.MarsGlobalReceiptOCR.quality(raw,'card'))raw=extra;
       }catch(_ignored){}
     }
     if($('m84OCRRaw'))$('m84OCRRaw').value=raw;
@@ -7224,6 +7127,217 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
   }
   window.MarsReceiptAccuracy={readTotal,paymentInfo,last4,paymentLabel,digits4,safeAlias,amountToken};
 })();
+</script>
+<script id="marsV930MultilingualReceiptOCR">
+/* MARS CRM v90.30 — multilingual receipt OCR; on-device Tesseract, no external image API */
+(function(){
+'use strict';
+const digMap={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
+const d=s=>String(s||'').replace(/[٠-٩۰-۹]/g,x=>digMap[x]).replace(/٫/g,'.').replace(/٬/g,',').replace(/[\u200e\u200f\u061c]/g,'');
+const upper=s=>d(s).toLocaleUpperCase('en-US').replace(/İ/g,'I').replace(/[ًٌٍَُِّْـ]/g,'').replace(/أ|إ|آ/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
+const C=[
+ ['EUR',/€|\bEUR\b|\bEURO\b|يورو/i],['USD',/\bUSD\b|\bUS\$\b|\$|دولار\s*(?:امريكي|أمريكي)/i],
+ ['TRY',/₺|\bTRY\b|\bTL\b|ليره\s*تركي/i],['GBP',/£|\bGBP\b|\bSTERLING\b|جنيه\s*استرليني/i],
+ ['SAR',/\bSAR\b|﷼|ر\.?\s*س\.?| ريال\s*سعودي/i],['AED',/\bAED\b|د\.?\s*ا\.?| درهم\s*امارات/i],
+ ['QAR',/\bQAR\b|ر\.?\s*ق\.?| ريال\s*قطري/i],['KWD',/\bKWD\b|د\.?\s*ك\.?| دينار\s*كويتي/i],
+ ['BHD',/\bBHD\b|د\.?\s*ب\.?| دينار\s*بحريني/i],['OMR',/\bOMR\b|ر\.?\s*ع\.?| ريال\s*عماني/i],
+ ['IQD',/\bIQD\b|د\.?\s*ع\.?| دينار\s*عراقي/i],['JOD',/\bJOD\b|دينار\s*اردني/i],
+ ['EGP',/\bEGP\b|ج\.?\s*م\.?| جنيه\s*مصري/i],['MAD',/\bMAD\b|درهم\s*مغربي/i],['DZD',/\bDZD\b|دينار\s*جزائري/i],['TND',/\bTND\b|دينار\s*تونسي/i],
+ ['BAM',/\bBAM\b|\bKM\b/i],['RSD',/\bRSD\b|\bDIN\b/i],['MKD',/\bMKD\b/i],['BGN',/\bBGN\b/i],['RON',/\bRON\b|\bLEI\b/i],['ALL',/\bALL\b|\bLEK\b/i],['CHF',/\bCHF\b/i],['JPY',/\bJPY\b|\bYEN\b/i],['CNY',/\bCNY\b|\bRMB\b|人民币|元/i],['KRW',/₩|\bKRW\b/i],['INR',/₹|\bINR\b/i],['ILS',/₪|\bILS\b/i],['PKR',/\bPKR\b/i],['IRR',/\bIRR\b/i],['BRL',/\bBRL\b|R\$/i],['CAD',/\bCAD\b/i],['PLN',/\bPLN\b|\bZL\b|ZŁ/i],['CZK',/\bCZK\b|\bKČ\b/i],['HUF',/\bHUF\b|\bFT\b/i],['SEK',/\bSEK\b/i],['NOK',/\bNOK\b/i],['DKK',/\bDKK\b/i]
+];
+function currency(s){const t=upper(s);return C.find(([c,re])=>re.test(t))?.[0]||'';}
+function amountValue(raw){
+ let s=d(raw).replace(/\s|\u00a0/g,'').replace(/[^0-9,.'-]/g,'').replace(/'/g,'');
+ if(!s||s==='-')return null;
+ const i=s.lastIndexOf(','),j=s.lastIndexOf('.');
+ if(i>=0&&j>=0){s=i>j?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');}
+ else if(i>=0){const after=s.length-i-1; s=after===3?s.replace(/,/g,''):s.replace(',','.');}
+ else if(j>=0){const after=s.length-j-1; if(after===3)s=s.replace(/\./g,'');}
+ const n=Number(s);return Number.isFinite(n)&&n>0&&n<1e9?n:null;
+}
+const token=/\d{1,3}(?:[.,'\s]\d{3})+(?:[.,]\d{1,3})?|\d{1,9}[.,]\d{1,3}|\d{1,9}/g;
+const paid=/(?:AMOUNT\s*PAID|PAID\s*AMOUNT|TOTAL\s*PAID|IMPORTO\s*PAGATO|PAGAMENTO\s*TOTALE|PAGATO|AMOUNT\s*CHARGED|TOTAL\s*COMPLESSIVO|NET\s*AMOUNT|TOTAL\s*A\s*PAGAR|TOTAL\s*A\s*PAYER|ZU\s*ZAHLEN|GESAMTBETRAG|GRAND\s*TOTAL|GENEL\s*TOPLAM|ODENECEK|ÖDENECEK|\bTOTAL\s*DUE\b|\bTOTAL\s*PAYABLE\b|\bTOTAL\s*AMOUNT\b|\bIMPORTE\s*TOTAL\b|\bTOTAL\s*TTC\b|\bTOTAL\s*GENERAL\b|المبلغ\s*(?:الاجمالي|المدفوع|المستحق|النهائي)|اجمالي\s*(?:المبلغ|المدفوع|الفاتوره|الفاتورة)|صافي\s*(?:المبلغ|المدفوع)|\bTOTAL\s*COMPL\b)/i;
+const total=/(?:\bTOTAL\b|\bTOTALE\b|\bTOPLAM\b|\bSUMME\b|\bGESAMT\b|\bSUMA\b|\bUKUPNO\b|\bTOTALI\b|\bSVEGA\b|\bIMPORTE\b|\bMONTANT\b|\bВСЕГО\b|\bИТОГО\b|\bОБЩО\b|\bΣΥΝΟΛΟ\b|الاجمالي|اجمالي|المجموع|مجموع|المبلغ|القيمه\s*الاجماليه)/i;
+const excluded=/(?:\bVAT\b|\bIVA\b|\bKDV\b|\bPDV\b|\bTAX\b|\bTAXE\b|\bTAXES\b|\bSUBTOTAL\b|\bSUB\s*TOTAL\b|ARA\s*TOPLAM|\bCHANGE\b|\bRESTO\b|\bResto\b|\bDISCOUNT\b|\bSAVING\b|\bTIP\b|\bSconto\b|\bIMPONIBILE\b|الضريبه|ضريبه|الخصم|خصم|الباقي|البقيه|المتبقي|ض\.?\s*ق\.?\s*م)/i;
+function amountsOf(line){
+ let safe=d(line).replace(/\b\d{1,2}[:]\d{2}(?::\d{2})?\b/g,' ')
+ .replace(/\b(?:19|20)\d{2}[-/.]\d{1,2}[-/.]\d{1,2}\b/g,' ')
+ .replace(/\b\d{1,2}[-/.]\d{1,2}[-/.](?:19|20)?\d{2}\b/g,' ');
+ let a=[];for(const m of safe.matchAll(token)){const v=amountValue(m[0]);if(v!==null&&m[0].length>=2)a.push({v,raw:m[0],at:m.index});}return a;
+}
+function readTotal(text){
+ const rows=d(text).split(/\r?\n/).map(s=>s.trim()).filter(Boolean),picks=[];
+ rows.forEach((raw,i)=>{
+  const u=upper(raw),pay=paid.test(u),tot=total.test(u),bad=excluded.test(u);
+  if(bad&&!pay)return;
+  let vals=amountsOf(raw);if(!vals.length)return;
+  const closeCurrency=currency(raw)||currency(rows[i+1]||'')||currency(rows[i-1]||'');
+  for(const [k,a] of vals.entries()){
+   if(!pay&&!tot&&!closeCurrency)continue;
+   // Refuse integer-only weak candidates (quantities, fiscal IDs) unless strong payable label.
+   if(!/[.,٫]/.test(a.raw)&&!pay&&!tot)continue;
+   let score=pay?135:tot?105:25;
+   score+=currency(raw)?15:closeCurrency?5:0;
+   score+=i>rows.length*.5?4:0;
+   if(k===vals.length-1)score+=2;
+   if(bad)score-=65;
+   picks.push({amount:a.v,currency:closeCurrency,score,index:i,reason:pay?'Ödenen tutar':tot?'Genel toplam':'Para birimli tutar',evidence:raw});
+  }
+  // Total on the line above and a single price on the next line.
+  if((pay||tot)&&!vals.length&&rows[i+1]){}
+ });
+ // Line break between label and amount.
+ rows.forEach((raw,i)=>{if(!(paid.test(upper(raw))||total.test(upper(raw)))||amountsOf(raw).length)return;
+   for(const off of [1,2]){const next=rows[i+off];if(!next||excluded.test(upper(next)))continue;for(const a of amountsOf(next)){
+      if(!/[.,]/.test(a.raw)&&!currency(next))continue;
+      picks.push({amount:a.v,currency:currency(next)||currency(raw),score:(paid.test(upper(raw))?116:90)-off,index:i+off,reason:'Sonraki satırda toplam',evidence:raw+' / '+next});
+   }}
+ });
+ // If a paid amount line exists, prioritize it over a tax, foreign exchange or item price.
+ picks.sort((a,b)=>b.score-a.score||b.index-a.index||b.amount-a.amount);
+ let best=picks[0]||null;
+ if(!best)return {amount:null,currency:'',confidence:'low',ambiguous:false,reason:'Güvenilir genel toplam bulunamadı'};
+ const ambiguous=picks.some(x=>x!==best&&x.score>=best.score-3&&(Math.abs(x.amount-best.amount)>.001 || (!!x.currency&&!!best.currency&&x.currency!==best.currency)));
+ return {...best,confidence:ambiguous?'low':best.score>=110?'high':'medium',ambiguous};
+}
+function dateInfo(text){
+ const rows=d(text).split(/\r?\n/),options=[];
+ function iso(yr,mo,day){let y=+yr,m=+mo,dd=+day;if(y<100)y+=y>=90?1900:2000;if(y<1990||y>2100||m<1||m>12||dd<1||dd>31)return '';
+ const date=new Date(Date.UTC(y,m-1,dd));return date.getUTCFullYear()===y&&date.getUTCMonth()+1===m&&date.getUTCDate()===dd?`${y}-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`:'';}
+ rows.forEach((raw,i)=>{
+   const s=upper(raw),dateLabel=/(?:\bDATA\b|\bDATE\b|\bDATUM\b|\bTARIH\b|\bFECHA\b|\bJOUR\b|\bDAT[AĂ]\b|التاريخ|تاريخ|بتاريخ|\bДАТА\b)/i.test(s);
+   // Year-first needs to be checked BEFORE day-first.
+   for(const m of s.matchAll(/(?<!\d)((?:19|20)\d{2})\s*[-./]\s*(\d{1,2})\s*[-./]\s*(\d{1,2})(?!\d)/g)){
+     const v=iso(m[1],m[2],m[3]);if(v)options.push({iso:v,score:dateLabel?130:70,index:i});
+   }
+   for(const m of s.matchAll(/(?<!\d)(\d{1,2})\s*[-./]\s*(\d{1,2})\s*[-./]\s*((?:19|20)?\d{2})(?!\d)/g)){
+     const v=iso(m[3],m[2],m[1]);if(v)options.push({iso:v,score:dateLabel?125:65,index:i});
+   }
+ });
+ options.sort((a,b)=>b.score-a.score||a.index-b.index);return options[0]?.iso||'';
+}
+function receiptNo(text){
+ const lines=d(text).split(/\r?\n/).map(x=>x.trim());
+ const label=/(?:SCONTRINO\s*(?:N\.?|NUM(?:ERO)?\.?|#)|NUM\.?\s*SCONTRINO|NUM[EÉ]RO\s*DE\s*(?:TICKET|RE[CÇ]U)|\bRECEIPT\s*(?:NO\.?|NUM(?:BER)?\.?|#)|\bFIS\s*(?:NO\.?|NUMARASI|#)|\bF[Iİ]Ş\s*(?:NO\.?|NUMARASI|#)|\bFATURA\s*(?:NO\.?|NUMARASI|#)|\bINVOICE\s*(?:NO\.?|NUMBER|#)|\bTICKET\s*(?:NO\.?|#)|\bBON\s*(?:NO\.?|NR\.?|#)|\bR[AĂ]CUN\s*(?:BR\.?|NO\.?|#)|\bRA[CČ]UN\s*(?:BR\.?|NO\.?|#)|\bBELEG\s*(?:NR\.?|#)|رقم\s*(?:الفاتوره|الفاتورة|الايصال|الوَصل|الوصل|السند|الفاتوره|العملية|العمليه)|(?:فاتوره|فاتورة|ايصال|إيصال)\s*(?:رقم|#)|\bСМЕТКА\s*(?:БР\.?|НОМЕР)|\bЧЕК\s*(?:№|NO\.?))/i;
+ for(let i=0;i<lines.length;i++){
+  const s=upper(lines[i]);const m=s.match(label);if(!m)continue;
+  const remain=s.slice(m.index+m[0].length).replace(/^[\s.:#№\-–]+/,'');
+  const n=remain.match(/^([A-Z0-9][A-Z0-9/.-]{1,27})/i);
+  if(n&&/[0-9]/.test(n[1]))return n[1].replace(/[.,;:]$/,'');
+  const look=upper(lines[i+1]||'').match(/\b([A-Z0-9][A-Z0-9/-]{1,25})\b/);if(look&&/[0-9]/.test(look[1]))return look[1];
+ }
+ return '';
+}
+function payment(text){
+ const rows=d(text).split(/\r?\n/).map(x=>upper(x)),card=/(?:CARTA\s*DI\s*CREDITO|CARTA\s*(?:BANCOMAT|DEBITO)|CARTE\s*(?:BANCAIRE|DE\s*CREDIT)|TARJETA\s*(?:DE\s*)?(?:CR[EÉ]DITO|D[EÉ]BITO)|KREDIT\s*KARTE|\bCREDIT\s*CARD\b|\bDEBIT\s*CARD\b|\bCARD\s*PAYMENT\b|\bVISA\b|MASTERCARD|\bPOS\s*(?:SALE|PAYMENT)\b|\bKREDI\s*KART|\bKARTLA\b|\bKART\s*ILE\b|بطاقه\s*(?:ائتمان|بنكيه|مصرفيه|مدي|مدى)?|\bمدى\b|\bشبكه\b|\bفيزا\b|ماستر\s*كارد|КАРТА|КАРТОЙ|ΚΑΡΤΑ)/i;
+ const cash=/(?:\bCASH\b|\bCONTANTI\b|\bESPECES\b|\bESP[EÈ]CES\b|\bEFECTIVO\b|\bBARGELD\b|\bNAKIT\b|\bGOTOVINA\b|\bGOTOVO\b|\bKESh\b|\bCASH\s*PAID\b|نقدا|نقد|كاش|\bНАЛИЧНЫМИ\b)/i;
+ let scoreCard=0,scoreCash=0;
+ rows.forEach((r,i)=>{
+  if(card.test(r)){scoreCard+=/(?:PAGAMENTO|PAGAM|PAYMENT|PAID|ZAHLUNG|PAGO|الدفع|طريقه\s*الدفع|وسيله\s*الدفع)/i.test(r)?4:2;}
+  if(cash.test(r)){scoreCash+=/(?:PAGAMENTO|PAGAM|PAYMENT|PAID|ZAHLUNG|PAGO|الدفع|طريقه\s*الدفع|وسيله\s*الدفع)/i.test(r)?4:2;}
+ });
+ return {method:scoreCard>=scoreCash&&scoreCard>0?'Kredi kartı':scoreCash>0?'Nakit':'Belirsiz',last4:'',confidence:Math.max(scoreCard,scoreCash)};
+}
+async function enhanceImage(image){
+ try{
+  if(!(image instanceof Blob) && typeof image!=='string')return null;
+  let img;
+  if(image instanceof Blob && typeof createImageBitmap==='function')img=await createImageBitmap(image);
+  else if(typeof image==='string'){
+   img=await new Promise((resolve,reject)=>{const e=new Image();e.onload=()=>resolve(e);e.onerror=reject;e.src=image;});
+  }
+  if(!img)return null;
+  const w=img.width||img.naturalWidth,h=img.height||img.naturalHeight;
+  const scale=Math.min(2.0,Math.max(.5,2600/Math.max(w,h)));
+  const canvas=document.createElement('canvas');canvas.width=Math.round(w*scale);canvas.height=Math.round(h*scale);
+  const ctx=canvas.getContext('2d');ctx.filter='grayscale(1) contrast(1.5) brightness(1.08)';ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  img.close?.();return canvas;
+ }catch(_){return null;}
+}
+const LANG={auto:['eng','ita','tur'],latin:['eng','ita','tur','fra','spa','deu'],arabic:['ara','eng'],cyrillic:['rus','eng','bul'],greek:['ell','eng'],asian:['eng','chi_sim'],persian:['fas','eng'],urdu:['urd','eng'],hebrew:['heb','eng'],hindi:['hin','eng'],japanese:['jpn','eng'],korean:['kor','eng']};
+function guessArabic(country){return /ARAB|SUUDI|SAUDI|IRA[KQ]|MISIR|EGYPT|CEZAY|ALGER|FAS|MOROCC|TUNUS|TUNIS|KATAR|QATAR|KUVEYT|KUWAIT|BAHREYN|BAHRAIN|UMMAN|OMAN|BIRLESIK ARAP|UNITED ARAB|DUBAI|BAE|JORDAN|URDUN|LIBYA|LUBNAN|LEBANON|YEMEN|SURIYE|SYRIA/i.test(upper(country||''));}
+function guessCyrillic(country){return /RUS|BULGAR|SIRB|SERB|MAKED|UKRAY|BELARUS|KAZAK|KIRGIZ|ÖZBEK|MOLDOVA|KARADAĞ|MONTENEGRO/i.test(upper(country||''));}
+function guessGreek(country){return /YUNAN|GREEC|HELLAS|KIBRIS|CYPRUS/i.test(upper(country||''));}
+function langs(mode,context){return mode==='auto'?(guessArabic(context)?LANG.arabic:guessCyrillic(context)?LANG.cyrillic:guessGreek(context)?LANG.greek:LANG.auto):(LANG[mode]||LANG.auto);}
+function cardQuality(text){
+ const t=String(text||''),lines=t.split(/\r?\n/).filter(x=>x.trim().length>2);
+ const mail=(t.match(/[\w.+-]+@[\w.-]+\.[A-Z]{2,}/gi)||[]).length;
+ const web=(t.match(/\b(?:www\.|https?:\/\/)[\w.-]+|\b[\w-]+\.(?:com|net|org|tr|it|al|de|ba|ru|sa|ae|rs|gr|uk|fr|es)\b/gi)||[]).length;
+ const phone=(t.match(/\+?\d[\d\s().-]{6,}\d/g)||[]).length;
+ const letters=(t.match(/[A-Za-zÀ-ž\u0400-\u052f\u0600-\u06ff\u0370-\u03ff]/g)||[]).length;
+ const scripts=(t.match(/[\u0600-\u06ff\u0400-\u052f\u0370-\u03ff]/g)||[]).length;
+ return Math.min(20,Math.min(mail,2)*6+Math.min(web,2)*3+Math.min(phone,2)*2+Math.min(lines.length,6)*.6+Math.min(letters,60)*.045+(scripts>=6?3:0));
+}
+function quality(text,purpose='receipt'){
+ if(purpose==='card')return cardQuality(text);
+ const a=readTotal(text),date=dateInfo(text),no=receiptNo(text),p=payment(text);
+ const script=(String(text||'').match(/[\u0600-\u06ff\u0400-\u052f\u0370-\u03ff]/g)||[]).length;
+ return (a.amount!=null?5:0)+(a.confidence==='high'?2:0)+(date?3:0)+(no?3:0)+(p.method!=='Belirsiz'?3:0)+(script>=8?1:0);
+}
+function autoProfiles(context){
+ const candidates=[
+  {key:'latin',codes:LANG.auto},
+  {key:'arabic',codes:LANG.arabic},
+  {key:'cyrillic',codes:LANG.cyrillic},
+  {key:'greek',codes:LANG.greek}
+ ];
+ // A known country is only a hint. The user never has to select the writing system.
+ const c=upper(context||'');
+ let preferred='';
+ if(guessArabic(c))preferred='arabic';
+ else if(guessCyrillic(c))preferred='cyrillic';
+ else if(guessGreek(c))preferred='greek';
+ else if(/IRAN|PERSIA/.test(c))preferred='persian';
+ else if(/PAKISTAN/.test(c))preferred='urdu';
+ else if(/ISRAIL|ISRAEL/.test(c))preferred='hebrew';
+ else if(/HINDISTAN|INDIA/.test(c))preferred='hindi';
+ else if(/JAPON|JAPAN/.test(c))preferred='japanese';
+ else if(/KORE|KOREA/.test(c))preferred='korean';
+ else if(/CIN|CHINA|CHINESE/.test(c))preferred='asian';
+ if(!preferred)return candidates;
+ const first=candidates.find(x=>x.key===preferred)||{key:preferred,codes:LANG[preferred]};
+ return [first,...candidates.filter(x=>x.key!==preferred)].slice(0,4);
+}
+async function recognize(image,mode='auto',context='',progress,purpose='receipt'){
+ if(!window.Tesseract?.recognize)throw Error('OCR motoru yüklenemedi. İnternet bağlantısını kontrol et.');
+ const candidates=mode==='auto'?autoProfiles(context):[{key:mode,codes:langs(mode,context)}];
+ const prepared=await enhanceImage(image);
+ let best={text:'',score:-1,profile:''},lastError=null;
+ for(let j=0;j<candidates.length;j++){
+  // Fast path for clear Western or regional receipts/cards. For unclear text,
+  // automatically try another writing system. No language selector is required.
+  const confidenceTarget=purpose==='card'?11:12;
+  if(j>0&&best.score>=confidenceTarget)break;
+  // Avoid excessive language-model downloads when there are no legible words.
+  if(j>2 && (!best.text || best.score<3))break;
+  const {codes,key}=candidates[j];
+  try{
+   progress?.('Yazı dili otomatik tanınıyor · '+(j+1)+'. okuma…');
+   const result=await window.Tesseract.recognize(prepared||image,codes.join('+'),{
+     logger:m=>{if(m?.status==='recognizing text'&&m.progress>=0)progress?.('Fiş/kartvizit okunuyor · %'+Math.round(m.progress*100));}
+   });
+   const t=result?.data?.text||'';
+   const score=quality(t,purpose);
+   if(score>best.score || (score===best.score&&t.trim().length>best.text.trim().length)){
+      best={text:t,score,profile:key+' (otomatik)'};
+   }
+   // A text region might be low contrast; retry the original pixels once.
+   if(score<4&&prepared){
+     const retry=await window.Tesseract.recognize(image,codes.join('+'));
+     const retryText=retry?.data?.text||'',retryScore=quality(retryText,purpose);
+     if(retryScore>best.score){best={text:retryText,score:retryScore,profile:key+' (orijinal)'};}
+   }
+  }catch(e){lastError=e;}
+ }
+ if(!best.text&&lastError)throw lastError;
+ return {...best,meta:parse(best.text)};
+}
+function parse(raw){const text=d(raw),t=readTotal(text),m=payment(text),code=t.currency||currency(text);return {text,amount:t.amount,currency:code,date:dateInfo(text),receiptNo:receiptNo(text),payment:m.method,last4:m.last4||'',confidence:t.confidence,ambiguous:!!t.ambiguous,reason:t.reason,amountEvidence:t.evidence||''};}
+window.MarsGlobalReceiptOCR={d,upper,currency,readTotal,dateInfo,receiptNo,payment,parse,recognize,langs,quality};
+// Share improved extraction with the existing fair and travel logic.
+if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;window.MarsReceiptAccuracy.paymentInfo=payment;}
+})();
+
 </script>
 <script id="marsV929TravelCardControls">
 (function(){
@@ -7892,19 +8006,19 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       return new File([blob],file.name.replace(/\.[^/.]+$/, '')+'_small.jpg',{type:'image/jpeg'});
     }catch{return file;}
   }
-  async function ocrFairFile(file){
+  async function ocrFairFile(file,mode='auto',progress){
     let raw='';
     if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
-      if(typeof extractPdfTextForTravel!=='function')throw Error('PDF okuma motoruna erişilemiyor.');
+      if(typeof extractPdfTextForTravel!=='function')throw Error('PDF metin okuma motoru yüklenemedi.');
       raw=await extractPdfTextForTravel(file);
-    } else if(file.type.startsWith('image/')){
+    }else if(file.type.startsWith('image/')){
       if(!window.Tesseract){await new Promise((ok,fail)=>{const js=document.createElement('script');js.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';js.onload=ok;js.onerror=()=>fail(Error('OCR motoru yüklenemedi'));document.head.appendChild(js);});}
-      try{raw=(await window.Tesseract.recognize(file,'eng+tur')).data.text||'';}
-      catch {raw=(await window.Tesseract.recognize(file,'eng')).data.text||'';}
+      const country=fairById(route.fairId)?.country||'';
+      const result=await window.MarsGlobalReceiptOCR.recognize(file,mode,country,progress);
+      raw=result.text;
     }
-    if(!raw.trim())return {amount:null,currency:'',reason:'Belgede okunabilir metin bulunamadı',rawText:''};
-    if(typeof analyzeTravelPdfText!=='function')throw Error('Toplam tutar analiz motoruna erişilemiyor.');
-    return {...analyzeTravelPdfText(raw),rawText:raw};
+    const meta=window.MarsGlobalReceiptOCR.parse(raw);
+    return {...meta,rawText:raw};
   }
   async function readFairDocument(form){
     const gallery=form.elements.namedItem('uploadFile'),camera=form.elements.namedItem('cameraFile');
@@ -7912,7 +8026,7 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     if(!selected?.size)return;
     const status=form.querySelector('[data-ocr-status]');if(status)status.textContent='Belge okunuyor… PDF metni / fotoğraf OCR analiz ediliyor.';
     try{
-      const result=await ocrFairFile(selected);
+      const result=await ocrFairFile(selected,'auto',msg=>{if(status)status.textContent=msg;});
       const check=window.MarsReceiptAccuracy.readTotal(result.rawText||'');
       const amount=form.elements.namedItem('receiptAmount'),currency=form.elements.namedItem('receiptCurrency');
       const suggested=check.amount!=null?check:result;
@@ -8003,10 +8117,10 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
       <label class="m929CardOnly">Kartın yalnızca son 4 hanesi<input name="receiptCardLast4" inputmode="numeric" maxlength="4" pattern="[0-9]{2,4}" placeholder="1234 (tam kart numarası değil)"></label>
       <label>Not<input name="note" placeholder="İsteğe bağlı"></label><span></span>
       </div><div class="m924Upload">
-      <strong>Fiş Fotoğrafı / PDF</strong><label class="m924File">📎 Dosya / Galeriden Seç<input name="uploadFile" type="file" accept="image/*,.pdf,application/pdf"></label>
+      <strong>Fiş Fotoğrafı / PDF</strong><span class="m931AutoLang">🌐 Fiş dili otomatik algılanır (Arapça dahil).</span><label class="m924File">📎 Dosya / Galeriden Seç<input name="uploadFile" type="file" accept="image/*,.pdf,application/pdf"></label>
       <label class="m924File">📷 Fotoğraf Çek<input name="cameraFile" type="file" accept="image/*" capture="environment"></label>
       <p class="m924Hint">OCR yalnızca tutar önerir; fişteki <b>ödenecek toplam</b> ve para birimini kontrol et. Kartın ait olduğu bankayı/adı sen seç; yalnızca son 4 haneyi sakla. Tam kart numarası/CVV yazma.</p>
-      <div class="m924Status" role="status">Belge seçildiğinde otomatik okuma başlayacak.</div></div>
+      <div class="m924Status" role="status">Belge seçildiğinde otomatik okuma başlayacak.</div><details class="m930OCRDetails"><summary>Okunan fiş metnini göster</summary><pre data-m930-raw style="white-space:pre-wrap;max-height:180px;overflow:auto;font-size:11px"></pre></details></div>
       <div class="m924Buttons"><button type="button" data-m924-close class="m84Btn light">Kapat</button><button type="submit" class="m84Btn" data-m924-save>Kaydet</button></div></form></div>`;
     document.body.appendChild(back);
     back.addEventListener('click',e=>{if(e.target===back||e.target.closest('[data-m924-close]'))closeFairReceipt();});
@@ -8033,23 +8147,21 @@ window.marsV903GoSettings=function(){marsV903SetActive('menuSettingsBtn'); alert
     form.querySelectorAll('.m929CardOnly').forEach(el=>{el.style.display=isCard?'flex':'none';});
   }
   function parseFairReceiptMeta(raw){
-    const t=String(raw||''),dated=t.match(/(?:TAR[Iİ]H|DATE)\s*[:#.-]?\s*(\d{1,2})[.\/-](\d{1,2})[.\/-](20\d{2})/i)||t.match(/\b(\d{1,2})[.\/-](\d{1,2})[.\/-](20\d{2})\b/);
-    const date=dated?`${dated[3]}-${dated[2].padStart(2,'0')}-${dated[1].padStart(2,'0')}`:'';
-    const no=t.match(/(?:F[Iİ]Ş|FATURA|FIS|RECEIPT|INVOICE)\s*(?:NO|NUMARASI|NUMBER|#|NR)?\s*[:#-]\s*([A-Z0-9\/-]{3,35})/i);
-    return {date,number:no?.[1]||'',payment:window.MarsReceiptAccuracy.paymentInfo(t)};
+    const x=window.MarsGlobalReceiptOCR.parse(raw);
+    return {date:x.date,number:x.receiptNo,payment:window.MarsReceiptAccuracy.paymentInfo(raw)};
   }
   async function readFairReceiptOCR(form,file){
     const status=form.querySelector('.m924Status');status.textContent='Belge OCR ile okunuyor…';
     try{
-      const found=await ocrFairFile(file),raw=found.rawText||'',meta=parseFairReceiptMeta(raw),check=window.MarsReceiptAccuracy.readTotal(raw);
-      const amt=form.elements.namedItem('receiptAmount'),curr=form.elements.namedItem('receiptCurrency');
+      const found=await ocrFairFile(file,'auto',msg=>{status.textContent=msg;}),raw=found.rawText||'',meta=parseFairReceiptMeta(raw),check=window.MarsReceiptAccuracy.readTotal(raw);
+      const rawView=form.querySelector('[data-m930-raw]');if(rawView)rawView.textContent=raw;const amt=form.elements.namedItem('receiptAmount'),curr=form.elements.namedItem('receiptCurrency');
       // Prefer explicit payable total. Never silently choose an ambiguous VAT/subtotal candidate.
       const amountResult=check.amount!=null?check:found;
       if(amountResult.amount!=null && !check.ambiguous){
         amt.value=Number(amountResult.amount).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
       }else{amt.value='';}
       const currency=amountResult.currency||found.currency||'';
-      if(currency&&[...curr.options].some(o=>o.value===currency))curr.value=currency;
+      if(currency){if(![...curr.options].some(o=>o.value===currency)){const opt=document.createElement('option');opt.value=currency;opt.textContent=currency;curr.appendChild(opt);}curr.value=currency;}
       if(meta.date && !Number.isNaN(Date.parse(meta.date)))form.elements.namedItem('receiptDate').value=meta.date;
       if(meta.number)form.elements.namedItem('receiptNo').value=meta.number;
       if(meta.payment.method!=='Belirsiz')form.elements.namedItem('receiptPayment').value=meta.payment.method;
@@ -8704,6 +8816,10 @@ body.m918FairActive #mars84Back,body.m918FairActive #mars84Back[hidden]{display:
 })();
 </script>
 
+<style id="marsV930OCRStyle">
+.m930Lang{display:block;font-size:13px;color:#30515a;margin:10px 0}
+.m930Lang select{display:block;margin-top:6px;width:min(100%,390px);min-height:42px;background:white;border:1px solid #cbdadd;border-radius:9px;padding:8px;color:#153f45}
+</style>
 <style id="m924FairReceiptStyle">
 .m924Overlay{position:fixed;inset:0;z-index:2147483500;background:rgba(19,28,34,.62);display:flex;justify-content:center;align-items:center;padding:15px;overflow:auto}
 .m924Overlay[hidden]{display:none!important}.m924Modal{width:min(950px,100%);max-height:calc(100dvh - 30px);overflow:auto;background:#fff;border-radius:20px;padding:22px;color:#1c3743;box-shadow:0 15px 60px #061b2d44}.m924Modal h2{margin:2px 0 23px;font-size:26px}.m924Fields{display:grid;grid-template-columns:1fr 1fr;gap:15px 40px}
