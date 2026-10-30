@@ -1,0 +1,30 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="robots" content="noindex,nofollow"/><title>MARS CRM — Sürüm Kontrolü</title><style>body{font-family:system-ui,Arial;background:#eff4f4;color:#16383c;margin:0;display:grid;place-items:center;min-height:100dvh;padding:16px}main{max-width:440px;background:white;border:1px solid #dae8e4;border-radius:18px;padding:24px;box-shadow:0 12px 35px #183d4a0d}h1{font-size:23px;margin-top:0}p{line-height:1.55}button{font:inherit;font-weight:750;width:100%;background:#196c60;color:white;border:0;border-radius:10px;padding:14px;margin-top:10px;cursor:pointer}button:disabled{opacity:.55}small{color:#60777b}#result{white-space:pre-wrap;margin-top:15px;font-size:13px;line-height:1.55}</style></head><body><main><h1>MARS CRM — Mobil Güncelleme</h1><p>Yeni <b>Ana Sayfa</b> ve <b>Fuar Yönetimi</b> görünmüyorsa önce GitHub Pages'de <b>v90.46</b> yayınlandığını doğrulayalım.</p><p>Bu işlem <strong>fişleri, kartvizitleri, seyahat kayıtlarını, fotoğrafları veya cihaz verilerini silmez</strong>; yalnızca eski servis çalışanını devre dışı bırakır.</p><button id="update" type="button">Sürümü Doğrula ve CRM'yi Güncelle</button><small>Önce GitHub'a yeni <code>index.html</code>, <code>sw.js</code> ve <code>yenile.html</code> yüklenmiş olmalı. İnternet gerekir.</small><div id="result" role="status" aria-live="polite"></div></main><script>
+(function(){
+ const REQUIRED='90.46',btn=document.getElementById('update'),msg=document.getElementById('result');
+ btn.onclick=async function(){
+   btn.disabled=true;msg.textContent='GitHub Pages üzerinden sürüm kontrol ediliyor…';
+   try {
+     // Check the live, public HTML before unregistering any service worker.
+     const probe=new URL('./index.html', location.href);
+     probe.searchParams.set('mars_deploy_check',String(Date.now()));
+     const response=await fetch(probe.href,{cache:'no-store',credentials:'same-origin'});
+     const html=await response.text();
+     const isNew=response.ok && html.includes('name="mars-crm-version" content="'+REQUIRED+'"') && html.includes('id="marsHome2026"');
+     if(!isNew){
+       msg.textContent='⛔ Yayındaki index.html dosyasında v'+REQUIRED+' bulunamadı. GitHub ana klasörüne yeni dosyanın doğru isimle yüklenip Commit edildiğini ve Pages yayınının tamamlandığını kontrol et.\n\nHTTP: '+response.status+' — Servis çalışanı değiştirilmedi.';
+       return;
+     }
+     msg.textContent='✅ v'+REQUIRED+' doğrulandı. Eski sayfa önbelleği devre dışı bırakılıyor…';
+     if('serviceWorker' in navigator){
+       const regs=await navigator.serviceWorker.getRegistrations();const scope=new URL('./',location.href).href;
+       for(const reg of regs){if(reg.scope===scope)await reg.unregister();}
+     }
+     const target=new URL('./index.html',location.href);
+     target.searchParams.set('surumkontrol','1');
+     target.searchParams.set('fresh',String(Date.now()));
+     location.replace(target.href);
+   } catch(err){msg.textContent='⛔ Kontrol tamamlanamadı: '+err.message+'\nGitHub yayını ve internet bağlantısını kontrol et.';}
+   finally{btn.disabled=false;}
+ };
+})();
+</script></body></html>

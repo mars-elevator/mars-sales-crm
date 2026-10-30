@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="mars-crm-version" content="90.46"/>
+<script>window.MARS_CRM_VERSION="90.46";</script>
 <meta name="theme-color" content="#0d3b31"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -520,15 +522,10 @@ button.btn:not(.secondary),.m80Primary{background:#196d61!important;border-radiu
     <button class="sideItem sideDirect" id="menuTripPlanBtn" type="button" onclick="marsV903GoTripPlan()"><span class="sideIcon">◇</span><span>Seyahat Planı</span></button>
     <button class="sideItem sideDirect" id="menuArchiveBtn" type="button" onclick="marsV903GoArchive()"><span class="sideIcon">▤</span><span>Seyahat Arşivi</span></button>
     <button class="sideItem sideDirect" id="menuFairBtn" type="button" onclick="marsV903GoFair()"><span class="sideIcon">◇</span><span>Fuar / Kartvizit</span></button>
-    <button class="sideItem sideDirect" id="menuExpenseBtn" type="button" onclick="marsV903GoExpenses()"><span class="sideIcon">□</span><span>Harcamalar</span></button>
-    <button class="sideItem sideDirect" id="menuFilesBtn" type="button" onclick="marsV903GoFiles()"><span class="sideIcon">◈</span><span>Dosyalar</span></button>
     <button class="sideItem sideDirect" id="menuSettingsBtn" type="button" onclick="marsV903GoSettings()"><span class="sideIcon">⚙</span><span>Ayarlar</span></button>
   </div>
 
-  <div class="sideBottom">
-    <div class="sideStatus ok"><span class="statusDot"></span><span>Mobil + Masaüstü</span></div>
-    <div class="sideStatus" id="sideCloudStatus"><span class="statusDot"></span><span>Bulut: Bağlı değil</span></div>
-  </div>
+
 </aside>
 <header><div class="top"><div><div class="brand">MARS ELEVATOR — Global Sales CRM</div><div class="sub">Firma portföyü • satış takibi • ziyaret ve teklif yönetimi • güncel müşteri ana listesi</div></div><div><button class="btn" onclick="openAdd()">+ Firma Ekle</button></div></div></header>
 <main>
@@ -585,32 +582,10 @@ button.btn:not(.secondary),.m80Primary{background:#196d61!important;border-radiu
   <input type="file" accept="image/*" capture="environment" id="m80PhotoInput" onchange="mars80SavePhoto(this.files)" hidden>
 </div>
 
-<section id="m904Dashboard" class="m904Dashboard" aria-label="Global Sales CRM ana sayfa">
-  <div class="m916MobileTitle"><strong>Global Sales CRM</strong><span>Satış · Seyahat · Müşteri yönetimi</span></div>
-  <div class="m904Kpis">
-    <div class="m904Kpi"><b id="m904Firms">—</b><span>Toplam Firma</span></div>
-    <div class="m904Kpi"><b id="m904Potential">—</b><span>A+ / A Potansiyel</span></div>
-    <div class="m904Kpi"><b id="m904Countries">—</b><span>Ülke</span></div>
-    <div class="m904Kpi"><b id="m904Trips">—</b><span>Kayıtlı Seyahat</span></div>
+<section id="m904Dashboard" class="m904Dashboard" aria-label="Seyahat odaklı MARS CRM ana sayfa">
+  <div id="marsHome2026" class="mh26" aria-live="polite">
+    <div class="mh26-loading">Seyahat ve günlük program kayıtları hazırlanıyor…</div>
   </div>
-  <div class="m904Box m916SearchBox"><div class="m916HeaderRow"><h2>Firma Arama ve Filtreler</h2></div>
-    <input class="m904Search" id="m904Search" type="search" placeholder="⌕ Firma, şehir, e-posta veya telefon ara..." oninput="marsV904Update()">
-    <div class="m904Filters">
-      <select id="m904Country" aria-label="Ülke filtresi" onchange="marsV904Update()"><option value="">Tüm Ülkeler</option></select>
-      <select id="m904Pot" aria-label="Potansiyel filtresi" onchange="marsV904Update()"><option value="">Potansiyeller</option><option>A+</option><option>A</option><option>B</option><option>C</option></select>
-      <button type="button" onclick="marsV916ShowFirms()">+ Firma Ekle / Liste</button>
-    </div>
-  </div>
-  <div class="m916Quick"><button class="m916QuickPrimary" type="button" onclick="mars80AddReceipt()">▣ Fiş Ekle</button><button type="button" onclick="marsV916TodayFirms()">▤ Bugünün Firmaları</button><button type="button" onclick="marsV903GoArchive()">▱ Arşiv</button></div>
-  <div class="m904Box m916CompanyBox"><div class="m916HeaderRow"><h2>Firma Listesi</h2><button class="m916TextLink" type="button" onclick="marsV916ShowFirms()">Tüm Firmaları Gör</button></div>
-    <table class="m904Table"><thead><tr><th>Firma</th><th>Ülke</th><th>Potansiyel</th><th class="m904DesktopOnly">Son Temas</th></tr></thead><tbody id="m904FirmRows"></tbody></table>
-    <p class="m904Muted" id="m904FirmHint"></p>
-  </div>
-  <div class="m916TodayPanel m904Box"><div class="m916HeaderRow"><h2>Bugünün Planı</h2><button class="m916TextLink" type="button" onclick="marsV903GoTripPlan()">Planı Aç ›</button></div><div id="m904Today" class="m916Activity"></div></div>
-  <div class="m904LowGrid"><div class="m904Box"><div class="m916HeaderRow"><h2>Son Seyahatler</h2><button class="m916TextLink" onclick="marsV903GoArchive()">Arşivi Aç ›</button></div><div class="m904Feed" id="m904RecentTrips"></div></div>
-  <div class="m904Box"><h2>Harcamalar & Fuarlar</h2><div class="m904Feed"><button type="button" onclick="mars80AddReceipt()">▣ Fiş Ekle</button><button type="button" onclick="marsV903GoFair()">▤ Fuar Arşivi / Kartvizit</button></div></div></div>
-  <div class="m916MobileExtras"><div class="m904Box"><div class="m916HeaderRow"><h2>Otel Geçmişi</h2><button class="m916TextLink" onclick="marsV903GoArchive()">Tümünü Gör</button></div><div id="m916Hotels" class="m904Feed"></div></div>
-  <div class="m904Box"><div class="m916HeaderRow"><h2>Firma Fotoğrafları</h2><button class="m916TextLink" onclick="marsV916ShowFirms()">Firmaları Aç</button></div><p class="m904Muted">Fotoğraflar ilgili firma kartından açılır ve eklenir.</p></div></div>
 </section>
 <div class="cards">
 <div class="card"><b id="kTotal">0</b><span>Toplam Firma</span></div>
@@ -2937,6 +2912,7 @@ async function exportTripReceiptsPdf(tripId){
 @media(max-width:900px){#m84Archive .m917CardForm{grid-template-columns:1fr 1fr}#m84Archive .m917CardForm>div,#m84Archive .m917CardForm label:nth-of-type(2),#m84Archive .m917CardForm label:nth-of-type(3){grid-column:1/-1}}
 @media(max-width:650px){#m84Archive .m917CardForm{grid-template-columns:1fr}#m84Archive .m917CardForm>div,#m84Archive .m917CardForm label:nth-of-type(2),#m84Archive .m917CardForm label:nth-of-type(3){grid-column:auto}#m84Archive .m917ReportActions button{width:100%}}
 </style>
+
 </body></html>`;
 
   if(win && !win.closed){
@@ -3630,30 +3606,47 @@ function archiveYearList(records,country){
   return [...new Set(records.filter(r=>r.country===country).map(r=>r.year).filter(Boolean))]
     .sort((a,b)=>b.localeCompare(a));
 }
+// v90.40 - Seyahat Arsivi is a normal CRM view, not a full-screen overlay.
+// Close a leftover travel-report modal before opening the archive; otherwise
+// the report can sit over the archive and prevent folder navigation.
 function openTravelArchive(){
-  bootstrapArchiveFromGeneratedPlans();
-  window.archiveNav={country:null,year:null};
+  try{ if(typeof closeReport==='function') closeReport(); }catch(e){ console.warn('Rapor kapatılamadı',e); }
+  const report=document.getElementById('reportBack');
+  if(report) report.style.display='none';
+  const fair=document.getElementById('mars84Back');
+  if(fair){fair.style.display='none';fair.hidden=true;}
+  document.body.classList.remove('m918FairActive');
   const page=document.getElementById('travelArchivePage');
-  if(page){ page.style.display='block'; page.style.visibility='visible'; page.style.opacity='1'; }
+  const main=document.querySelector('body > main');
+  if(!page || !main){console.error('Seyahat arşivi içerik alanı bulunamadı');return;}
+  if(page.parentElement!==main)main.appendChild(page);
+  const previouslyOpen=document.body.classList.contains('m940ArchiveActive');
+  document.body.classList.add('m940ArchiveActive');
+  if(!previouslyOpen)window.archiveNav={country:null,year:null};
+  page.hidden=false;
+  page.style.display='block';
+  page.style.visibility='visible';
+  page.style.opacity='1';
   renderTravelArchive();
+  window.scrollTo({top:0,behavior:'instant'});
   if(window.marsCloudUser){
-    syncArchiveFromCloud().then(()=>renderTravelArchive()).catch(e=>console.warn('Arşiv bulut senkronu başarısız',e));
+    syncArchiveFromCloud().then(()=>{
+      if(document.body.classList.contains('m940ArchiveActive'))renderTravelArchive();
+    }).catch(e=>console.warn('Arşiv bulut senkronu başarısız',e));
   }
 }
 function closeTravelArchive(){
-  // If a receipt window was opened while the archive was visible,
-  // close it first so it cannot appear after returning to CRM.
   try{
     if(typeof window.marsCloseReceiptStandalone==='function'){
       window.marsCloseReceiptStandalone();
     }else{
       const receipt=document.getElementById('receiptBack');
-      if(receipt) receipt.style.display='none';
+      if(receipt){receipt.classList.remove('receiptVisible');receipt.style.display='none';}
     }
-  }catch(e){}
-
+  }catch(e){console.warn('Fiş ekranı kapatılamadı',e);}
+  document.body.classList.remove('m940ArchiveActive');
   const page=document.getElementById('travelArchivePage');
-  if(page){ page.style.display='none'; }
+  if(page){page.style.display='none';page.hidden=true;}
 }
 function archiveGoRoot(){
   window.archiveNav={country:null,year:null};
@@ -5298,7 +5291,7 @@ function forceInitialDataLoad(){
         <h1>Seyahat Arşivi</h1>
         <div class="small">Ülke → Yıl → Seyahat klasörü → Excel dosyaları</div>
       </div>
-      <button class="btn" type="button" onclick="closeTravelArchive()">CRM'e Dön</button>
+      <!-- v90.40: Sol menü ve mobil alt menüyle gezinilir; ayrı geri düğmesi kaldırıldı. -->
     </div>
     <div id="archiveBreadcrumb" class="archiveBreadcrumb"></div>
     <div id="archiveContent"></div>
@@ -6223,7 +6216,7 @@ function forceInitialDataLoad(){
   });
 
   if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
-    window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('PWA servis çalışanı kaydı başarısız',e)));
+    window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(e=>console.warn('PWA servis çalışanı kaydı başarısız',e)));
   }
 })();
 </script>
@@ -6652,17 +6645,18 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
 .m90Form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:end;gap:13px;margin:14px 0}.m90Field{min-width:0;display:flex;flex-direction:column;gap:5px}.m90Field.wide{grid-column:1/-1}.m90Field label{font-size:12px;font-weight:800;color:#385c66}.m90Field input,.m90Field select,.m90Field textarea{min-width:0;width:100%;box-sizing:border-box;border:1px solid #cedbdf;border-radius:10px;background:#fff;color:#183640;font:inherit;font-size:14px;padding:10px;min-height:42px}.m90Form button[type=submit]{grid-column:1/-1;min-height:43px;justify-self:start}.m90RowList{display:grid;gap:8px;margin-top:16px}.m90Row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 13px;background:#fafcfd;border:1px solid #e1e9ed;border-radius:11px;overflow-wrap:anywhere}.m90Row strong{display:block;color:#19353e;font-size:14px}.m90Row small{display:block;color:#647882;line-height:1.5;font-size:12px;margin-top:4px}.m90MiniBtn,.m90MiniDanger{padding:9px 13px;border-radius:9px;border:1px solid #cddfe0;background:#e9f3f1;color:#216458;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;flex:0 0 auto}.m90MiniDanger{background:#fff1ef;color:#9e433b;border-color:#efccc7}.m90Empty{padding:13px;border:1px dashed #d3e0e4;border-radius:10px;background:#fcfefe;color:#6d838b;margin-top:12px;font-size:12px}.m90Totals{display:flex;gap:8px;flex-wrap:wrap}.m90Amount{padding:8px 12px;border-radius:99px;background:#e6f4ed;color:#1b745c;font-weight:800;font-size:13px}
 @media(max-width:650px){.m90FolderGrid{grid-template-columns:1fr 1fr;gap:9px}.m90Folder{min-height:137px;padding:13px}.m90Folder strong{font-size:14px}.m90FolderStats{font-size:11px}.m90Stats{grid-template-columns:repeat(2,1fr)}.m90Form{grid-template-columns:1fr}.m90Form button[type=submit]{width:100%;justify-self:stretch}.m90PanelBody{padding:13px}.m90DetailIntro h3{font-size:18px}.m90Row{align-items:flex-start}.m90ArchiveHeader h3{font-size:19px}}
 @media(max-width:380px){.m90FolderGrid{grid-template-columns:1fr}}
+#mars84Back .m918TopActions[hidden], #mars84Back .m84Tabs[hidden]{display:none!important}
 </style>
 
 <section id="mars84Back" class="m84Back" aria-label="Fuar Arşivi" hidden>
- <div class="m84App"><div class="m84Header"><div><h2>Fuar Arşivi</h2><div class="m918HeaderHint">Ülke → Yıl → Fuar klasörü → Excel, rapor, kartvizit ve fişler</div></div><div class="m918TopActions"><button type="button" class="m84Btn" onclick="mars918NewFair()">+ Yeni Fuar Ekle</button><button type="button" class="m84Btn light" onclick="mars918ImportFromTrip()">Seyahatten Ekle</button><button type="button" class="m84Btn light" onclick="mars84CloseFair()">CRM’e Dön</button></div></div>
+ <div class="m84App"><div class="m84Header"><div><h2>Fuar Arşivi</h2><div class="m918HeaderHint">Ülke → Yıl → Fuar klasörü → Excel, rapor, kartvizit ve fişler</div></div><div class="m918TopActions"><button type="button" class="m84Btn" data-fair-root-only onclick="mars918NewFair()">+ Yeni Fuar Ekle</button><button type="button" class="m84Btn light" data-fair-root-only onclick="mars918ImportFromTrip()">Seyahatten Ekle</button></div></div>
  <div class="m84Body"><div class="m84Tabs"><button id="m84TabCalendar" class="m84Tab is-on" onclick="mars84Tab('calendar')">Fuar Takvimi</button><button id="m84TabAdd" class="m84Tab" onclick="mars84Tab('add')">+ Fuar Ekle</button><button id="m84TabCards" class="m84Tab" onclick="mars84Tab('cards')">Kartvizitler</button><button id="m84TabArchive" class="m84Tab" onclick="mars84Tab('archive')">📁 Fuar Arşivi</button></div>
  <section id="m84Calendar"><div class="m84Info">Fuarların tam adresi ve tarihleri doğrulanmadan kesin kayıt olarak gösterilmez. Yeni fuarları ekleyebilir, daha sonra doğrulayabilirsin. Google Maps butonu yalnızca kayıtlı adrese yönlendirir.</div><div class="m84Toolbar"><input id="m84Search" placeholder="Fuar adı, şehir, ülke ara…" oninput="mars84RenderFairs()"><select id="m84Country" onchange="mars84RenderFairs()"><option value="">Tüm Ülkeler</option></select><button class="m84Btn" onclick="mars84Tab('add')">+ Fuar Ekle</button></div><div id="m84Fairs" class="m84Rows"></div></section>
  <section id="m84Add" hidden><form id="m84FairForm" class="m84Form" onsubmit="mars84SaveFair(event)"><input type="hidden" id="m84EditId"><label>Fuar adı *<input id="m84Name" required></label><label>Ülke *<select id="m84AddCountry" required></select></label><label>Şehir *<input id="m84City" required></label><label>Fuar merkezi / salon<input id="m84Venue"></label><label>Başlangıç tarihi *<input type="date" id="m84Start" required></label><label>Bitiş tarihi *<input type="date" id="m84End" required></label><label class="full">Tam adres (biliniyorsa)<input id="m84Address"></label><label>Resmî fuar sitesi<input type="url" id="m84Website" placeholder="https://..."></label><label>Adres doğrulama<select id="m84Verified"><option value="no">Doğrulanmadı</option><option value="yes">Resmî kaynaktan doğrulandı</option></select></label><label class="full">Not / salon-giriş bilgisi<textarea id="m84Note"></textarea></label><div class="m84Actions"><button type="submit" class="m84Btn">Fuarı Kaydet</button><button type="button" class="m84Btn light" onclick="mars84Tab('archive')">Vazgeç</button></div></form></section>
  <section id="m84Cards" hidden><button type="button" class="m84Btn light" onclick="mars84Tab('archive')">← Fuar Dosyasına Dön</button><div class="m84Info">Kartviziti kamerayla çek veya galeriden seç. Görsel küçültülerek ayrı saklanır; büyük fotoğraf müşteri kaydını engellemez. OCR önerilerini kontrol edip onayla.</div><div class="m84Form"><label>Bağlı Fuar<select id="m84CardFair"></select></label><div class="m84ImageInputField"><strong>Kartvizit fotoğrafı</strong><div class="m84ImageChoices">
 <label for="m84CameraPhoto" class="m84ImageChoice m84ImageChoiceCamera">📷 Fotoğraf Çek<input type="file" id="m84CameraPhoto" accept="image/*" capture="environment" onchange="mars84CardImage(this)"></label>
 <label for="m84Photo" class="m84ImageChoice m84ImageChoiceGallery">🖼️ Galeriden Seç<input type="file" id="m84Photo" accept="image/*" onchange="mars84CardImage(this)"></label>
-</div><span class="m931AutoLang">Kartvizit OCR v90.36 · Latin harfli kartlarda Arapça tahmin kullanılmaz; koyu kartvizitler bölüm bölüm okunur.</span><span id="m84ImagePicked" class="m84ImagePicked" role="status" aria-live="polite">Henüz fotoğraf seçilmedi.</span></div><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Yetkili Telefonu / WhatsApp<input id="m84CardPhone"></label><label>Yetkili E-postası<input id="m84CardEmail" type="email"></label><label>Şirket Telefonu<input id="m84CardCompanyPhone"></label><label>Şirket E-postası<input id="m84CardCompanyEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta" role="status" aria-live="polite">Kartvizit ekleyin.</div></label><label class="full">OCR tarafından okunan metin (düzeltilebilir)<textarea id="m84OCRRaw" rows="5" spellcheck="false" placeholder="Fotoğraf okunduktan sonra bulunan yazılar burada görünecek. Gerekirse düzeltip yeniden ayırabilirsin."></textarea><button class="m84Btn light" type="button" onclick="mars915ReparseOCR()">↻ Metinden Alanları Yeniden Ayır</button><small style="display:block;margin-top:6px;color:#587077">Kişi ve şirket bölümleri ayrı okunur. OCR önerilerini fotoğrafla karşılaştırıp kaydet.</small></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
+</div><span class="m931AutoLang">Kartvizit OCR v90.38 · Kamera ve galeri aynı yöntemle okunur.</span><span id="m84ImagePicked" class="m84ImagePicked" role="status" aria-live="polite">Henüz fotoğraf seçilmedi.</span></div><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Yetkili Telefonu / WhatsApp<input id="m84CardPhone"></label><label>Yetkili E-postası<input id="m84CardEmail" type="email"></label><label>Şirket Telefonu<input id="m84CardCompanyPhone"></label><label>Şirket E-postası<input id="m84CardCompanyEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta" role="status" aria-live="polite">Kartvizit ekleyin.</div></label><label class="full">OCR tarafından okunan metin (düzeltilebilir)<textarea id="m84OCRRaw" rows="5" spellcheck="false" placeholder="Fotoğraf okunduktan sonra bulunan yazılar burada görünecek. Gerekirse düzeltip yeniden ayırabilirsin."></textarea><button class="m84Btn light" type="button" onclick="mars915ReparseOCR()">↻ Metinden Alanları Yeniden Ayır</button><small style="display:block;margin-top:6px;color:#587077">Kişi ve şirket bölümleri ayrı okunur. OCR önerilerini fotoğrafla karşılaştırıp kaydet.</small></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
 <section id="m84Archive" hidden aria-label="Fuar arşivi"></section>
  </div></div>
 </section>
@@ -6679,6 +6673,8 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
  let cardImageFile=null;
  let cardImageBusy=false;
  let cardOcrBusy=false;
+ let m937CameraFocused=false; // Original camera pixels crop to the card before JPEG compression.
+ let m937LastDetected={}; // Last OCR-generated values: preserve any user-edited fields.
  function options(el,empty='Ülke seçiniz'){if(!el)return;let v=el.value;el.innerHTML='<option value="">'+empty+'</option>'+window.mars84AllCountries.map(x=>'<option value="'+E(x)+'">'+E(x)+'</option>').join('');if(v)el.value=v}
  function fairOptions(){let rows=read(fk).filter(x=>!window.m919IsFairDeleted?.(x.id));for(let id of ['m84CardFair','mars84TripFair']){const el=$(id);if(!el)continue;const v=el.value;const country=$('rCountry')?.value||'';const match=id==='mars84TripFair'?rows.filter(x=>!country||x.country===country):rows;el.innerHTML='<option value="">Fuar seçiniz</option>'+match.map(x=>'<option value="'+E(x.id)+'">'+E(x.name+' — '+x.city+' ('+x.start+')')+'</option>').join('');el.value=v;}}
  window.mars84OpenFair=()=>{if(!window.marsCloudUser){alert('Fuar verileri için önce CRM hesabına giriş yapmalısınız.');return;}$('mars84Back').style.display='block';mars84Tab('calendar')};
@@ -6854,18 +6850,28 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    for(let i=1;i<rows.length;i++)if(roleAnchor.test(rows[i])){
      if(personScore(rows[i-1])>=4)likelyPersonBeforeRole.add(rows[i-1]);
    }
-   const positions=rows.map((v,i)=>({v,i,score:companyScore(v,i)-(likelyPersonBeforeRole.has(v)?15:0)})).sort((a,b)=>b.score-a.score);
-   const company=companyTag?.replace(/^[^:–-]+[:–-]\s*/,'') || (positions[0]?.score>=4?positions[0].v:'');
+   // A row of one/two-letter fragments or OCR symbols isn't a company.
+   // In older builds the first garbled OCR line still received a high score
+   // just because it was near the top of the card.
+   const m938LegibleName=s=>{
+     const v=String(s||'').trim(),tokens=v.split(/\s+/).filter(Boolean);
+     if(!v||/[<>;{}|]/.test(v)||/^[^\p{L}]+$/u.test(v))return false;
+     if(tokens.length>6||tokens.filter(x=>x.replace(/[^\p{L}]/gu,'').length<3).length>Math.floor(tokens.length*.33))return false;
+     return true;
+   };
+   const positions=rows.map((v,i)=>({v,i,score:m938LegibleName(v)?companyScore(v,i)-(likelyPersonBeforeRole.has(v)?15:0):-20})).sort((a,b)=>b.score-a.score);
+   const taggedCompany=companyTag?.replace(/^[^:–-]+[:–-]\s*/,'')||'';
+   const company=m938LegibleName(taggedCompany)?taggedCompany:(positions[0]?.score>=4?positions[0].v:'');
    const clean=rows.filter(x=>x!==company&&!/@|www\.|https?:|\b(?:tel|fax|phone|mobile|gsm|whatsapp|e-?mail)\b/i.test(x));
    const roles=/\b(manager|director|sales|representative|business development|marketing|ceo|owner|founder|engineer|president|general manager|account manager|commercial|administrator|responsabile|direttore|amministratore|y[oö]netici|m[uü]d[uü]r|sat[iı]ş)\b/i;
-   const role=clean.find(x=>roles.test(x)&&x.length<85);
+   const role=clean.find(x=>roles.test(x)&&x.length<60&&x.split(/\s+/).length<=4&&m938LegibleName(x));
    let person=personTag?.replace(/^[^:–-]+[:–-]\s*/,'')||'';
    // Printed role/name adjacency beats first-line, all-caps or email-based guesses.
-   if(!person&&likelyPersonBeforeRole.size)person=[...likelyPersonBeforeRole][0];
+   if(!person&&likelyPersonBeforeRole.size){const found=[...likelyPersonBeforeRole].find(m938LegibleName);if(found)person=found;}
    if(!person){const cands=clean.filter(x=>x!==role).map((v,i)=>({v,score:personScore(v),i})).sort((a,b)=>b.score-a.score);
      // Without a title or an explicit name label, long random OCR word groups
      // must not be presented as verified person names.
-     if(cands[0]?.score>=5 && (cands[0].v.split(/\s+/).length<=3 || cands[0].v.length>=21 && cands[0].score>=7))person=cands[0].v;}
+     if(cands[0]?.score>=5 && m938LegibleName(cands[0].v) && (cands[0].v.split(/\s+/).length<=3 || cands[0].v.length>=21 && cands[0].score>=7))person=cands[0].v;}
    let addr=rows.find(x=>/^(?:العنوان|عنوان|adres|address|indirizzo|street address)\s*[:\-]/i.test(x));
    if(addr)addr=addr.replace(/^[^:]+:\s*/,'');
    else {const ai=rows.findIndex(x=>looksLikeAddress(x)&&x!==company&&!/@|www\./.test(x));if(ai>=0){addr=rows[ai];
@@ -6901,23 +6907,94 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    let filled=0;for(const [id,value] of Object.entries(val)){
      const input=$(id);if(input&&value&&(!input.value.trim()||reason==='reparse')){input.value=value;filled++;}
    }
-   const status=$('m84OCRStatus');if(status)status.textContent='OCR '+(reason==='reparse'?'yeniden değerlendirildi':'tamamlandı')+' · '+filled+' alan önerildi. '+(m933Used.length?'Boş alanlar için tahmin: '+m933Used.join(', ')+'. ': '')+(!val.m84CardCompany?'⚠️ Firma bulunamadı; elle gir. ':'')+(!val.m84CardPerson?'⚠️ Yetkili bulunamadı; elle gir. ':'')+(!addr?'⚠️ Adres bulunamadı; elle gir. ':'')+'Kartvizitte yazan ad/şirket bilgisi önceliklidir; önerileri kontrol et.';
+   // Remember only machine-filled fields so a later camera shot can clear
+   // stale OCR garbage without wiping anything that the user typed manually.
+   m937LastDetected={};
+   for(const id of Object.keys(val)){
+     const input=$(id);
+     if(input && input.value && input.value===val[id])m937LastDetected[id]=input.value;
+   }
+   const status=$('m84OCRStatus');if(status)status.textContent='OCR '+(reason==='reparse'?'yeniden değerlendirildi':'tamamlandı')+' · '+filled+' alan önerildi. '+(m933Used.length?'Boş alanlar için tahmin: '+m933Used.join(', ')+'. ': '')+(!val.m84CardCompany?'⚠️ Firma bulunamadı; elle gir. ':'')+(!val.m84CardPerson?'⚠️ Yetkili bulunamadı; elle gir. ':'')+(!addr?'⚠️ Adres bulunamadı; elle gir. ':'')+'Fotoğraf net değilse yanlış tahmini kaydetme; OCR metnini kontrol et. Kamera ile galeri aynı yöntemi kullanır.';
    return val;
  }
  window.mars915ReparseOCR=()=>parseText($('m84OCRRaw')?.value||'','reparse');
 
+ // v90.37: Camera captures are often 4:3 portrait frames with a much smaller
+ // horizontal business card. Resizing the full 12MP image to 1900px first
+ // destroys small letters. Detect and crop the card BEFORE JPEG compression.
+ // Gallery uploads keep the proven older path. This does not change cloud sync.
+ async function m937PrepareCameraPhoto(file){
+   let bitmap=null, image=null, url='';
+   try{
+     // On modern iOS Safari createImageBitmap respects the file's EXIF orientation.
+     // The <img> fallback works for browsers without ImageBitmap decoding.
+     if(typeof createImageBitmap==='function'){
+       try{bitmap=await createImageBitmap(file);}catch(e){console.warn('ImageBitmap fallback',e);}
+     }
+     if(!bitmap){
+       url=URL.createObjectURL(file);
+       image=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('Kamera fotoğrafı açılamadı. JPG fotoğrafla yeniden dene.'));im.src=url;});
+     }
+     const pic=bitmap||image;
+     const w=pic.naturalWidth||pic.width,h=pic.naturalHeight||pic.height;
+     if(!w||!h)throw Error('Fotoğraf boyutları okunamadı');
+     // Cap the working canvas for iOS Safari's memory budget, not the final card.
+     const limit=Math.min(1,3200/Math.max(w,h),Math.sqrt(6500000/(w*h)));
+     const frame=document.createElement('canvas');frame.width=Math.max(1,Math.round(w*limit));frame.height=Math.max(1,Math.round(h*limit));
+     const fc=frame.getContext('2d',{alpha:false});if(!fc)throw Error('Fotoğraf işlenemedi');
+     fc.imageSmoothingEnabled=true;fc.imageSmoothingQuality='high';
+     fc.drawImage(pic,0,0,frame.width,frame.height);
+     const box=m935DarkCardBox(frame);
+     let rect={x:0,y:0,w:1,h:1},focused=false;
+     if(box){
+       const aspect=frame.width*box.w/(frame.height*box.h),coverage=box.w*box.h;
+       // Accept only a plausible physical card, to avoid cropping dark clothing
+       // or a random black patch in the photo.
+       if(aspect>=1.25&&aspect<=2.3&&coverage>=.09&&box.w>.4&&box.h>.16){
+         const padx=box.w*.034,pady=box.h*.045;
+         const x=Math.max(0,box.x-padx),y=Math.max(0,box.y-pady);
+         rect={x,y,w:Math.min(1-x,box.w+2*padx),h:Math.min(1-y,box.h+2*pady)};
+         focused=true;
+       }
+     }
+     const sw=frame.width*rect.w,sh=frame.height*rect.h;
+     const scale=Math.min(2.2,focused?2400/Math.max(sw,sh):2500/Math.max(sw,sh));
+     const result=document.createElement('canvas');
+     result.width=Math.max(1,Math.round(sw*scale));result.height=Math.max(1,Math.round(sh*scale));
+     const ctx=result.getContext('2d',{alpha:false});if(!ctx)throw Error('Kamera fotoğrafı dönüştürülemedi');
+     ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+     ctx.drawImage(frame,frame.width*rect.x,frame.height*rect.y,sw,sh,0,0,result.width,result.height);
+     const blob=await new Promise((resolve,reject)=>result.toBlob(b=>b?resolve(b):reject(Error('Fotoğraf JPEG olarak hazırlanamadı')),'image/jpeg',.90));
+     return {blob,focused,sourceWidth:w,sourceHeight:h,resultWidth:result.width,resultHeight:result.height};
+   }finally{try{bitmap?.close?.();}catch(e){} if(url)URL.revokeObjectURL(url);}
+ }
+ window.m937PrepareCameraPhoto=m937PrepareCameraPhoto;
  window.mars84CardImage=async(input)=>{
   const f=input.files?.[0];if(!f)return;
-  const otherId=input.id==='m84Photo'?'m84CameraPhoto':'m84Photo';const other=$(otherId);if(other)other.value='';
-  cardImage='';cardImageFile=null;cardImageBusy=true;
+  const camera=input.id==='m84CameraPhoto';
+  const otherId=camera?'m84Photo':'m84CameraPhoto';const other=$(otherId);if(other)other.value='';
+  cardImage='';cardImageFile=null;cardImageBusy=true;m937CameraFocused=false;
+  // Clear previous automatic suggestions only. Manually corrected inputs stay.
+  for(const [id,last] of Object.entries(m937LastDetected)){
+    const field=$(id);if(field && field.value===last)field.value='';
+  }
+  m937LastDetected={};
+  if($('m84OCRRaw'))$('m84OCRRaw').value='';
   const label=$('m84ImagePicked');if(label)label.textContent='Fotoğraf hazırlanıyor…';
-  try{if(f.size>25*1024*1024)throw Error('25 MB üzerindeki görselleri telefon galerisinden daha küçük seç.');
+  try{
+    if(f.size>25*1024*1024)throw Error('25 MB üzerindeki görselleri daha küçük seç.');
+    // v90.38: Camera and gallery must feed the EXACT SAME pixels/decoder path
+    // to OCR. The v90.37 iPhone-only pre-crop produced false cutouts and
+    // different recognition from a gallery upload of the same card.
+    // Preserve the known-working gallery settings, including iOS EXIF handling
+    // by HTMLImageElement, instead of a createImageBitmap/crop detour.
     const blob=await imgToJpeg(f,1900,.80);
+    m937CameraFocused=false;
     cardImage=await readCardFile(blob);cardImageFile=blob;
     $('m84PhotoPreview').src=cardImage;$('m84PhotoPreview').style.display='block';
-    if(label)label.textContent='Seçildi: '+f.name+' · OCR için '+Math.round(blob.size/1024)+' KB olarak hazırlandı.';
+    if(label)label.textContent='Seçildi: '+f.name+' · OCR için '+Math.round(blob.size/1024)+' KB. '+(camera?'Kamera ve galeri aynı OCR hazırlığını kullanıyor.':'Galeriden görüntü hazırlandı.');
     if($('m84OCRStatus'))$('m84OCRStatus').textContent='Fotoğraf hazır. “Kartviziti Oku” ile bilgileri ayır.';
-  }catch(err){cardImage='';cardImageFile=null;input.value='';if(label)label.textContent='Görsel hazırlanamadı: '+err.message;}
+  }catch(err){cardImage='';cardImageFile=null;m937CameraFocused=false;input.value='';if(label)label.textContent='Görsel hazırlanamadı: '+err.message; if($('m84OCRStatus'))$('m84OCRStatus').textContent='Kamera hatası: '+err.message;}
   finally{cardImageBusy=false;}
  };
  // v90.35 — Read the actual pixels before trying to infer names from noisy text.
@@ -6974,6 +7051,20 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    ctx.drawImage(canvas,canvas.width*rect.x,canvas.height*rect.y,sw,sh,0,0,out.width,out.height);
    return out;
  }
+ // v90.38: Inverted, high-contrast crop for white letters on dark cards.
+ // Tesseract generally recognizes dark ink on a light background more reliably.
+ function m938InvertCrop(source,rect){
+   const base=m935Crop(source,rect,false);
+   const out=document.createElement('canvas');out.width=base.width;out.height=base.height;
+   const ctx=out.getContext('2d',{alpha:false});
+   ctx.filter='grayscale(1) invert(1) contrast(1.45)';
+   ctx.drawImage(base,0,0);return out;
+ }
+ function m938SingleLine(t){
+   const line=String(t||'').split(/\r?\n/).map(x=>x.replace(/[^\p{L}\s'’.-]/gu,' ').replace(/\s+/g,' ').trim()).filter(Boolean)[0]||'';
+   const words=line.split(/\s+/).filter(Boolean);
+   return words.length>=2&&words.length<=4&&words.every(x=>x.replace(/[.'’]/g,'').length>=3)&&line.length>=8?line:'';
+ }
  function m935NormalizeText(raw){
    // Keep the top and bottom blocks in reading order, drop exact duplicate lines.
    const seen=new Set(),rows=[];
@@ -6992,23 +7083,34 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
      worker=await window.Tesseract.createWorker('eng',1,{logger:m=>{
        if(m?.status==='recognizing text')progress?.('Kartvizit okunuyor · %'+Math.round(m.progress*100));
      }});
-     const blocks=[];
-     // Sparse-text mode often preserves the separation between a printed name
-     // and the CEO title. Single-block mode is better for contact and address lines.
-     progress?.('İsim ve unvan okunuyor…');
+     // On the real Kreshnik Ushina black card the full-page OCR damaged the
+     // name, but single-line OCR of the upper-left name zone read it exactly.
+     // Apply it only if a role/title line is also detected, to avoid treating
+     // an arbitrary two-word company logo as a person's name.
+     const nameZone={x:full.x+.07*full.w,y:full.y+.13*full.h,w:.70*full.w,h:.13*full.h};
+     const roleZone={x:full.x+.07*full.w,y:full.y+.255*full.h,w:.48*full.w,h:.10*full.h};
+     progress?.('İsim satırı ayrı okunuyor…');
+     await worker.setParameters({tessedit_pageseg_mode:'7'});
+     const nameText=(await worker.recognize(m938InvertCrop(source,nameZone)))?.data?.text||'';
+     const nameLine=m938SingleLine(nameText);
+     const roleText=(await worker.recognize(m938InvertCrop(source,roleZone)))?.data?.text||'';
+     const roleLine=/\b(?:CEO|CFO|CTO|COO|DIRECTOR|OWNER|FOUNDER|MANAGER)\b/i.test(roleText)?roleText.trim():'';
+     progress?.('Diğer iletişim satırları okunuyor…');
      await worker.setParameters({tessedit_pageseg_mode:'11'});
      const upperSparse=(await worker.recognize(m935Crop(source,top,false)))?.data?.text||'';
-     progress?.('Telefon ve e-posta okunuyor…');
      await worker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});
      const upperBlock=(await worker.recognize(m935Crop(source,top,false)))?.data?.text||'';
      progress?.('Firma ve adres okunuyor…');
-     const lowerBlock=(await worker.recognize(m935Crop(source,bottom,false)))?.data?.text||'';
+     const lowerBase=(await worker.recognize(m935Crop(source,bottom,false)))?.data?.text||'';
+     const lowerInverted=(await worker.recognize(m938InvertCrop(source,bottom)))?.data?.text||'';
+     const lowerEvidence=t=>((String(t).match(/(?:@|\+\d|sh\.?p\.?k|s\.?r\.?l|d\.?o\.?o|street|rruga|adres|address|tirana|shqip)/gi)||[]).length);
+     const lowerBlock=lowerEvidence(lowerInverted)>lowerEvidence(lowerBase)?lowerInverted:lowerBase;
      // Keep sparse-text first to preserve title/name adjacency; append only
      // missing contact lines from block OCR, avoiding duplicated noisy guesses.
      const supplemental=upperBlock.split(/\r?\n/).filter(line=>
        /(?:\+|00)\s*\d[\d .()-]{7,}|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(line) &&
        !upperSparse.includes(line.trim()));
-     let best=m935NormalizeText([upperSparse,...supplemental,lowerBlock].join('\n'));
+     let best=m935NormalizeText([...(nameLine&&(roleLine||/\b(?:CEO|DIRECTOR|MANAGER)\b/i.test(upperSparse+' '+upperBlock))?[nameLine,roleLine].filter(Boolean):[]),upperSparse,...supplemental,lowerBlock].join('\n'));
      let score=window.MarsGlobalReceiptOCR.quality(best,'card');
      // Single-pass, high-contrast OCR is a last fallback, not the default.
      if(score<17){
@@ -7033,7 +7135,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    const t=String(latinText||'');
    // A legible Latin email or Latin-only corporate marker is stronger evidence
    // than the country of the trade fair (international visitors are common).
-   const latinEvidence=/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}|\b(?:sh\.?p\.?k|d\.?o\.?o|s\.?r\.?l|ltd|gmbh|company|vertikus)\b/i.test(t);
+   const latinEvidence=/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}|\b(?:sh\.?p\.?k|d\.?o\.?o|s\.?r\.?l|ltd|gmbh|company)\b/i.test(t);
    if(latinEvidence||/(?:\+|00)\s*(?:355|383|39|90|49|33|34|44|387|381|389)\b/.test(t))return 'latin';
    if(/ARAB|SUUDI|SAUDI|IRA[KQ]|MISIR|EGYPT|CEZAY|ALGER|FAS|MOROCC|TUNUS|TUNIS|KATAR|QATAR|KUVEYT|KUWAIT|BAHREYN|BAHRAIN|UMMAN|OMAN|BIRLESIK ARAP|UNITED ARAB|DUBAI|BAE|JORDAN|URDUN|LIBYA|LUBNAN|LEBANON|YEMEN|SURIYE|SYRIA/.test(c))return 'arabic';
    if(/RUS|BULGAR|SIRB|SERB|MAKED|UKRAY|BELARUS|KAZAK|KIRGIZ/.test(c))return 'cyrillic';
@@ -7063,9 +7165,11 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
      const image=await m935ImageCanvas(cardImage);
      const darkBox=m935DarkCardBox(image);
      let raw='',score=0;
-     if(darkBox){
+     if(darkBox||m937CameraFocused){
        try{
-         const found=await m935ReadDarkCard(image,darkBox,msg=>status.textContent=msg);
+         // A pre-cropped camera image fills the canvas; the desk/background
+         // contrast used by m935DarkCardBox is no longer present.
+         const found=await m935ReadDarkCard(image,m937CameraFocused?{x:0,y:0,w:1,h:1}:darkBox,msg=>status.textContent=msg);
          raw=found.text.trim();score=found.score;
        }catch(e){console.warn('Koyu kartvizit okuması atlandı; genel OCR deneniyor',e);}
      }
@@ -7103,7 +7207,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    for(const id of ['m84CardCompany','m84CardPerson','m84CardTitle','m84CardPhone','m84CardEmail','m84CardCompanyPhone','m84CardCompanyEmail','m84CardWeb','m84CardCountry','m84CardCity','m84CardAddress','m84CardNote','m84OCRRaw'])if($(id))$(id).value='';
    $('m84Photo').value='';$('m84CameraPhoto').value='';$('m84PhotoPreview').style.display='none';
    const picked=$('m84ImagePicked');if(picked)picked.textContent='Henüz fotoğraf seçilmedi.';
-   cardImage='';cardImageFile=null;cardImageBusy=false;
+   cardImage='';cardImageFile=null;cardImageBusy=false;m937CameraFocused=false;m937LastDetected={};
  };
  window.mars84SaveCard=async()=>{
    const f=$('m84CardFair').value,company=$('m84CardCompany').value.trim();
@@ -7133,7 +7237,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    alert('Kartvizit cihazda kaydedildi. Bulut Yedekleme ekranını ve diğer cihazda fotoğrafı doğrulamadan aslı atmayın. '+status+(photoIssue?' Ayrıntı: '+photoIssue:''));
    return true;
  };
- window.mars84RenderCards=()=>{let fairMap=Object.fromEntries(read(fk).map(x=>[x.id,x.name]));$('m84CardsList').innerHTML=read(ck).slice().reverse().map(x=>'<div class="m84Card"><strong>'+E(x.company)+'</strong><div class="m84Meta">'+E(fairMap[x.fairId]||'Fuar seçilmedi')+' · '+E(x.person)+' · '+E(x.phone)+'</div><div>'+E(x.email)+'</div><div class="m84Meta">'+[x.companyPhone&&('Şirket tel: '+x.companyPhone),x.companyEmail&&('Şirket e-posta: '+x.companyEmail)].filter(Boolean).map(E).join(' · ')+'</div><div class="m84Actions">'+((x.photo||x.photoLocalId||x.photoPath)?'<button type="button" class="m84Btn light" onclick="mars915ShowCardPhoto(\''+E(x.id)+'\')">📷 Fotoğrafı Gör</button>':'')+'<button class="m84Btn light" onclick="mars84DeleteCard(\''+E(x.id)+'\')">Sil</button></div></div>').join('')||'<div class="m84Empty">Henüz kartvizit eklenmedi.</div>'};
+ window.mars84RenderCards=()=>{let fairMap=Object.fromEntries(read(fk).map(x=>[x.id,x.name]));$('m84CardsList').innerHTML=read(ck).filter(x=>!x.deletedAt).slice().reverse().map(x=>'<div class="m84Card"><strong>'+E(x.company)+'</strong><div class="m84Meta">'+E(fairMap[x.fairId]||'Fuar seçilmedi')+' · '+E(x.person)+' · '+E(x.phone)+'</div><div>'+E(x.email)+'</div><div class="m84Meta">'+[x.companyPhone&&('Şirket tel: '+x.companyPhone),x.companyEmail&&('Şirket e-posta: '+x.companyEmail)].filter(Boolean).map(E).join(' · ')+'</div><div class="m84Actions">'+((x.photo||x.photoLocalId||x.photoPath)?'<button type="button" class="m84Btn light" onclick="mars915ShowCardPhoto(\''+E(x.id)+'\')">📷 Fotoğrafı Gör</button>':'')+'<button class="m84Btn light" onclick="mars84DeleteCard(\''+E(x.id)+'\')">Sil</button></div></div>').join('')||'<div class="m84Empty">Henüz kartvizit eklenmedi.</div>'};
  window.mars84DeleteCard=id=>{if(!confirm('Kartvizit silinsin mi?'))return;write(ck,read(ck).filter(x=>x.id!==id));mars84RenderCards()};
  function boot(){options($('m84Country'),'Tüm Ülkeler');options($('m84AddCountry'));fairOptions();const r=$('rCountry');r?.addEventListener('change',()=>setTimeout(()=>fairOptions(),0));}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{boot();setTimeout(()=>migrateLegacyCardPhotos().catch(console.warn),2000)});else{boot();setTimeout(()=>migrateLegacyCardPhotos().catch(console.warn),2000)}
@@ -7150,7 +7254,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
   let active=null;
   function info(message, bad){
     const el=document.getElementById('mars85SyncStatus');
-    if(el){el.hidden=false;el.textContent=message;el.style.borderColor=bad?'#e7a3a3':'#bedad7';el.style.color=bad?'#9a2323':'#285348';}
+    if(el){el.hidden=!bad;el.textContent=message;el.style.borderColor=bad?'#e7a3a3':'#bedad7';el.style.color=bad?'#9a2323':'#285348';}
   }
   window.mars88CloudDetails=async function(){
     try{
@@ -7624,7 +7728,7 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
 
   function setStatus(str) {
     lastStatus = str;
-    const el=$('m90FairSyncStatus'); if(el) el.textContent=str;
+    const el=$('m90FairSyncStatus'); if(el){ el.textContent=str; el.hidden=!/(?:hata|başarısız|reddedil|erişilem|oturum|engell|yüklenemedi|aktarım hatası|⚠|⛔)/i.test(str); }
   }
   function saveEvents(events) {
     localStorage.setItem(KEY, JSON.stringify(events));
@@ -7644,12 +7748,18 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
   function visibleEvents(fairId, type) {
     const events=readArray(KEY).filter(e => e && e.app===MARK);
     const deleted=new Set(events.filter(e=>e.type==='delete' && e.targetId).map(e=>e.targetId));
-    return events.filter(e=>e.fairId===fairId && e.type===type && !deleted.has(e.id)).sort((a,b)=>text(b.createdAt).localeCompare(text(a.createdAt)));
+    const rows=events.filter(e=>e.fairId===fairId && e.type===type && !deleted.has(e.id)).sort((a,b)=>text(b.createdAt).localeCompare(text(a.createdAt)));
+    if(type!=='expense')return rows;
+    // Edits and review states are append-only records in the SAME synced fair ledger.
+    const edits=events.filter(e=>e.fairId===fairId && e.type==='expense_update' && !deleted.has(e.id)).sort((a,b)=>text(a.createdAt).localeCompare(text(b.createdAt)));
+    const updates=new Map();
+    for(const e of edits){if(!e.targetId)continue;const data={};for(const k of ['date','category','amount','currency','paymentType','receiptNo','note','reviewStatus'])if(Object.prototype.hasOwnProperty.call(e,k))data[k]=e[k];updates.set(e.targetId,{...updates.get(e.targetId),...data});}
+    return rows.map(e=>({...e,...(updates.get(e.id)||{})}));
   }
   function fairById(id) { return readArray(FAIR_KEY).find(f=>f.id===id); }
   function deletedFairIds(){return new Set(readArray(KEY).filter(e=>e?.app===MARK && e.type==='fair_deleted').map(e=>e.fairId));}
   function isFairDeleted(fairId){return deletedFairIds().has(fairId);}
-  function cards(fairId) { return readArray(CARD_KEY).filter(c=>c.fairId===fairId); }
+  function cards(fairId) { return readArray(CARD_KEY).filter(c=>c.fairId===fairId && !c.deletedAt); }
   function fairs() {const gone=deletedFairIds();return readArray(FAIR_KEY).filter(f=>validFair(f)&&!gone.has(f.id)).sort((a,b)=>text(b.start).localeCompare(text(a.start)));}
   function deleteFair(fairId){
     const fair=fairById(fairId);if(!fair)return;
@@ -7665,7 +7775,7 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
     alert('Fuar arşivden kaldırıldı. Silme bilgisi buluta eşitlenmeye çalışılıyor. Belgeler/yedekler korunuyor.');
   }
   window.mars84DeleteFair=deleteFair;window.m919IsFairDeleted=isFairDeleted;
-  function statusInfo() { return '<p id="m90FairSyncStatus" class="m90Sync">'+escape(lastStatus)+'</p>'; }
+  function statusInfo() { const show=/(?:hata|başarısız|reddedil|erişilem|oturum|engell|yüklenemedi|aktarım hatası|⚠|⛔)/i.test(lastStatus); return '<p id="m90FairSyncStatus" class="m90Sync"'+(show?'':' hidden')+'>'+escape(lastStatus)+'</p>'; }
   function countSummary(fair) {
     const id=fair.id;
     return {cards:cards(id).length, hotels:visibleEvents(id,'hotel').length,
@@ -7798,10 +7908,12 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
   }
   function cardReportRows(f){
     const list=cards(f.id);
-    if(!list.length)return '<div class="m90Empty">Henüz kartvizit yok. Kartvizit Ekle ile kaydettiğinde görüşme raporuna otomatik düşecek. Firma önceden seçilmeyecek.</div>';
-    return '<div class="m917Horizontal"><table class="m917Table"><thead><tr><th>Firma</th><th>Yetkili / Unvan</th><th>Telefon / E-posta</th><th>Potansiyel</th><th>Görüşme ve Sonraki Aksiyon</th></tr></thead><tbody>'+list.map(c=>{
+    if(!list.length)return '<div class="m90Empty">Henüz kartvizit yok. Kartvizit Ekle ile kaydettiğinde görüşme raporuna otomatik düşecek.</div>';
+    return '<div class="m917Horizontal"><table class="m917Table m942CardsTable"><thead><tr><th>Firma</th><th>Yetkili / Unvan</th><th>Telefon / E-posta</th><th>Potansiyel</th><th>Görüşme ve Sonraki Aksiyon</th><th>İşlemler</th></tr></thead><tbody>'+list.map(c=>{
       const a=assessmentFor(f.id,c.id);
-      return '<tr><td><strong>'+escape(c.company||'—')+'</strong><small>'+escape(c.city||c.country||'')+'</small></td><td>'+escape(c.person||'—')+'<small>'+escape(c.title||'')+'</small></td><td>'+escape(c.phone||'')+'<small>'+escape(c.email||'')+'</small></td><td>'+escape(a.potential||'Değerlendirilmedi')+'</td><td>'+escape(a.meeting||c.note||'—')+'<small>'+escape(a.action||'')+'</small></td></tr>';
+      return '<tr><td><strong>'+escape(c.company||'—')+'</strong><small>'+escape(c.city||c.country||'')+'</small></td><td>'+escape(c.person||'—')+'<small>'+escape(c.title||'')+'</small></td><td>'+escape(c.phone||'')+'<small>'+escape(c.email||'')+'</small></td><td>'+escape(a.potential||'Değerlendirilmedi')+'</td><td>'+escape(a.meeting||c.note||'—')+'<small>'+escape(a.action||'')+'</small></td><td class="m942Actions">'+
+      button('✎ Düzelt','data-m942-edit-card="'+escape(c.id)+'"','m942Edit')+
+      button('Sil','data-m942-delete-card="'+escape(c.id)+'"','m942Delete')+'</td></tr>';
     }).join('')+'</tbody></table></div>';
   }
   function receiptReportRows(f){
@@ -8142,47 +8254,164 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
       return '<div class="m920CardFile"><div><strong>'+escape(x.filename||'Belge')+'</strong><small>'+escape(dateLabel(x.createdAt))+' · '+(amount>0?money(amount,currency):'Tutar okunamadı')+' · '+button(amount>0?'Tutarı düzelt':'Tutar gir','data-correct-doc="'+escape(x.id)+'"','m922EditAmount')+'</small></div><div class="m921FileActions">'+button('Gör','data-preview="'+escape(x.id)+'"','m90MiniBtn')+button('Sil','data-remove-file="'+escape(x.id)+'"','m90MiniDanger')+'</div></div>';
     }).join('')+'</div>';
   }
-  function detail(f) {
-    const n=countSummary(f),docRows=visibleEvents(f.id,'file'),people=fairPersonCount(f.id);
-    const getDocs=kind=>docRows.filter(x=>x.docType===kind).length;
-    const hotelCount=n.hotels+getDocs('hotel'),carCount=n.cars+getDocs('car');
-    const amountText=Object.entries(fairSums(f.id)).map(([c,v])=>money(v,c)).join(' · ');
-    const card=(icon,title,desc,count,attr,label,kind=null,legacy='')=>
-      '<div class="m918ServiceCard'+(kind&&openDocKind===kind?' m920DocOpen':'')+'"'+(kind?' data-doc-card="'+kind+'"':'')+'><div class="m918ServiceHead"><span class="m918Icon">'+icon+'</span><div><strong>'+title+'</strong><p>'+desc+'</p></div></div>'+
-      '<div class="m918ServiceCount">'+count+'</div>'+(legacy||'')+
-      (kind?attachedDocumentRows(f.id,kind)+inlineDocForm(kind):'')+
-      '<div class="m918ServiceFoot">'+(kind?'<div class="m922UploaderButtons">'+button('PDF Ekle',attr,'m84Btn m918WideButton')+button('📷 Fotoğraf Çek','data-camera-kind="'+kind+'"','m84Btn light m922CameraButton')+'</div>':button(label,attr,'m84Btn m918WideButton'))+'</div></div>';
-    const basicLegacy=(eventType,name)=>{
-      const records=visibleEvents(f.id,eventType);if(!records.length)return '';
-      return '<div class="m921OldRecords"><small>Önceki kayıtlar ('+records.length+')</small>'+records.map(x=>'<div class="m921OldRow"><span>'+escape(x[name]||'Kayıt')+'</span>'+button('Sil','data-remove="'+escape(x.id)+'"','m90MiniDanger')+'</div>').join('')+'</div>';
-    };
-    const cardsArea='<div class="m918Services">'+
-      card('🏨','Konaklama','PDF yükle veya fotoğraf çek; ödenen toplam otomatik okunur.',hotelCount+' kayıt','data-service-doc="hotel"','PDF / Fotoğraf Ekle','hotel',basicLegacy('hotel','hotelName'))+
-      card('✈️','Uçak / Ulaşım','Bilet / PDF / fotoğraf. Ödenen toplam otomatik okunur.',getDocs('ticket')+' belge','data-service-doc="ticket"','PDF / Fotoğraf Ekle','ticket')+
-      card('🚗','Araç / Kiralama','Kiralama PDF / fotoğraf. Ödenen toplam otomatik okunur.',carCount+' kayıt','data-service-doc="car"','PDF / Fotoğraf Ekle','car',basicLegacy('car','company'))+
-      '</div>';
-    const receiptCount=getDocs('receipt');
-    const receiptDock='<section class="m922ReceiptRecords" data-doc-card="receipt">'+(receiptCount?'<h4>🧾 Fişler / Harcamalar ('+receiptCount+')</h4>'+attachedDocumentRows(f.id,'receipt'):'')+inlineDocForm('receipt')+'</section>';
-    return '<div class="m918EventBoard">'+
-      '<aside class="m918EventInfo"><div class="m918EventDate">'+escape(dateLabel(f.start))+' – '+escape(dateLabel(f.end))+' <span class="m918Planned">Fuar</span></div>'+
-      '<h3>'+escape(f.name)+'</h3><p>📍 '+escape(f.country||'Ülke yok')+' / '+escape(f.city||'Şehir yok')+'</p>'+
-      (f.venue?'<p>🏢 '+escape(f.venue)+'</p>':'')+(f.address?'<p>🧭 '+escape(f.address)+'</p>':'')+
-      '<hr><div class="m918InfoStat"><span>🪪 Kartvizitler</span><b>'+n.cards+'</b></div><div class="m918InfoStat"><span>🧾 Harcamalar</span><b>'+n.expenses+'</b></div><div class="m918InfoStat"><span>📎 Belgeler</span><b>'+n.files+'</b></div>'+
-      (amountText?'<div class="m918Sum">Toplam harcama: <b>'+escape(amountText)+'</b></div>':'')+
-      button('Fuar Bilgilerini Düzenle','data-edit-fair="'+escape(f.id)+'"','m84Btn light')+button('🗑 Fuarı Sil','data-delete-fair="'+escape(f.id)+'"','m84Btn light m919DeleteFair')+'</aside>'+
-      '<div class="m918EventMain"><div class="m918Overline">FUAR İŞLEMLERİ</div>'+
-      '<div class="m918ActionsGrid">'+
-      button('📊 <strong>Güncel Fuar Excel</strong><small>Kartvizitler + harcamalar + rapor</small>','data-export-report="'+escape(f.id)+'"','m918Action m918ActionPrimary')+
-      button('📷 <strong>Fiş Ekle</strong><small>Tarih · Tutar · Fotoğraf / PDF</small>','data-fair-receipt-open','m918Action')+
-      button('🧾 <strong>Fişler / Harcamalar ('+n.expenses+')</strong><small>Kayıtları görüntüle · Fişleri PDF Al</small>','data-fair-receipt-manager','m918Action')+
-      button('🪪 <strong>Kartvizitler ('+n.cards+')</strong><small>+ Kartvizit Ekle · Kamera / Galeri / OCR</small>','data-add-card="'+escape(f.id)+'"','m918Action m923CardAction')+'</div>'+
-      '<div class="m921DocsTitle"><div class="m918Overline">FUAR BELGELERİ VE KAYITLAR</div><label class="m919People">Kişi sayısı <input type="number" min="1" max="50" inputmode="numeric" data-person-count="1" value="'+people+'"></label></div>'+
-      cardsArea+
-      '<div class="m918AutoNote"><b>Fuar harcamaları rapora otomatik eklenir.</b><span>Kartvizit ve belgelerin kayıtları ilgili fuarın Excel raporunda görünür; seyahat dosyalarıyla karışmaz.</span></div>'+
-      '<div class="m918ExtraActions">'+button('🗓️ Fuar Öncesi Plan','data-open-section="plan"')+
-      button('📄 Fuar Sonrası Rapor / Notlar','data-open-section="report"')+
-      button('📝 Fuar Notları','data-open-section="notes"')+'</div></div></div>'+
-      '<section id="m919Workspace" class="m919Workspace" hidden><div class="m919WorkspaceHeader"><strong id="m919WorkspaceTitle">İşlem</strong>'+button('✕ Kapat','data-close-workspace','m84Btn light')+'</div><div class="m918ExpandableSections">'+reportPlan(f)+reportPost(f)+cardsPanel(f)+expensePanel(f)+hotelPanel(f)+carPanel(f)+notesPanel(f)+'</div></section>'+expenseOverview(f);
+  // v90.43: the approved five-tab design, populated from REAL fair archive records.
+  // No copied/demo customer data, no replacement for original OCR/upload/report handlers.
+  let m943Tab='overview',m943ExpenseFilter='all',m943Search='';
+  const m943Currencies=['EUR','TRY','USD','GBP','EGP','ALL','BAM','RSD','RON','CHF','SAR','AED','MKD'];
+  function m943Budget(fairId){return visibleEvents(fairId,'fair_budget')[0]||{};}
+  function m943Status(fairId,expense){
+    const value=expense.reviewStatus;
+    if(value)return value;
+    if(expense.amount===undefined||expense.amount===null||String(expense.amount).trim()===''||!Number.isFinite(Number(expense.amount))||Number(expense.amount)<=0)return 'Eksik bilgi';
+    return 'Kontrol edilmedi'; // Older records were not approved automatically.
+  }
+  function m943Amounts(fairId){
+    // Fuar gelir/giderleri YALNIZCA seçilen fuarın event kayıtlarından hesaplanır.
+    // Seyahat arşivi veya örnek veriler burada okunmaz. Eksik para birimi EUR varsayılmaz.
+    const sums={};visibleEvents(fairId,'expense').forEach(e=>{
+      if(e.amount===null||e.amount===undefined||String(e.amount).trim()==='')return;
+      const n=Number(e.amount), c=String(e.currency||'').toUpperCase().trim();
+      if(Number.isFinite(n)&&n>0&&c)sums[c]=(sums[c]||0)+n;
+    });return sums;
+  }
+  function m943Money(n,c){return Number(n||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+escape(c||'EUR');}
+  function m943TotalRows(f){const sums=m943Amounts(f.id);return Object.entries(sums).sort().map(([c,n])=>'<span class="m943CurrencyChip">'+m943Money(n,c)+'</span>').join('')||'<span class="m943Muted">Henüz tutar kaydı yok</span>';}
+  function m943DocCard(f,kind,icon,title,description,count){
+    const attr='data-service-doc="'+kind+'"';
+    return '<article class="m943DocCard" data-doc-card="'+kind+'"><div class="m943DocHeader"><span class="m943DocIcon">'+icon+'</span><div><strong>'+title+'</strong><small>'+description+'</small></div><b>'+count+' belge</b></div>'+
+      attachedDocumentRows(f.id,kind)+inlineDocForm(kind)+
+      '<div class="m943DocButtons">'+button('PDF Ekle',attr,'m84Btn')+button('📷 Fotoğraf Çek','data-camera-kind="'+kind+'"','m84Btn light')+'</div></article>';
+  }
+  function m943ExpenseTable(f,compact=false){
+    const docs=new Map(visibleEvents(f.id,'file').map(x=>[x.id,x]));
+    const rows=visibleEvents(f.id,'expense').filter(x=>{
+      const st=m943Status(f.id,x);
+      const category=String(x.category||'');
+      const selected=m943ExpenseFilter==='all'||(m943ExpenseFilter==='pending_all'&&st!=='Ödendi')||m943ExpenseFilter===st||m943ExpenseFilter===category;
+      const match=!m943Search||[x.category,x.note,x.receiptNo,x.paymentType,x.currency,docs.get(x.attachmentId)?.filename].join(' ').toLocaleLowerCase('tr').includes(m943Search.toLocaleLowerCase('tr'));
+      return selected&&match;
+    });
+    if(!rows.length)return '<div class="m943Empty">Bu filtreye uygun gider bulunmuyor.</div>';
+    return '<div class="m943Scroll"><table class="m943Table"><thead><tr><th>Tarih / Tür</th><th>Fiş ve ödeme</th><th>Tutar</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>'+rows.slice(0,compact?5:500).map(x=>{
+      const status=m943Status(f.id,x),file=docs.get(x.attachmentId);
+      return '<tr><td><strong>'+escape(x.category||'Gider')+'</strong><small>'+escape(dateLabel(x.date))+'</small></td><td>'+escape(x.receiptNo||file?.filename||'—')+'<small>'+escape(x.paymentType||'Ödeme bilgisi girilmedi')+'</small></td><td class="m943Amount">'+m943Money(x.amount,x.currency)+'</td><td><span class="m943Status '+(status==='Ödendi'?'m943Paid':status==='Onay bekliyor'?'m943Pending':status==='Reddedildi'?'m943Rejected':status==='Eksik bilgi'?'m943Missing':'m943Neutral')+'">'+escape(status)+'</span></td><td class="m943RowActions">'+(file?button('Gör','data-preview="'+escape(file.id)+'"','m943Small'):'')+button('Düzelt','data-m943-expense-edit="'+escape(x.id)+'"','m943Small')+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+  }
+  function m943Overview(f){
+    const expenses=visibleEvents(f.id,'expense'),files=visibleEvents(f.id,'file'),cs=cards(f.id);
+    const problems=expenses.filter(x=>m943Status(f.id,x)!=='Ödendi');
+    return '<div class="m943OverviewGrid"><section class="m943Panel"><div class="m943PanelTitle"><h3>Hızlı işlemler</h3><span>Fuar kayıtlarına doğrudan ekle</span></div><div class="m943Quick">'+
+    button('🧾 Fiş Ekle','data-fair-receipt-open','m943QuickPrimary')+
+    button('🪪 Kartvizit Ekle','data-add-card="'+escape(f.id)+'"','m943QuickAlt')+
+    button('📊 Güncel Fuar Excel','data-export-report="'+escape(f.id)+'"','m943QuickAlt')+'</div><div class="m943MiniTitle">İşlem ve kontrol bekleyen giderler <b>'+problems.length+'</b></div>'+
+    (problems.length?'<div class="m943PendingList">'+problems.slice(0,4).map(x=>'<button type="button" data-m943-expense-edit="'+escape(x.id)+'"><span>'+escape(x.category||'Harcama')+'<small>'+escape(dateLabel(x.date))+'</small></span><strong>'+m943Money(x.amount,x.currency)+'</strong><em>'+escape(m943Status(f.id,x))+'</em></button>').join('')+'</div>':'<p class="m943Muted">Kontrol bekleyen gider bulunmuyor.</p>')+
+    button('Tüm Harcamaları Gör →','data-m943-tab="expenses"','m943TextButton')+'</section>'+ 
+    '<section class="m943Panel"><div class="m943PanelTitle"><h3>Belge ve görüşme özeti</h3><span>Tüm kayıtlar aynı fuar klasöründe</span></div><div class="m943CountList">'+
+    [['🏨 Konaklama','hotel'],['✈️ Uçak / Ulaşım','ticket'],['🚗 Araç / Kiralama','car'],['🧾 Fiş görselleri','receipt']].map(([label,k])=>'<div><span>'+label+'</span><b>'+files.filter(x=>x.docType===k).length+'</b></div>').join('')+
+    '<div><span>🪪 Kartvizitler</span><b>'+cs.length+'</b></div></div><div class="m943OverviewFooter">'+
+    button('Belgeleri Aç →','data-m943-tab="documents"','m943TextButton')+button('Kartvizitlere Git →','data-m943-tab="contacts"','m943TextButton')+'</div></section></div>';
+  }
+  function m943Expenses(f){
+    const cats=[...new Set(visibleEvents(f.id,'expense').map(x=>x.category).filter(Boolean))];
+    const filters=[['all','Tüm harcamalar'],['pending_all','İşlem / kontrol bekleyen'],['Kontrol edilmedi','Kontrol edilmedi'],['Eksik bilgi','Eksik bilgi'],['Onay bekliyor','Onay bekliyor'],['Ödendi','Ödendi'],['Reddedildi','Reddedildi'],...cats.map(c=>[c,c])];
+    return '<section class="m943Panel"><div class="m943PanelTitle"><h3>Harcamalar / Fişler</h3><span>Her fiş ilgili fuara bağlıdır</span></div><div class="m943Toolbar">'+
+      '<input id="m943Search" aria-label="Harcamalarda ara" placeholder="Fiş, tutar, açıklama ara..." value="'+escape(m943Search)+'">'+
+      '<select id="m943Filter" aria-label="Harcama filtresi">'+filters.map(([v,label])=>'<option value="'+escape(v)+'"'+(v===m943ExpenseFilter?' selected':'')+'>'+escape(label)+'</option>').join('')+'</select>'+ 
+      button('+ Fiş Ekle','data-fair-receipt-open','m84Btn')+button('Fişleri PDF Al / Gör','data-fair-receipt-manager','m84Btn light')+'</div>'+m943ExpenseTable(f)+'</section>';
+  }
+  function m943Documents(f){const files=visibleEvents(f.id,'file');return '<div class="m943DocGrid">'+
+    m943DocCard(f,'hotel','🏨','Konaklama','Otel faturası, rezervasyon ve fotoğraf',files.filter(x=>x.docType==='hotel').length)+
+    m943DocCard(f,'ticket','✈️','Uçak / Ulaşım','Uçuş ve ulaşım biletleri',files.filter(x=>x.docType==='ticket').length)+
+    m943DocCard(f,'car','🚗','Araç / Kiralama','Araç kiralama ve ödeme belgesi',files.filter(x=>x.docType==='car').length)+
+    '<article class="m943DocCard"><div class="m943DocHeader"><span class="m943DocIcon">🧾</span><div><strong>Fiş / Harcama</strong><small>Ödemeler ve fiş görselleri</small></div><b>'+files.filter(x=>x.docType==='receipt').length+' belge</b></div>'+attachedDocumentRows(f.id,'receipt')+'<div class="m943DocButtons">'+button('Fiş Ekle','data-fair-receipt-open','m84Btn')+button('Fişleri Gör','data-fair-receipt-manager','m84Btn light')+'</div></article></div>';
+  }
+  function m943Contacts(f){return '<section class="m943Panel"><div class="m943PanelTitle"><h3>Fuar Kartvizitleri ('+cards(f.id).length+')</h3><span>Firma, yetkili ve görüşme bilgilerini kontrol et</span></div><div class="m943Toolbar">'+button('+ Kartvizit Ekle','data-add-card="'+escape(f.id)+'"','m84Btn')+'</div>'+cardReportRows(f)+
+    '<details class="m943ExtraNotes"><summary>Görüşme notlarını ve potansiyel puanlarını düzenle</summary>'+cardAssessments(f)+'</details></section>';
+  }
+  function m943Report(f){const originalReport=reportPost(f).replace('<details id="m916Section_report"','<details open id="m916Section_report"');return '<section class="m943Panel m943ReportArea"><div class="m943PanelTitle"><h3>Fuar Sonrası Rapor</h3><span>Fuar notları, kartvizitler ve harcamalar</span></div>'+originalReport+reportPlan(f)+notesPanel(f)+'</section>';}
+  // MARS v90.44 — Referans döviz kurları yalnızca FUAR EKRANINDA gösterim içindir.
+  // Miktar/para birimi/muhasebe/Excel/Seyahat Arşivi kayıtları asla değiştirilmez.
+  // Kamuya açık USD bazlı kurlar günlük güncellenir; API'ye müşteri veya gider verisi GÖNDERİLMEZ.
+  const M943_FX_KEY='mars_crm_v9044_display_fx_usd';
+  let m943Fx=null,m943FxLoading=false,m943FxError='',m943FxAttemptedAt=0;
+  function m943ReadFxCache(){
+    try{
+      const x=JSON.parse(localStorage.getItem(M943_FX_KEY)||'null');
+      if(x&&x.rates&&x.base==='USD'&&Number(x.rates.USD)===1&&
+         Number.isFinite(Number(x.updated))&&Date.now()-Number(x.updated)<36*3600000)return x;
+    }catch(_){}
+    return null;
+  }
+  async function m943LoadFx(){
+    if(m943FxLoading || Date.now()-m943FxAttemptedAt<60000)return;
+    const existing=m943ReadFxCache();
+    if(existing && Date.now()-Number(existing.checked)<23*3600000){m943Fx=existing;return;}
+    m943FxLoading=true;m943FxAttemptedAt=Date.now();m943FxError='';
+    try{
+      const response=await fetch('https://open.er-api.com/v6/latest/USD',{method:'GET',cache:'no-cache'});
+      if(!response.ok)throw new Error('Kur servisi HTTP '+response.status);
+      const data=await response.json();
+      if(data.result!=='success'||data.base_code!=='USD'||!data.rates||data.rates.USD!==1)throw new Error('Kur verisi doğrulanamadı');
+      const updated=Number(data.time_last_update_unix)*1000;
+      if(!Number.isFinite(updated)||updated<=0||updated>Date.now()+3600000)throw new Error('Kur tarihi geçersiz');
+      m943Fx={base:'USD',rates:data.rates,updated,checked:Date.now()};
+      try{localStorage.setItem(M943_FX_KEY,JSON.stringify(m943Fx));}catch(_){}
+    }catch(err){
+      m943FxError=err.message||'Kur alınamadı';
+      m943Fx=m943ReadFxCache(); // En fazla 36 saatlik önbellek; tarih açıkça belirtilir.
+    }finally{
+      m943FxLoading=false;
+      if(route.fairId && $('m84Archive') && !$('m84Archive').hidden)render();
+    }
+  }
+  function m943UsdFromAmounts(sums){
+    let total=0;const missing=[];
+    Object.entries(sums).forEach(([currency,value])=>{
+      const code=String(currency).toUpperCase();
+      const rate=code==='USD'?1:Number(m943Fx?.rates?.[code]);
+      if(!Number.isFinite(rate)||rate<=0){missing.push(code);return;}
+      total+=Number(value)/rate; // USD bazında: 1 USD = rate birim yerel döviz.
+    });
+    return {total,missing};
+  }
+  function m943FxDate(){
+    if(!m943Fx?.updated)return '';
+    return new Date(m943Fx.updated).toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'});
+  }
+  function m943FxNote(needsConversion=true){
+    if(!needsConversion)return '<span>Harcamalar yalnızca USD; kur dönüşümü gerekmiyor.</span>';
+    if(!m943Fx)return '<span class="m943Muted">'+(m943FxError?'Güncel kur alınamadı. İnternet bağlantısını kontrol et.':'Günlük USD referans kurları yükleniyor…')+'</span>';
+    return '<span>Kur tarihi: '+escape(m943FxDate())+(m943FxError?' · Önbellek kullanıldı':'')+' · <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer">Rates By Exchange Rate API</a></span>';
+  }
+  function m943Kpis(f){
+    const sums=m943Amounts(f.id),budget=m943Budget(f.id);
+    const currency=String(budget.currency||'').toUpperCase(),budgetValue=Number(budget.amount);
+    const valid=!!currency&&budget.amount!==undefined&&budget.amount!==null&&Number.isFinite(budgetValue)&&budgetValue>=0;
+    const currencies=Object.keys(sums);
+    const needsFx=currencies.some(c=>c!=='USD')||(valid&&currency!=='USD');
+    if(needsFx && !m943Fx && !m943FxLoading)m943LoadFx();
+    const converted=m943UsdFromAmounts(sums);
+    const canConvert=(!needsFx||!!m943Fx)&&!converted.missing.length;
+    const spent=currencies.length?(canConvert?m943Money(converted.total,'USD'):(m943FxError?'Kur alınamadı':'Kur bekleniyor')):'Henüz gider yok';
+    const budgetRate=currency==='USD'?1:Number(m943Fx?.rates?.[currency]);
+    const budgetUsd=valid && Number.isFinite(budgetRate)&&budgetRate>0?budgetValue/budgetRate:null;
+    const remainingUsd=budgetUsd!==null&&canConvert?budgetUsd-converted.total:null;
+    const pending=visibleEvents(f.id,'expense').filter(x=>m943Status(f.id,x)!=='Ödendi').length;
+    const fxHint=currencies.length && converted.missing.length && m943Fx?'Kur bulunamayan para birimi: '+escape(converted.missing.join(', ')):'Günlük referans kur üzerinden yaklaşık USD karşılığı';
+    return '<div class="m943Kpis"><article class="m943Kpi"><span>Fuar bütçesi</span><strong>'+(valid?m943Money(budgetValue,currency):'Henüz girilmedi')+'</strong>'+
+      (budgetUsd!==null&&currency!=='USD'?'<small>≈ '+m943Money(budgetUsd,'USD')+'</small>':'')+button('Bütçeyi Düzenle','data-m943-budget','m943Link')+'</article>'+
+      '<article class="m943Kpi"><span>Gerçekleşen gider · USD</span><strong>'+spent+'</strong><small>'+fxHint+'</small></article>'+
+      '<article class="m943Kpi"><span>Kalan bütçe · USD</span><strong>'+(valid?(remainingUsd!==null?m943Money(remainingUsd,'USD'):(m943FxError?'Kur alınamadı':'Kur bekleniyor')):'Bütçe bekleniyor')+'</strong><small>'+(valid?'Tüm fuar giderleri USD karşılığıyla düşülür':'Önce fuar bütçesini gir')+'</small></article>'+
+      '<article class="m943Kpi m943Attention"><span>İşlem / kontrol bekleyen</span><strong>'+pending+' kayıt</strong>'+button('Kayıtlara Git →','data-m943-tab="expenses" data-m943-pending','m943Link')+'</article></div>';
+  }
+  function detail(f){
+    const totals=m943TotalRows(f);
+    const tabs=[['overview','Genel Bakış'],['expenses','Harcamalar'],['documents','Belgeler'],['contacts','Kartvizitler'],['report','Fuar Raporu']];
+    const content=m943Tab==='overview'?m943Overview(f):m943Tab==='expenses'?m943Expenses(f):m943Tab==='documents'?m943Documents(f):m943Tab==='contacts'?m943Contacts(f):m943Report(f);
+    return '<div class="m943Screen"><header class="m943FairHead"><div><span class="m943Eyebrow">FUAR YÖNETİMİ · '+escape(f.country||'')+' / '+escape(f.city||'')+'</span><h2>'+escape(f.name)+'</h2><p>📅 '+escape(dateLabel(f.start))+' — '+escape(dateLabel(f.end))+' <span class="m943EventTag">Fuar</span> '+(f.address?' · 📍 '+escape(f.address):'')+'</p></div><div class="m943HeadActions">'+button('Fuar Bilgilerini Düzenle','data-edit-fair="'+escape(f.id)+'"','m84Btn light')+button('Fuarı Sil','data-delete-fair="'+escape(f.id)+'"','m943Danger')+'</div></header>'+ 
+    m943Kpis(f)+'<div class="m943OtherCurrencies"><strong>Orijinal harcamalar (raporda değişmez):</strong> '+totals+' <small>USD yalnızca bu ekranda referans kurla hesaplanır. Excel ve Seyahat Arşivi kayıtlarına dokunulmaz. '+m943FxNote(Object.keys(m943Amounts(f.id)).some(c=>c!=='USD')||(!!m943Budget(f.id).currency&&m943Budget(f.id).currency!=='USD'))+'</small></div>'+ 
+    '<nav class="m943Tabs" aria-label="Fuar bölümleri">'+tabs.map(([id,label])=>'<button type="button" data-m943-tab="'+id+'" class="'+(m943Tab===id?'is-active':'')+'">'+label+'</button>').join('')+'</nav>'+ 
+    '<div class="m943TabBody">'+content+'</div></div>';
   }
   function render() {
     const root=$('m84Archive');if(!root||root.hidden) return;
@@ -8193,10 +8422,17 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
     else if(route.country) html=renderYears();
     else html=renderCountries();
     root.innerHTML='<div class="m918ArchiveTop"><div class="m918Overline">'+(route.fairId?'FUAR KLASÖRÜ':route.year?'FUARLAR':route.country?'YILLAR':'FUAR ARŞİVİ')+'</div>'+button('⬇ Fuar Yedeği (JSON)','data-export-fairs','m84Btn light')+'</div>'+breadcrumbs()+statusInfo()+html;
+    // Yeni fuar oluşturma yalnızca Tüm Ülkeler / Fuar Arşivi ana ekranında gösterilir.
+    // Bu kontrol, fuar detayından üst menüye kaçan yanlış ekleme akışını önler.
+    const onArchiveHome=!route.country&&!route.year&&!route.fairId;
+    const header=$('mars84Back')?.querySelector('.m918TopActions');
+    if(header)header.hidden=!onArchiveHome;
+    const legacyTabs=$('mars84Back')?.querySelector('.m84Tabs');
+    if(legacyTabs)legacyTabs.hidden=!onArchiveHome;
   }
   function open(fairId) {
     if(fairId){
-      if(route.fairId!==fairId)openDocKind=null;
+      if(route.fairId!==fairId){openDocKind=null;m943Tab='overview';m943Search='';m943ExpenseFilter='all';}
       const f=fairById(fairId);if(!f) return;
       route={country:f.country||'Bilinmeyen Ülke',year:text(f.start).slice(0,4)||'Tarihsiz',fairId};
     }else route={country:null,year:null,fairId:null};
@@ -8525,9 +8761,141 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
     }catch(err){win.document.body.textContent='PDF oluşturulamadı: '+err.message;alert('Fiş PDF oluşturulamadı: '+err.message);}
   }
 
+  // v90.42: edit/report card metadata without touching its photo or regenerating its ID.
+  // Soft deletion is pushed to the same owner-scoped cloud record before hiding locally.
+  function m942CardById(id){return readArray(CARD_KEY).find(c=>c.id===id && !c.deletedAt);}
+  function m942RefreshReport(){
+    const active=$('m919Workspace');
+    // Edit/Delete originate from the report table: keep that panel open even if emit() rerenders it.
+    const show=true;
+    const reportOpen=true;
+    const y=window.scrollY;
+    render();
+    if(m943Tab==='report'||m943Tab==='contacts'){
+      const sec=$('m916Section_report');if(sec)sec.open=true;
+    }
+    window.scrollTo(0,y);
+  }
+  async function m942PushCard(card){
+    if(!navigator.onLine)throw new Error('İnternet yok. İki cihazda aynı kayıt kalması için internete bağlan.');
+    if(typeof ensureCloudSession!=='function'||typeof cloudFetch!=='function')throw new Error('Bulut bağlantısı hazır değil.');
+    const s=await ensureCloudSession();
+    if(!s?.user?.id || !s.access_token)throw new Error('Bulut oturumun açık değil.');
+    await cloudFetch('/rest/v1/mars_crm_sync_records?on_conflict=owner_id,kind,record_id',{
+      method:'POST',headers:cloudHeaders(s.access_token,{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+      body:JSON.stringify({owner_id:s.user.id,kind:'fair_cards',record_id:String(card.id),payload:card,is_deleted:false})
+    });
+  }
+  function m942Editor(){
+    let overlay=$('m942CardEditor');if(overlay)return overlay;
+    overlay=document.createElement('div');overlay.id='m942CardEditor';overlay.className='m942Overlay';overlay.hidden=true;
+    overlay.innerHTML=`<div class="m942Dialog" role="dialog" aria-modal="true" aria-labelledby="m942Title">
+      <div class="m942DialogHead"><h3 id="m942Title">Kartviziti Düzelt</h3><button type="button" data-m942-close class="m84Btn light">✕ Kapat</button></div>
+      <p class="m942Sub">Kaydı ve bağlı fotoğrafı korur. Değişiklik iki cihazın ortak bulut kaydına yazılır.</p>
+      <form id="m942CardEditForm"><div class="m942Fields">
+       <label>Firma<input name="company" required></label><label>Yetkili<input name="person"></label>
+       <label>Unvan<input name="title"></label><label>Yetkili Telefonu<input name="phone"></label>
+       <label>Yetkili E-postası<input name="email" type="email"></label><label>Şirket Telefonu<input name="companyPhone"></label>
+       <label>Şirket E-postası<input name="companyEmail" type="email"></label><label>Web Sitesi<input name="website"></label>
+       <label>Ülke<input name="country"></label><label>Şehir<input name="city"></label>
+       <label class="m942Full">Adres<input name="address"></label>
+       <label class="m942Full">Kartvizit Notu<textarea name="note" rows="2"></textarea></label>
+       <label>Potansiyel<select name="potential"><option>Değerlendirilmedi</option><option>A+</option><option>A</option><option>B</option><option>C</option><option>Takip edilecek</option></select></label><span></span>
+       <label class="m942Full">Görüşme Özeti<textarea name="meeting" rows="2"></textarea></label>
+       <label class="m942Full">Sonraki Aksiyon<input name="action"></label>
+      </div><div class="m942Footer"><span id="m942SaveStatus" role="status"></span><button type="submit" class="m84Btn">Değişiklikleri Kaydet</button></div></form>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click',e=>{if(e.target===overlay||e.target.closest('[data-m942-close]'))overlay.hidden=true;});
+    overlay.querySelector('form').addEventListener('submit',m942SaveCard);
+    return overlay;
+  }
+  function m942EditCard(id){
+    const card=m942CardById(id);if(!card)return alert('Kartvizit kaydı bulunamadı.');
+    const overlay=m942Editor(),form=overlay.querySelector('form');
+    const assessment=assessmentFor(card.fairId,id);
+    for(const k of ['company','person','title','phone','email','companyPhone','companyEmail','website','country','city','address','note'])form.elements.namedItem(k).value=card[k]||'';
+    for(const k of ['potential','meeting','action'])form.elements.namedItem(k).value=assessment[k]|| (k==='potential'?'Değerlendirilmedi':'');
+    form.dataset.cardId=id;
+    $('m942SaveStatus').textContent='';overlay.hidden=false;
+    form.elements.namedItem('company').focus();
+  }
+  async function m942SaveCard(e){
+    e.preventDefault();const form=e.currentTarget,id=form.dataset.cardId,prev=m942CardById(id);if(!prev)return;
+    const btn=form.querySelector('[type="submit"]'),status=$('m942SaveStatus');
+    const updated={...prev,updatedAt:new Date().toISOString()};
+    for(const k of ['company','person','title','phone','email','companyPhone','companyEmail','website','country','city','address','note'])updated[k]=String(form.elements.namedItem(k).value||'').trim();
+    if(!updated.company){status.textContent='Firma adı boş olamaz.';return;}
+    btn.disabled=true;status.textContent='Buluta kaydediliyor…';
+    try{
+      // Only acknowledge success once the owner-specific cloud record was updated.
+      await m942PushCard(updated);
+      const rows=readArray(CARD_KEY),i=rows.findIndex(c=>c.id===id);if(i<0)throw new Error('Cihazdaki kart kaydı bulunamadı.');
+      rows[i]=updated;localStorage.setItem(CARD_KEY,JSON.stringify(rows));
+      const a=assessmentFor(updated.fairId,id),val=k=>String(form.elements.namedItem(k).value||'').trim();
+      if(['potential','meeting','action'].some(k=>val(k)!==String(a[k]||(k==='potential'?'Değerlendirilmedi':'')))){
+        emit(updated.fairId,'card_assessment',{cardId:id,potential:val('potential'),meeting:val('meeting'),action:val('action')});
+      }
+      $('m942CardEditor').hidden=true;m942RefreshReport();
+      window.mars84RenderCards?.();
+    }catch(err){status.textContent='Kaydedilemedi: '+err.message;alert('Kartvizit düzenlemesi iki cihazda doğrulanamadı: '+err.message);}
+    finally{btn.disabled=false;}
+  }
+  async function m942DeleteCard(id){
+    const card=m942CardById(id);if(!card)return alert('Kartvizit bulunamadı.');
+    if(!confirm('“'+(card.company||'Kartvizit')+'” kaydı bu fuardan kaldırılsın mı?\nFotoğraf güvenlik için bulut deposunda korunacak.'))return;
+    const tombstone={...card,deletedAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+    try{
+      await m942PushCard(tombstone);
+      const rows=readArray(CARD_KEY),i=rows.findIndex(c=>c.id===id);if(i>=0){rows[i]=tombstone;localStorage.setItem(CARD_KEY,JSON.stringify(rows));}
+      m942RefreshReport();window.mars84RenderCards?.();
+    }catch(err){alert('Kartvizit silme işlemi buluta yazılamadı; kayıt korunuyor. Hata: '+err.message);}
+  }
+  function m943Modal(title,formHtml,onSave){
+    let root=$('m943EditOverlay');if(root)root.remove();
+    root=document.createElement('div');root.id='m943EditOverlay';root.className='m943Overlay';
+    root.innerHTML='<div role="dialog" aria-modal="true" aria-labelledby="m943ModalTitle" class="m943Modal"><div class="m943ModalHead"><h2 id="m943ModalTitle">'+escape(title)+'</h2><button type="button" data-m943-cancel class="m84Btn light">Kapat</button></div><form id="m943EditForm">'+formHtml+'<div class="m943ModalFoot"><span id="m943ModalStatus"></span><button class="m84Btn" type="submit">Kaydet</button></div></form></div>';
+    document.body.appendChild(root);
+    const close=()=>root.remove();
+    root.addEventListener('click',e=>{if(e.target===root||e.target.closest('[data-m943-cancel]'))close();});
+    root.querySelector('form').addEventListener('submit',e=>{e.preventDefault();try{onSave(new FormData(e.target));close();render();}catch(err){root.querySelector('#m943ModalStatus').textContent=err.message;}});
+  }
+  const m943Field=(label,name,value='',type='text')=>'<label>'+label+'<input name="'+name+'" type="'+type+'" value="'+escape(value)+'"></label>';
+  function m943BudgetEditor(){
+    const budget=m943Budget(route.fairId),actualCurrencies=Object.keys(m943Amounts(route.fairId));
+    const preferred=budget.currency||actualCurrencies[0]||'EUR';
+    m943Modal('Fuar Bütçesi', '<div class="m943FormGrid">'+m943Field('Bütçe tutarı','amount',budget.amount??'', 'number')+'<label>Para birimi<select name="currency">'+[...new Set([preferred,...actualCurrencies,...m943Currencies])].map(c=>'<option'+(preferred===c?' selected':'')+'>'+escape(c)+'</option>').join('')+'</select></label></div><p class="m943Muted">Yalnızca seçili fuarın giderleri ekranda referans kurla USD olarak karşılaştırılır; Excel, fiş ve Seyahat Arşivi tutarları değiştirilmez.</p>',fd=>{
+      const n=Number(fd.get('amount'));if(!Number.isFinite(n)||n<0||!String(fd.get('amount')).trim())throw Error('Geçerli bir bütçe gir.');
+      const v=emit(route.fairId,'fair_budget',{amount:n,currency:String(fd.get('currency'))});if(!v)throw Error('Bütçe kaydedilemedi.');
+    });
+  }
+  function m943ExpenseEditor(id){
+    const e=visibleEvents(route.fairId,'expense').find(x=>x.id===id);if(!e)return;
+    const options=['Kontrol edilmedi','Eksik bilgi','Onay bekliyor','Ödendi','Reddedildi'];
+    const html='<div class="m943FormGrid">'+m943Field('Tarih','date',e.date||'','date')+m943Field('Harcama türü','category',e.category||'')+
+      m943Field('Tutar','amount',e.amount??'','number')+'<label>Para birimi<select name="currency">'+[...new Set([...m943Currencies,e.currency||'EUR'])].map(c=>'<option'+(e.currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></label>'+
+      m943Field('Fiş / Fatura No','receiptNo',e.receiptNo||'')+m943Field('Ödeme şekli / Kart','paymentType',e.paymentType||'')+
+      '<label>Durum<select name="reviewStatus">'+options.map(c=>'<option'+(m943Status(route.fairId,e)===c?' selected':'')+'>'+c+'</option>').join('')+'</select></label>'+m943Field('Açıklama / Not','note',e.note||'')+'</div>';
+    m943Modal('Harcama Düzelt / Kontrol Et',html,fd=>{
+      const raw=String(fd.get('amount')||''),amount=Number(raw);
+      if(!raw.trim()||!Number.isFinite(amount)||amount<0)throw Error('Geçerli bir tutar gir.');
+      const data={targetId:id,date:String(fd.get('date')),category:String(fd.get('category')),amount,currency:String(fd.get('currency')),receiptNo:String(fd.get('receiptNo')),paymentType:String(fd.get('paymentType')),reviewStatus:String(fd.get('reviewStatus')),note:String(fd.get('note'))};
+      if(!emit(route.fairId,'expense_update',data))throw Error('Gider düzeltmesi kaydedilemedi.');
+      if(e.attachmentId && amount!==Number(e.amount))emit(route.fairId,'file_amount_override',{targetId:e.attachmentId,amount,currency:data.currency});
+    });
+  }
   const docRoot=$('m84Archive');
   docRoot?.addEventListener('click',async e=>{
     const btn=e.target.closest('button');if(!btn) return;
+    if(btn.hasAttribute('data-m943-tab')){
+      m943Tab=btn.dataset.m943Tab;
+      if(btn.hasAttribute('data-m943-pending'))m943ExpenseFilter='pending_all';
+      render();return;
+    }
+    if(btn.hasAttribute('data-m943-budget')){m943BudgetEditor();return;}
+    if(btn.hasAttribute('data-m943-expense-edit')){m943ExpenseEditor(btn.dataset.m943ExpenseEdit);return;}
+    if(btn.hasAttribute('data-m942-edit-card')){m942EditCard(btn.dataset.m942EditCard);return;}
+    if(btn.hasAttribute('data-m942-delete-card')){await m942DeleteCard(btn.dataset.m942DeleteCard);return;}
     if(btn.hasAttribute('data-fair-receipt-open')){openFairReceipt();return;}
     if(btn.hasAttribute('data-fair-receipt-manager')){openFairExpenseManager();return;}
     if(btn.hasAttribute('data-edit-fair')){window.mars84EditFair?.(btn.dataset.editFair);return;}
@@ -8598,6 +8966,13 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
     }
   });
   docRoot?.addEventListener('input',e=>{
+    if(e.target?.id==='m943Search'){
+      m943Search=e.target.value;
+      // No rerender while typing: preserve mobile keyboard and focus.
+      const words=m943Search.toLocaleLowerCase('tr');
+      docRoot.querySelectorAll('.m943Table tbody tr').forEach(row=>{row.hidden=!!words&&!row.textContent.toLocaleLowerCase('tr').includes(words);});
+      return;
+    }
     if(!e.target.matches?.('[data-person-count]'))return;
     const people=Math.max(1,Math.min(50,Math.floor(Number(e.target.value)||1)));
     docRoot.querySelectorAll('[data-person-split]').forEach(el=>{
@@ -8612,6 +8987,7 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
       if(route.fairId)emit(route.fairId,'person_count',{count:n});
       return;
     }
+    if(e.target?.id==='m943Filter'){m943ExpenseFilter=e.target.value;render();return;}
     const input=e.target;if(!input?.matches?.('form[data-inline-doc] input[type="file"]'))return;
     const form=input.closest('form');
     if(!form||!input.files?.length||form.dataset.uploading==='1')return;
@@ -8999,7 +9375,7 @@ body.m918FairActive #mars84Back,body.m918FairActive #mars84Back[hidden]{display:
 #mars84Back button:focus-visible{outline:3px solid #75bcae;outline-offset:2px}
 @media(min-width:1600px){#mars84Back .m918Services{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:1100px){#mars84Back .m918EventBoard{grid-template-columns:minmax(205px,240px) 1fr}#mars84Back .m918Services{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:760px){body.m918FairActive header{display:none!important}body.m918FairActive main{padding:12px 12px 85px!important}#mars84Back .m84Header{padding:0 0 14px!important}#mars84Back .m84Header h2{font-size:23px!important}#mars84Back .m918TopActions{display:grid;grid-template-columns:repeat(2,1fr);width:100%}#mars84Back .m918TopActions button{padding:11px 7px;font-size:12px}#mars84Back .m918TopActions button:last-child{grid-column:1/-1}#mars84Back .m918EventBoard{grid-template-columns:1fr}#mars84Back .m918EventInfo{border-right:0;border-bottom:1px solid #e6eff0;padding:16px}#mars84Back .m918EventMain{padding:15px}#mars84Back .m918ActionsGrid{grid-template-columns:1fr;gap:8px}#mars84Back .m918Action{min-height:65px}#mars84Back .m918Services{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#mars84Back .m918ServiceCard{padding:11px}#mars84Back .m918ServiceHead{flex-direction:column}#mars84Back .m918ServiceCount{font-size:13px}#mars84Back .m90FolderGrid{grid-template-columns:repeat(2,minmax(0,1fr))}#mars84Back .m90Folder{min-height:135px;padding:14px}#mars84Back .m918ArchiveTop .m918Overline{font-size:15px}#mars84Back .m918ArchiveTop button{font-size:11px;padding:10px 9px}body.m918FairActive .m80BottomBar{display:none!important}}
+@media(max-width:760px){body.m918FairActive header{display:none!important}body.m918FairActive main{padding:12px 12px 85px!important}#mars84Back .m84Header{padding:0 0 14px!important}#mars84Back .m84Header h2{font-size:23px!important}#mars84Back .m918TopActions{display:grid;grid-template-columns:repeat(2,1fr);width:100%}#mars84Back .m918TopActions button{padding:11px 7px;font-size:12px}#mars84Back .m918TopActions button:last-child{grid-column:auto}#mars84Back .m918EventBoard{grid-template-columns:1fr}#mars84Back .m918EventInfo{border-right:0;border-bottom:1px solid #e6eff0;padding:16px}#mars84Back .m918EventMain{padding:15px}#mars84Back .m918ActionsGrid{grid-template-columns:1fr;gap:8px}#mars84Back .m918Action{min-height:65px}#mars84Back .m918Services{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#mars84Back .m918ServiceCard{padding:11px}#mars84Back .m918ServiceHead{flex-direction:column}#mars84Back .m918ServiceCount{font-size:13px}#mars84Back .m90FolderGrid{grid-template-columns:repeat(2,minmax(0,1fr))}#mars84Back .m90Folder{min-height:135px;padding:14px}#mars84Back .m918ArchiveTop .m918Overline{font-size:15px}#mars84Back .m918ArchiveTop button{font-size:11px;padding:10px 9px}body.m918FairActive .m80BottomBar{display:none!important}}
 @media(max-width:390px){#mars84Back .m918Services{grid-template-columns:1fr}}
 </style>
 <script id="m918FairIntegratedRouting">
@@ -9459,5 +9835,389 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 window.mars9028Sync=run;
 })();
 
+</script>
+
+<!-- MARS CRM v90.40: Seyahat Arşivi, CRM içinde erişilebilir bir sayfa olarak çalışır. -->
+<style id="marsV940ArchiveNavFix">
+#travelArchivePage{position:relative!important;inset:auto!important;z-index:auto!important;overflow:visible!important;min-height:60vh!important;background:#f6f8fb!important}
+#travelArchivePage .archiveShell{max-width:none!important;margin:0!important;padding:4px 0 28px!important}
+#travelArchivePage .archiveHeader{position:relative!important;top:auto!important;z-index:auto!important}
+body.m940ArchiveActive>header{display:none!important}
+body.m940ArchiveActive main>:not(#travelArchivePage):not(#mars84Back){display:none!important}
+body.m940ArchiveActive #travelArchivePage{display:block!important}
+@media(max-width:760px){
+  body.m940ArchiveActive #travelArchivePage{padding:12px 12px calc(85px + env(safe-area-inset-bottom))!important;min-height:calc(100dvh - 90px)!important}
+  body.m940ArchiveActive .m80BottomBar{display:grid!important;z-index:10030!important}
+}
+</style>
+<script id="marsV940ArchiveNavLogic">
+(function(){
+ 'use strict';
+ // Any other sidebar view should close the archive BEFORE its own click handler runs.
+ document.addEventListener('click',function(e){
+   if(!document.body.classList.contains('m940ArchiveActive'))return;
+   const side=e.target.closest?.('.sideItem.sideDirect');
+   const mobile=e.target.closest?.('.m80BottomBar button');
+   if(side && side.id!=='menuArchiveBtn' && typeof closeTravelArchive==='function')closeTravelArchive();
+   if(mobile && !/mars80OpenArchive|marsV903GoArchive/.test(mobile.getAttribute('onclick')||'')){
+     if(typeof closeTravelArchive==='function')closeTravelArchive();
+   }
+ },true);
+ // Prevent an old report window from becoming visible when switching to the archive.
+ const originalOpenReport=window.openReport;
+ if(typeof originalOpenReport==='function')window.openReport=function(...args){
+   if(document.body.classList.contains('m940ArchiveActive'))closeTravelArchive();
+   return originalOpenReport.apply(this,args);
+ };
+ // When returning to the home dashboard via a programmatic menu action, close archive.
+ for(const name of ['marsV903GoHome','marsV903GoCompanies']){
+   const original=window[name];
+   if(typeof original==='function')window[name]=function(...args){
+     if(document.body.classList.contains('m940ArchiveActive'))closeTravelArchive();
+     return original.apply(this,args);
+   };
+ }
+})();
+</script>
+
+<!-- MARS CRM v90.41: sade menu. Bulut senkronizasyon kodu korunur. -->
+<style id="marsV941CleanUi">
+/* These are legacy utility/debug controls, not user-facing CRM sections. */
+html body #menuExpenseBtn,
+html body #menuFilesBtn,
+html body #mars9026AuditButton,
+html body #mars9027Button,
+html body #mars9028OpenBtn,
+html body #mars9027MobileButton,
+html body .crmSideNav .sideBottom,
+html body #sideCloudStatus,
+html body #cloudStatus { display:none!important; }
+/* Routine green synchronization toasts and explanatory banners are removed.
+   True failures are still shown via the existing error notifications. */
+html body #mars85SyncStatus:not(.mars941Error),
+html body #m90FairSyncStatus[hidden],
+html body #mars84Back .m918AutoNote { display:none!important; }
+</style>
+<script id="marsV941OnlySyncErrors">
+/* Legacy cloud-sync-v89.js updates this element every 25 seconds.
+   Suppress its successful/technical status messages, not meaningful errors. */
+(function(){
+  function watch(){
+    const node=document.getElementById('mars85SyncStatus');
+    if(!node) return;
+    const update=function(){
+      const msg=node.textContent||'';
+      const isError=/(?:hata|başarısız|reddedil|erişilem|oturum aç|aktarılmadı|depolama dolu|⚠|⛔)/i.test(msg);
+      node.classList.toggle('mars941Error',isError);
+      if(isError)node.hidden=false;
+    };
+    update();
+    new MutationObserver(update).observe(node,{childList:true,characterData:true,subtree:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watch,{once:true});else watch();
+})();
+</script>
+
+<style id="m942ApprovedCompactFairStyle">
+/* Desktop: four fair actions side-by-side, not 3+1. Tablet: 2 columns. */
+#mars84Back .m918ActionsGrid {display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important;margin-bottom:16px!important}
+#mars84Back .m918ActionsGrid .m918Action {min-width:0!important;min-height:72px!important;padding:11px 12px!important;gap:4px!important;border-radius:10px!important;font-size:12px!important}
+#mars84Back .m918ActionsGrid .m918Action strong{font-size:12px!important;line-height:1.22}
+#mars84Back .m918ActionsGrid .m918Action small{font-size:10px!important;line-height:1.25}
+#mars84Back .m918Overline{margin:10px 0 8px!important;font-size:11px!important}
+/* Compact post-fair table and note editor */
+#mars84Back .m917SectionTitle{font-size:13px!important;margin:14px 0 7px!important;padding-bottom:6px!important}
+#mars84Back .m917Horizontal{overflow-x:auto;max-width:100%}
+#mars84Back .m917Table{min-width:800px;font-size:11.5px!important;table-layout:fixed}
+#mars84Back .m942CardsTable th:nth-child(1){width:20%}#mars84Back .m942CardsTable th:nth-child(2){width:17%}
+#mars84Back .m942CardsTable th:nth-child(3){width:21%}#mars84Back .m942CardsTable th:nth-child(4){width:12%}
+#mars84Back .m942CardsTable th:nth-child(5){width:20%}#mars84Back .m942CardsTable th:nth-child(6){width:10%}
+#mars84Back .m917Table td,#mars84Back .m917Table th{padding:6px 7px!important;line-height:1.4!important}
+#mars84Back .m917Table td small{font-size:10px!important;margin-top:2px!important;line-height:1.3!important}
+#mars84Back .m942Actions{white-space:nowrap;text-align:right}
+#mars84Back .m942Actions button{cursor:pointer;border-radius:6px;min-height:28px;padding:5px 7px;font-size:10px;font-weight:750;border:1px solid #cfe1dd}
+#mars84Back .m942Actions .m942Edit{background:#e7f3ef;color:#146355}
+#mars84Back .m942Actions .m942Delete{background:#fff0ef;color:#ae3434;border-color:#f2cfca;margin-left:3px}
+#mars84Back .m917Assessments{margin-top:11px;padding:10px}
+#mars84Back .m917CardForm{gap:7px;margin-top:8px;padding-top:8px}
+#mars84Back .m917CardForm label{font-size:11px}
+#mars84Back .m917CardForm input,#mars84Back .m917CardForm select,#mars84Back .m917CardForm textarea{padding:7px;font-size:11px;min-height:32px}
+/* Card editor is intentionally a modal to avoid scrolling or breaking report navigation. */
+#m942CardEditor[hidden]{display:none!important}
+#m942CardEditor{position:fixed;z-index:31000;inset:0;background:#0a2431b0;display:flex;align-items:center;justify-content:center;padding:13px;overflow:auto}
+#m942CardEditor .m942Dialog{width:min(760px,100%);max-height:94dvh;overflow:auto;background:#fff;border-radius:15px;padding:19px 21px;color:#1c3b45;box-shadow:0 20px 65px #051d2770}
+#m942CardEditor .m942DialogHead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#m942CardEditor h3{margin:0;font-size:20px}
+#m942CardEditor .m942Sub{font-size:12px;color:#607783;margin:7px 0 14px}
+#m942CardEditor .m942Fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px 15px}
+#m942CardEditor label{font-size:12px;font-weight:700;display:flex;flex-direction:column;gap:5px}
+#m942CardEditor input,#m942CardEditor select,#m942CardEditor textarea{font:inherit;font-weight:400;min-width:0;border:1px solid #d2e1e5;border-radius:8px;padding:9px;color:#193e45;background:white}
+#m942CardEditor .m942Full{grid-column:1/-1}
+#m942CardEditor .m942Footer{display:flex;justify-content:flex-end;align-items:center;gap:13px;margin-top:14px}
+#m942SaveStatus{font-size:12px;color:#b1462c;flex:1}
+@media(max-width:1170px){#mars84Back .m918ActionsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:760px){#mars84Back .m918ActionsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#mars84Back .m918Action{min-height:65px!important}}
+@media(max-width:420px){#mars84Back .m918ActionsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}#mars84Back .m918ActionsGrid .m918Action{padding:9px!important}#mars84Back .m942Actions button{font-size:11px}}
+@media(max-width:580px){#m942CardEditor .m942Fields{grid-template-columns:1fr}#m942CardEditor .m942Dialog{padding:14px}#m942CardEditor .m942Full{grid-column:auto}}
+</style>
+<style id="marsV943ApprovedFairDesign">
+#m84Archive .m943Screen{width:100%;max-width:1580px;color:#1c3944;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+#m84Archive .m943FairHead{background:#fff;border:1px solid #e2eaec;border-radius:15px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:15px;margin:12px 0 14px}
+#m84Archive .m943FairHead h2{font-size:23px!important;line-height:1.25;margin:5px 0!important;font-weight:800;color:#fff!important}
+#m84Archive .m943Eyebrow{font-size:10px;font-weight:800;letter-spacing:.07em;color:#b5e9db}
+#m84Archive .m943FairHead p{color:#e0f3ec;font-size:12px;margin:0!important;line-height:1.5}
+#m84Archive .m943EventTag{border-radius:30px;background:#e0f3ea;color:#176d54;padding:4px 7px;font-size:10px;font-weight:800}
+#m84Archive .m943HeadActions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#m84Archive .m943HeadActions button{font-size:11px!important;padding:9px 11px!important;min-height:32px}
+#m84Archive .m943Danger{background:#fff1f0;border:1px solid #f2cecb;color:#b73934;border-radius:9px;padding:9px 12px;cursor:pointer;font-weight:700}
+#m84Archive .m943Kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 9px}
+#m84Archive .m943Kpi{background:#fff;border:1px solid #e0eaed;border-radius:13px;padding:15px;min-height:113px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
+#m84Archive .m943Kpi>span{font-size:12px;color:#6d8590;font-weight:700}
+#m84Archive .m943Kpi strong{font-size:21px;line-height:1.2;overflow-wrap:anywhere;color:#1b4148}
+#m84Archive .m943Kpi small{font-size:10px;color:#82939a}
+#m84Archive .m943Attention{background:#fffaf5;border-color:#f2dfc4}
+#m84Archive .m943Link{border:0;background:none;padding:0;color:#1d7668;font-size:11px;font-weight:800;cursor:pointer;text-align:left}
+#m84Archive .m943OtherCurrencies{background:#ecf6f3;color:#315c59;border:1px solid #d8ede6;padding:10px 13px;border-radius:10px;font-size:11px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+#m84Archive .m943CurrencyChip{border-radius:7px;background:white;padding:5px 8px;color:#175e55;font-weight:800}
+#m84Archive .m943OtherCurrencies small{color:#6c8482}
+#m84Archive .m943Tabs{display:flex;align-items:stretch;gap:7px;border-bottom:1px solid #d9e5e8;padding:0 0 9px;margin:0 0 14px;overflow-x:auto;scrollbar-width:thin}
+#m84Archive .m943Tabs button{flex:1 0 auto;min-height:44px;background:#ebf0f4;color:#43636d;border:1px solid transparent;border-radius:10px;font-size:12px;font-weight:750;padding:10px 14px;cursor:pointer;white-space:nowrap}
+#m84Archive .m943Tabs button.is-active{background:#246d60;color:white}
+#m84Archive .m943Panel{background:#fff;border:1px solid #e0e8eb;border-radius:14px;padding:17px;margin-bottom:10px;min-width:0}
+#m84Archive .m943PanelTitle{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+#m84Archive .m943PanelTitle h3{font-size:16px;color:#193b43;margin:0;font-weight:800}
+#m84Archive .m943PanelTitle span{font-size:11px;color:#82939a}
+#m84Archive .m943OverviewGrid{display:grid;grid-template-columns:1.15fr 1fr;gap:12px}
+#m84Archive .m943Quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#m84Archive .m943Quick button{min-height:70px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;border:1px solid #dce7e8;padding:9px}
+#m84Archive .m943QuickPrimary{background:#216e5e;color:#fff}
+#m84Archive .m943QuickAlt{background:#edf3f4;color:#284d58}
+#m84Archive .m943MiniTitle{font-size:12px;font-weight:800;margin:20px 0 8px;display:flex;justify-content:space-between}
+#m84Archive .m943MiniTitle b{background:#fdf0e0;color:#986019;border-radius:20px;padding:2px 8px}
+#m84Archive .m943PendingList{display:grid;gap:6px}
+#m84Archive .m943PendingList button{background:#fafcfd;border:1px solid #e6edef;border-radius:9px;padding:10px;display:flex;gap:8px;justify-content:space-between;align-items:center;text-align:left;color:#294853;cursor:pointer}
+#m84Archive .m943PendingList small{display:block;color:#84949a;margin-top:2px}
+#m84Archive .m943PendingList em{color:#a26718;font-size:10px;font-style:normal}
+#m84Archive .m943TextButton{border:0;background:none;color:#1c7769;font-weight:800;cursor:pointer;margin-top:10px;padding:5px;font-size:12px}
+#m84Archive .m943CountList{display:grid;gap:5px}
+#m84Archive .m943CountList>div{border-bottom:1px solid #eaf0f0;padding:7px 0;display:flex;justify-content:space-between;font-size:12px}
+#m84Archive .m943CountList b{color:#1f7061}
+#m84Archive .m943OverviewFooter{display:flex;gap:14px;flex-wrap:wrap}
+#m84Archive .m943Toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:13px}
+#m84Archive .m943Toolbar input,#m84Archive .m943Toolbar select{padding:10px 12px!important;border:1px solid #d5e3e8;border-radius:9px;min-width:0;font-size:12px;background:#fff;color:#1c4148}
+#m84Archive .m943Toolbar input{flex:1;min-width:165px}
+#m84Archive .m943Toolbar button{font-size:12px;min-height:39px}
+#m84Archive .m943Scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#m84Archive .m943Table{width:100%;min-width:700px;border-collapse:collapse;font-size:12px}
+#m84Archive .m943Table th{text-align:left;background:#edf4f3;color:#345a61;padding:12px 9px}
+#m84Archive .m943Table td{padding:10px 8px;border-bottom:1px solid #e6eeee;vertical-align:middle}
+#m84Archive .m943Table td small{display:block;color:#87979f;margin-top:4px;font-size:10px}
+#m84Archive .m943Table tr[hidden]{display:none!important}
+#m84Archive .m943Amount{font-weight:800;white-space:nowrap}
+#m84Archive .m943Status{display:inline-block;border-radius:8px;font-size:10px;font-weight:800;padding:6px 8px;white-space:nowrap}
+#m84Archive .m943Paid{color:#176c55;background:#e5f5ea}
+#m84Archive .m943Pending{color:#966011;background:#fff1d9}
+#m84Archive .m943Rejected{color:#b34139;background:#ffeeeb}
+#m84Archive .m943Missing{color:#a35220;background:#ffebe3}
+#m84Archive .m943Neutral{color:#5b7080;background:#eef3f6}
+#m84Archive .m943RowActions{white-space:nowrap}
+#m84Archive .m943Small{background:#eaf4f1;border:1px solid #d4e5e1;color:#17695b;border-radius:7px;font-weight:800;font-size:11px;padding:8px;margin:2px;cursor:pointer}
+#m84Archive .m943DocGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+#m84Archive .m943DocCard{display:flex;flex-direction:column;min-width:0;background:#fff;border:1px solid #dfe9eb;border-radius:13px;padding:13px}
+#m84Archive .m943DocHeader{display:flex;gap:8px;align-items:center;margin-bottom:14px}
+#m84Archive .m943DocIcon{font-size:22px;background:#eaf6f1;border-radius:11px;padding:8px}
+#m84Archive .m943DocHeader div{flex:1;min-width:0}
+#m84Archive .m943DocHeader strong{display:block;font-size:13px}
+#m84Archive .m943DocHeader small{display:block;font-size:10px;color:#83969b;line-height:1.4;margin-top:4px}
+#m84Archive .m943DocHeader b{font-size:10px;color:#426c72;white-space:nowrap}
+#m84Archive .m943DocButtons{display:flex;align-items:center;gap:6px;margin-top:auto;padding-top:13px}
+#m84Archive .m943DocButtons button{flex:1;padding:10px 6px!important;font-size:11px;min-width:0}
+#m84Archive .m943DocCard .m920CardDocs{flex:1}
+#m84Archive .m943DocCard .m920CardDocsHeader{flex-wrap:wrap}
+#m84Archive .m943DocCard .m920CardFile{padding:8px 7px;gap:5px;min-width:0}
+#m84Archive .m943DocCard .m920CardFile strong{font-size:11px;overflow-wrap:anywhere}
+#m84Archive .m943DocCard .m921FileActions button{font-size:10px;padding:7px}
+#m84Archive .m943ExtraNotes{margin-top:17px;border:1px solid #e1e9eb;border-radius:11px;padding:12px}
+#m84Archive .m943ExtraNotes summary{cursor:pointer;color:#256e63;font-size:12px;font-weight:800}
+#m84Archive .m943ReportArea .m90FolderSection{margin:8px 0;border:1px solid #edf0f1;border-radius:10px}
+#m84Archive .m943ReportArea #m916Section_report>summary{display:none}
+#m84Archive .m943ReportArea .m90PanelBody{padding:12px!important}
+#m84Archive .m943ReportArea .m917Table{font-size:11px!important}
+#m84Archive .m943ReportArea .m917Table td{padding:7px!important}
+#m84Archive .m943ReportArea .m917Table th{padding:8px!important}
+#m84Archive .m943Empty{padding:25px;text-align:center;color:#81949c;font-size:12px}
+#m84Archive .m943Muted{font-size:11px;color:#82959a;line-height:1.6}
+#m943EditOverlay{position:fixed;z-index:35000;inset:0;background:#0e28399c;display:grid;place-items:center;padding:14px;overflow:auto}
+#m943EditOverlay .m943Modal{background:#fff;border-radius:16px;max-width:690px;width:100%;padding:19px;max-height:94dvh;overflow:auto;box-shadow:0 24px 70px #102a3560}
+#m943EditOverlay .m943ModalHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:15px}
+#m943EditOverlay h2{font-size:19px;color:#1c4346;margin:0}
+#m943EditOverlay .m943FormGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#m943EditOverlay label{display:grid;gap:5px;font-size:12px;font-weight:750;color:#2b555a}
+#m943EditOverlay input,#m943EditOverlay select{border:1px solid #d4e3e7;border-radius:9px;min-width:0;padding:11px;font:inherit;color:#173e44;background:white}
+#m943EditOverlay .m943ModalFoot{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin-top:17px}
+#m943ModalStatus{color:#b23b3b;font-size:12px;flex:1}
+@media(max-width:1200px){#m84Archive .m943Kpis{grid-template-columns:repeat(2,minmax(0,1fr))}#m84Archive .m943DocGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){#m84Archive .m943FairHead{padding:14px;display:block}#m84Archive .m943HeadActions{margin-top:10px}#m84Archive .m943Kpis{gap:7px}#m84Archive .m943Kpi{padding:12px;min-height:112px}#m84Archive .m943Kpi strong{font-size:16px}#m84Archive .m943Tabs{gap:5px}#m84Archive .m943Tabs button{padding:10px 12px;min-height:40px}#m84Archive .m943OverviewGrid,#m84Archive .m943DocGrid{grid-template-columns:1fr}#m84Archive .m943Quick{grid-template-columns:1fr 1fr}#m84Archive .m943Panel{padding:13px}#m84Archive .m943Toolbar input{flex-basis:100%}#m943EditOverlay .m943FormGrid{grid-template-columns:1fr}}
+@media(max-width:400px){#m84Archive .m943Kpi strong{font-size:14px}#m84Archive .m943Quick{grid-template-columns:1fr}}
+</style>
+
+<!-- v90.45: Real-data, responsive travel home. All other CRM modules untouched. -->
+<style id="marsHome2026Style">
+body.m904Home #m904Dashboard{max-width:1420px!important;width:100%!important;margin:0 auto 35px!important}
+#marsHome2026{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#19343c;font-size:13px;line-height:1.42}
+#marsHome2026 *{box-sizing:border-box}
+#marsHome2026 .mh26-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 15px}
+#marsHome2026 h1{font-size:24px;margin:0 0 2px;font-weight:850;letter-spacing:-.5px;color:#19363c}
+#marsHome2026 h2{font-size:17px;margin:0;color:#183941}
+#marsHome2026 .mh26-muted{color:#72868e;font-size:12px}
+#marsHome2026 .mh26-kicker{font-size:11px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;color:#1d7265}
+#marsHome2026 .mh26-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#marsHome2026 button,#mh26Overlay button{cursor:pointer;font:inherit}
+#marsHome2026 .mh26-btn,#mh26Overlay .mh26-btn{border-radius:10px;border:1px solid #dce7e7;background:#edf4f3;color:#205057;padding:10px 12px;font-weight:750;font-size:12px;min-height:39px}
+#marsHome2026 .mh26-btn.primary,#mh26Overlay .mh26-btn.primary{background:#217166;color:white;border-color:#217166}
+#marsHome2026 .mh26-btn:disabled{opacity:.48;cursor:not-allowed}
+#marsHome2026 .mh26-card{background:white;border:1px solid #e0e8e9;border-radius:17px;padding:18px;box-shadow:0 6px 22px #193e4a07;min-width:0}
+#marsHome2026 .mh26-travel{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:13px;margin-bottom:15px}
+#marsHome2026 .mh26-trip{background:linear-gradient(115deg,#173844,#206b58);color:white;display:flex;flex-direction:column;justify-content:space-between;gap:13px}
+#marsHome2026 .mh26-trip h2{color:white;font-size:23px;margin:3px 0 7px}
+#marsHome2026 .mh26-trip .mh26-kicker{color:#b4e0d0}
+#marsHome2026 .mh26-facts{display:flex;gap:7px;flex-wrap:wrap}
+#marsHome2026 .mh26-facts span{background:#ffffff1b;border:1px solid #ffffff25;border-radius:25px;padding:6px 10px;font-size:12px}
+#marsHome2026 .mh26-travelbar{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid #ffffff2c;padding-top:10px;color:#cae6de;font-size:12px}
+#marsHome2026 .mh26-hotel{display:flex;flex-direction:column;gap:12px}
+#marsHome2026 .mh26-hotel-row{display:flex;gap:12px;align-items:flex-start}
+#marsHome2026 .mh26-hotel-emoji{background:#e8f4f0;border-radius:12px;display:grid;place-items:center;width:44px;height:44px;flex-shrink:0;font-size:23px}
+#marsHome2026 .mh26-hotel-name{font-size:16px;font-weight:800;margin:3px 0}
+#marsHome2026 .mh26-cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(285px,1fr);gap:13px}
+#marsHome2026 .mh26-stack{display:grid;gap:13px;align-content:start;min-width:0}
+#marsHome2026 .mh26-section-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}
+#marsHome2026 .mh26-section-sub{font-size:12px;color:#75878d;margin-top:3px}
+#marsHome2026 .mh26-agenda{display:grid;gap:9px}
+#marsHome2026 .mh26-event{border:1px solid #e2eaeb;border-radius:13px;padding:12px;display:grid;grid-template-columns:65px minmax(0,1fr);gap:13px;background:#fff}
+#marsHome2026 .mh26-event.gap{background:#f9f8f3;border-color:#e9dfc7}
+#marsHome2026 .mh26-event.done{background:#f4faf7}
+#marsHome2026 .mh26-when{font-size:15px;font-weight:850;color:#184a51;padding-top:1px}
+#marsHome2026 .mh26-event-title{font-weight:800;font-size:13px;overflow-wrap:anywhere}
+#marsHome2026 .mh26-event-desc{font-size:12px;color:#74848d;margin:4px 0 8px;overflow-wrap:anywhere}
+#marsHome2026 .mh26-event-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+#marsHome2026 .mh26-event-actions button{font-size:11px;padding:6px 9px;min-height:30px}
+#marsHome2026 .mh26-pill{display:inline-block;border-radius:24px;background:#e8f1f1;color:#37616a;font-size:10px;font-weight:800;padding:4px 8px;white-space:nowrap}
+#marsHome2026 .mh26-pill.done{background:#e2f6e8;color:#207c51}
+#marsHome2026 .mh26-pill.gap{background:#fff2d2;color:#8e6613}
+#marsHome2026 .mh26-pill.later{background:#feece9;color:#a74e46}
+#marsHome2026 .mh26-suggestion{border:1px solid #e1ebeb;border-radius:12px;padding:10px 11px;display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:9px}
+#marsHome2026 .mh26-name{font-weight:800;margin-bottom:3px}
+#marsHome2026 .mh26-mini{font-size:11px;color:#76868b;overflow-wrap:anywhere}
+#marsHome2026 .mh26-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#marsHome2026 .mh26-quick .mh26-btn{min-height:64px;text-align:left;font-size:13px;padding:12px}
+#marsHome2026 .mh26-note{background:#eff7f5;border:1px solid #dceae6;border-radius:10px;padding:10px;font-size:11px;color:#3c7065;margin-top:12px}
+#marsHome2026 .mh26-follow{border-bottom:1px solid #edf0f1;padding:9px 0}
+#marsHome2026 .mh26-follow:last-child{border-bottom:0}
+#marsHome2026 .mh26-empty{padding:17px;background:#f5f8f8;border-radius:11px;color:#738890;font-size:12px}
+#marsHome2026 .mh26-pending{color:#ae6126;font-weight:700}
+#mh26Overlay{position:fixed;inset:0;background:#0a1f299b;z-index:100150;display:none;align-items:center;justify-content:center;padding:12px}
+#mh26Overlay.open{display:flex}
+#mh26Overlay .mh26-dialog{background:white;border-radius:18px;max-width:760px;width:100%;max-height:91dvh;overflow-y:auto;padding:20px 22px;color:#173b44}
+#mh26Overlay .mh26-modal-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+#mh26Overlay h2{margin:0;font-size:20px}
+#mh26Overlay .mh26-form{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+#mh26Overlay label{font-size:12px;font-weight:750;color:#294950;display:grid;gap:5px}
+#mh26Overlay label.wide{grid-column:1/-1}
+#mh26Overlay input,#mh26Overlay select,#mh26Overlay textarea{font:inherit;font-size:14px;color:#152f35;border:1px solid #d9e5e6;border-radius:9px;padding:10px;width:100%;min-width:0;background:#fff}
+#mh26Overlay textarea{min-height:90px;resize:vertical}
+#mh26Overlay .mh26-modal-foot{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:17px}
+#mh26Overlay .mh26-modal-hint{font-size:11px;color:#71828b;margin-top:9px}
+@media(max-width:1050px){#marsHome2026 .mh26-travel{grid-template-columns:1fr}#marsHome2026 .mh26-cols{grid-template-columns:1fr}}
+@media(max-width:760px){body.m904Home #marsHome2026{padding:0 0 calc(65px + env(safe-area-inset-bottom));font-size:12px}#marsHome2026 h1{font-size:21px}#marsHome2026 .mh26-head{align-items:flex-start}#marsHome2026 .mh26-head .mh26-actions{gap:4px}#marsHome2026 .mh26-card{padding:13px;border-radius:14px}#marsHome2026 .mh26-travel{gap:10px}#marsHome2026 .mh26-trip h2{font-size:21px}#marsHome2026 .mh26-cols{gap:11px}#marsHome2026 .mh26-event{grid-template-columns:54px minmax(0,1fr);gap:9px;padding:10px}#marsHome2026 .mh26-when{font-size:13px}#marsHome2026 .mh26-suggestion{flex-direction:column;align-items:stretch}#marsHome2026 .mh26-quick{gap:7px}#mh26Overlay .mh26-form{grid-template-columns:1fr}#mh26Overlay label.wide{grid-column:auto}#mh26Overlay .mh26-dialog{padding:16px}}
+</style>
+<div id="mh26Overlay" aria-hidden="true"><div class="mh26-dialog" role="dialog" aria-modal="true" aria-labelledby="mh26ModalTitle"><div class="mh26-modal-header"><h2 id="mh26ModalTitle">Yeni ziyaret</h2><button class="mh26-btn" type="button" data-mh26-close>✕ Kapat</button></div><form id="mh26Form"><div class="mh26-form" id="mh26Fields"></div><div id="mh26ModalHint" class="mh26-modal-hint">Kaydettiğin bilgiler seyahatle ilişkilendirilir. Bulut senkron durumu ayrıca kontrol edilir.</div><div class="mh26-modal-foot"><button class="mh26-btn" type="button" data-mh26-close>İptal</button><button class="mh26-btn primary" type="submit" id="mh26Save">Kaydet</button></div></form></div></div>
+<script id="marsHome2026Logic">
+(function(){'use strict';
+const $=id=>document.getElementById(id), HOME_KEY='mars_crm_home_records_v1', MARK='mars_home_2026';
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=x=>String(x??'').trim().toLocaleUpperCase('tr');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const nowTime=()=>new Date().toTimeString().slice(0,5);
+const safeLocal=()=>{try{return JSON.parse(localStorage.getItem(HOME_KEY)||'[]').filter(x=>x?.app===MARK)}catch{return []}};
+let records=safeLocal(),trip=null,day=today(),activeCity='',cloudBusy=false,cloudNotice='',lastRead=0,modalMode='',editing='',initDone=false;
+function saveLocal(){localStorage.setItem(HOME_KEY,JSON.stringify(records))}
+function allCompanies(){try{return typeof companies!=='undefined' && Array.isArray(companies)?companies:[]}catch{return []}}
+function allTrips(){try{return typeof readTripArchive==='function'?readTripArchive():[]}catch{return []}}
+function selectTrip(){const trips=allTrips().filter(t=>t?.from).slice().sort((a,b)=>String(a.from).localeCompare(String(b.from)));const t=today();return trips.find(x=>String(x.from).slice(0,10)<=t && String(x.to||x.from).slice(0,10)>=t) || trips.find(x=>String(x.from).slice(0,10)>t) || trips.slice(-1)[0] || null}
+const fullDate=x=>{if(!x)return '—';try{return new Intl.DateTimeFormat('tr-TR',{day:'numeric',month:'short',year:'numeric'}).format(new Date(x.slice(0,10)+'T12:00'))}catch{return x}};
+function tripKey(){return trip?.id||'no_trip'}
+function currentRecords(kind){return records.filter(r=>!r.deleted && r.tripId===tripKey() && (!kind||r.type===kind))}
+function uniqById(rows){const out=new Map();for(const r of rows){if(!r?.id)continue;const old=out.get(r.id);if(!old || String(r.updatedAt||'')>String(old.updatedAt||''))out.set(r.id,r)}return Array.from(out.values())}
+function allEvents(){const cs=allCompanies(),plan=[];const id=trip?.id;
+ const add=(item)=>{if(!item?.date||!item?.time)return;const c=cs.find(x=>String(x.id)===String(item.companyId));const company=typeof item.company==='string'?item.company:item.company?.company||c?.company||'Firma ziyareti';plan.push({id:item.id||item.companyId+'_'+item.date+'_'+item.time,companyId:item.companyId||c?.id||'',company,date:item.date,time:item.time,end:item.endTime||item.end||'',city:item.city||c?.city||'',person:item.person||'',address:item.address||c?.address||'',status:item.status||'Randevulu',note:item.note||'',action:item.action||'',kind:'planned',source:item})};
+ if(trip){for(const p of (trip.schedule||[]))add(p);for(const p of (window.tripPlans||[])){if(!p?.date||!p?.time)continue;const c=cs.find(x=>String(x.id)===String(p.companyId));if(c && norm(c.country)!==norm(trip.country))continue;if(!c&&!p.homeVisit)continue;add({...p,company:c?.company||p.company||'Firma ziyareti',city:c?.city||p.city,address:c?.address||p.address})}}
+ const dedup=new Map();for(const p of plan){const k=[p.companyId||p.company,p.date,p.time].join('|');if(!dedup.has(k))dedup.set(k,p)}
+ const extra=currentRecords().filter(x=>x.type==='visit'||x.type==='fair_visit').map(x=>({...x,kind:'custom',company:x.company||'Firma ziyareti'}));
+ return [...dedup.values(),...extra].filter(x=>x.date===day).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+}
+function collectGaps(events){const gaps=[];let prev=9*60;for(const e of events){const parts=(e.time||'').split(':').map(Number);if(parts.length!==2||!Number.isFinite(parts[0]))continue;const start=parts[0]*60+parts[1];if(start-prev>=60)gaps.push({from:prev,to:start});const end=(e.end||'').split(':').map(Number);prev=Math.max(prev,end.length===2&&Number.isFinite(end[0])?end[0]*60+end[1]:start+60)}if(prev<=16*60)gaps.push({from:prev,to:18*60});return gaps}
+const mins=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+function getHotel(){const home=currentRecords('hotel').slice().sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)))[0]||{};return {name:home.name||trip?.hotelName||'',address:home.address||trip?.hotelAddress||'',phone:home.phone||trip?.hotelPhone||'',doc:home.doc||'',note:home.note||trip?.hotelNote||''}}
+function getCity(events){const c=events.find(x=>x.city)?.city||trip?.city||trip?.schedule?.find?.(x=>x.city)?.city||'';return c}
+const mapUrl=addr=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(addr||'');
+function suggestions(events){if(!trip||String(trip.from||'').slice(0,10)>day||String(trip.to||trip.from||'').slice(0,10)<day)return [];const visited=new Set(events.filter(x=>x.status==='Ziyaret edildi').map(x=>String(x.companyId)));const city=activeCity||getCity(events);if(!city)return [];return allCompanies().filter(x=>norm(x.country)===norm(trip.country)&&norm(x.city)===norm(city)&&!visited.has(String(x.id))&&!events.some(y=>String(y.companyId)===String(x.id))).sort((a,b)=>{const score=x=>(['A+','A','B','C'].indexOf(x.potential||'C')+1);return score(a)-score(b)}).slice(0,5)}
+function toast(msg){const e=$('mh26ModalHint');if(e)e.textContent=msg;alert(msg)}
+function render(){const root=$('marsHome2026');if(!root)return;trip=selectTrip();const es=allEvents();activeCity=getCity(es)||'';
+ const dateText=new Intl.DateTimeFormat('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(day+'T12:00'));
+ const exactActive=trip && String(trip.from).slice(0,10)<=today()&&String(trip.to||trip.from).slice(0,10)>=today();
+ const h=getHotel(),follow=currentRecords().filter(r=>r.type==='visit'||r.type==='fair_visit'||r.type==='task').filter(x=>x.note||x.action).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt))).slice(0,5), recs=suggestions(es),gaps=collectGaps(es);
+ const status=s=>s==='Ziyaret edildi'?'done':s==='Ertelendi'?'later':s==='Boş'?'gap':'';
+ const btn=(label,act,primary=false)=>`<button type="button" class="mh26-btn ${primary?'primary':''}" data-mh26-action="${esc(act)}">${label}</button>`;
+ const eventCard=e=>`<div class="mh26-event ${status(e.status)}"><div class="mh26-when">${esc(e.time||'—')}</div><div><span class="mh26-pill ${status(e.status)}">${esc(e.status||'Randevulu')}</span><div class="mh26-event-title" style="margin-top:6px">${esc(e.company)}</div><div class="mh26-event-desc">${esc([e.person,e.address].filter(Boolean).join(' · ')||e.city||'')}${e.note?'<div>'+esc(e.note)+'</div>':''}</div><div class="mh26-event-actions">${e.address?`<button type="button" class="mh26-btn" data-mh26-action="map" data-address="${esc(e.address)}">Rotayı aç</button>`:''}${e.kind==='custom'?`<button type="button" class="mh26-btn" data-mh26-action="edit" data-id="${esc(e.id)}">Düzenle</button>`:btn('Seyahat planı','tripplan')}${e.kind==='custom'&&e.status!=='Ziyaret edildi'?`<button type="button" class="mh26-btn primary" data-mh26-action="complete" data-id="${esc(e.id)}">Ziyareti tamamla</button>`:''}</div></div></div>`;
+ const agenda=(()=>{let parts=[],last=9*60;for(const e of es){const [hh,mm]=(e.time||'').split(':').map(Number);const start=hh*60+mm;if(Number.isFinite(start)&&start-last>=60)parts.push(`<div class="mh26-event gap"><div class="mh26-when">${mins(last)}</div><div><span class="mh26-pill gap">Boş</span><div class="mh26-event-title" style="margin-top:6px">${mins(last)} – ${mins(start)} · Serbest zaman</div><div class="mh26-event-desc">Şehirdeki uygun firmaları değerlendirebilirsin.</div><div class="mh26-event-actions">${btn('Firma önerileri','suggest')}${btn('Serbest ziyaret ekle','visit')}</div></div></div>`);parts.push(eventCard(e));const [eh,em]=(e.end||'').split(':').map(Number);last=Math.max(last,Number.isFinite(eh)&&Number.isFinite(em)?eh*60+em:start+60)}return parts.length?parts.join(''):`<div class="mh26-empty">${trip?'Bugün için kayıtlı randevu yok. Plan ekleyebilir veya serbest ziyaret kaydedebilirsin.':'Henüz kayıtlı seyahat yok. Yeni seyahat planlamak için Seyahat Planı bölümünü aç.'}</div>`})();
+ root.innerHTML=`<div class="mh26-head"><div><div class="mh26-kicker">Günlük çalışma paneli</div><h1>Bugünün seyahat planı</h1><div class="mh26-muted">${esc(dateText)}</div></div><div class="mh26-actions">${btn('Seyahat Planı','tripplan')}</div></div>
+ <div class="mh26-travel"><section class="mh26-card mh26-trip"><div><div class="mh26-kicker">✈ ${exactActive?'Aktif seyahat':trip?(String(trip.from).slice(0,10)>today()?'Yaklaşan seyahat':'Son seyahat'):'Seyahat seçilmedi'}</div><h2>${trip?esc(trip.country||'Ülke belirtilmemiş')+(activeCity?' / '+esc(activeCity):''):'Henüz seyahat yok'}</h2><div class="mh26-facts">${trip?`<span>📅 ${esc(fullDate(trip.from))} – ${esc(fullDate(trip.to||trip.from))}</span><span>🗂 ${esc(trip.companyCount||trip.schedule?.length||0)} firma</span>`:'<span>Seyahat Planı bölümünden oluştur</span>'}</div></div><div class="mh26-travelbar"><span>📍 ${trip?esc(trip.country):'Yeni seyahat oluştur'}</span>${btn('Arşivi aç','archive')}</div></section>
+ <section class="mh26-card mh26-hotel"><div class="mh26-section-head"><h2>🏨 Konaklama</h2>${btn('✎ Otel Bilgileri','hotel')}</div><div class="mh26-hotel-row"><div class="mh26-hotel-emoji">🏨</div><div><div class="mh26-hotel-name">${esc(h.name||'Henüz otel seçilmedi')}</div><div class="mh26-muted">${esc(h.address||'Adres, telefon ve rezervasyon belgesi ekleyebilirsin.')}</div></div></div><div class="mh26-actions">${h.address?`<button class="mh26-btn" type="button" data-mh26-action="map" data-address="${esc(h.address)}">⌖ Harita</button>`:''}${h.phone?`<button class="mh26-btn" type="button" data-mh26-action="call" data-phone="${esc(h.phone)}">☎ Telefon</button>`:''}${btn('Rezervasyon belgesi','archive')}</div></section></div>
+ <div class="mh26-cols"><div class="mh26-stack"><section class="mh26-card" id="mh26Agenda"><div class="mh26-section-head"><div><h2>Bugünün Programı</h2><div class="mh26-section-sub">Saat sırasıyla randevu ve ziyaret akışı</div></div>${btn('+ Plan / Ziyaret','visit',true)}</div><div class="mh26-agenda">${agenda}</div></section><section class="mh26-card" id="mh26Suggest"><div class="mh26-section-head"><div><h2>Boş Zaman / Uygun Firmalar</h2><div class="mh26-section-sub">Aynı şehirden, henüz bugün ziyaret edilmeyen firmalar</div></div></div>${recs.length?recs.map(c=>`<div class="mh26-suggestion"><div><div class="mh26-name">${esc(c.company)} <span class="mh26-pill">${esc(c.potential||'Yeni')}</span></div><div class="mh26-mini">${esc(c.city||'')} · ${esc(c.address||'Adres girilmemiş')} ${c.lastContact?'· Son temas: '+esc(c.lastContact):''}</div></div><button class="mh26-btn primary" type="button" data-mh26-action="visit" data-company="${esc(c.id)}">+ Rotaya ekle</button></div>`).join(''):`<div class="mh26-empty">${trip&&!activeCity?'Firma önerileri için seyahatte şehir bilgisi gerekli.':'Bu seyahatte uygun firma önerisi bulunamadı. Güncel seyahat ve şehir bilgilerini kontrol edebilirsin.'}</div>`}<div class="mh26-note">Yakınlık ve rota süresi hesaplanmıyor; öneriler kayıtlı şehir ve potansiyel bilgisine göre sıralanır. Harita için yalnızca seçtiğin adres açılır.</div></section></div>
+ <div class="mh26-stack"><section class="mh26-card"><div class="mh26-section-head"><h2>⚡ Hızlı İşlemler</h2></div><div class="mh26-quick">${btn('📷 Fiş Ekle','receipt',true)}${btn('🤝 Plansız Ziyaret','visit')}${btn('🎪 Fuarda Görüşme','fair')}${btn('🏢 Firma Ekle','company')}</div></section><section class="mh26-card"><div class="mh26-section-head"><h2>Günlük Özet</h2><span class="mh26-pill">${esc(fullDate(day))}</span></div><div class="mh26-quick"><div class="mh26-note">📅 <b>${es.filter(x=>x.status==='Randevulu'||x.status==='Planlandı').length}</b><br>Planlı randevu</div><div class="mh26-note">✓ <b>${es.filter(x=>x.status==='Ziyaret edildi').length}</b><br>Tamamlanan</div><div class="mh26-note">⏳ <b>${gaps.length}</b><br>Boş aralık</div><div class="mh26-note">📝 <b>${follow.length}</b><br>Son not</div></div></section><section class="mh26-card"><div class="mh26-section-head"><h2>Son Notlar ve Takip İşleri</h2>${btn('+ Takip','task')}</div>${follow.length?follow.map(x=>`<div class="mh26-follow"><div class="mh26-name">${esc(x.company||x.title||'Görüşme')}</div><div class="mh26-mini">${esc(x.note||'')}${x.action?' · Sonraki aksiyon: '+esc(x.action):''}</div>${x.pending?'<div class="mh26-mini mh26-pending">Bulut eşitlemesi bekleniyor</div>':''}</div>`).join(''):'<div class="mh26-empty">Bu seyahatte henüz görüşme notu veya takip işi eklenmemiş.</div>'}</section><section class="mh26-card"><div class="mh26-section-head"><h2>🎪 Fuar Görüşmeleri</h2></div><div class="mh26-muted">Kartvizit, görüşme notu ve stand bilgileri mevcut Fuar Arşivi’ne kaydedilir.</div><div style="margin-top:12px">${btn('+ Fuarda Yeni Görüşme','fair',true)}</div></section></div></div>`;
+}
+function field(name,label,value='',type='text',extra=''){const opts=type==='select'?`<select name="${esc(name)}">${extra}</select>`:type==='textarea'?`<textarea name="${esc(name)}">${esc(value)}</textarea>`:`<input name="${esc(name)}" type="${type}" value="${esc(value)}" ${type==='date'?'min="2020-01-01"':''}>`;return `<label class="${type==='textarea'?'wide':''}">${esc(label)}${opts}</label>`}
+const opt=(vals,current)=>vals.map(x=>`<option value="${esc(x)}" ${x===current?'selected':''}>${esc(x)}</option>`).join('');
+function showModal(kind,id='',companyId=''){if(!trip){alert('Önce Seyahat Planı bölümünde seyahat oluşturmalısın.');return;}if(kind!=='hotel' && (String(trip.from).slice(0,10)>day||String(trip.to||trip.from).slice(0,10)<day)){alert('Bugüne ait aktif seyahat bulunmadı. Yeni ziyaret için önce Seyahat Planı bölümünde güncel seyahati seçmelisin.');return;}modalMode=kind;editing=id;const old=records.find(x=>x.id===id)||{},c=allCompanies().find(x=>String(x.id)===String(companyId||old.companyId));$('mh26ModalTitle').textContent=kind==='hotel'?'Otel Bilgileri':kind==='task'?'Takip İşi':'Firma Ziyareti';
+ let fields='';if(kind==='hotel'){const h=getHotel();fields=field('name','Otel adı',h.name)+field('phone','Otel telefonu',h.phone,'tel')+field('address','Otel adresi',h.address,'textarea')+field('note','Rezervasyon notu / numarası',h.note,'textarea');}
+ else if(kind==='task'){fields=field('title','Konu / Firma',old.title||'')+field('action','Sonraki aksiyon',old.action||'')+field('note','Not',old.note||'','textarea');}
+ else {const cs=allCompanies().filter(x=>norm(x.country)===norm(trip.country));fields=`<label class="wide">Firma<select name="companyId"><option value="">Yeni / serbest firma</option>${cs.map(x=>`<option value="${esc(x.id)}" ${String(x.id)===String(companyId||old.companyId)?'selected':''}>${esc(x.company)} · ${esc(x.city||'')}</option>`).join('')}</select></label>`+field('company','Firma adı',c?.company||old.company||'')+field('person','Görüşülen kişi',old.person||'')+field('date','Ziyaret tarihi',old.date||day,'date')+field('time','Saat',old.time||nowTime(),'time')+field('status','Durum',old.status||'Randevulu','select',opt(['Randevulu','Planlandı','Ziyaret edildi','Ertelendi'],old.status||'Randevulu'))+field('address','Adres',c?.address||old.address||'','textarea')+field('note','Görüşme sonucu / not',old.note||'','textarea')+field('action','Sonraki aksiyon',old.action||'','select',opt(['','Teklif gönder','Tekrar ara','Fuar sonrası iletişim kur','Yeni randevu al','Diğer'],old.action||''));}
+ $('mh26Fields').innerHTML=fields;$('mh26Overlay').classList.add('open');$('mh26Overlay').setAttribute('aria-hidden','false');$('mh26ModalHint').textContent='Kaydın önce cihazda korunur; ardından buluta gönderilir. Bulut eşitlemesi başarısızsa uyarı gösterilir.';
+ const select=$('mh26Fields').querySelector('[name=companyId]');if(select)select.addEventListener('change',()=>{const c=allCompanies().find(x=>String(x.id)===select.value);if(!c)return;for(const [k,v] of [['company',c.company],['address',c.address]]){const el=$('mh26Fields').querySelector('[name='+k+']');if(el)el.value=v||''}});
+}
+function closeModal(){$('mh26Overlay').classList.remove('open');$('mh26Overlay').setAttribute('aria-hidden','true')}
+async function pushRecord(r){const s=await ensureCloudSession();if(!s?.user?.id)throw Error('Bulut oturumu yok.');await cloudFetch('/rest/v1/mars_crm_sync_records?on_conflict=owner_id,kind,record_id',{method:'POST',headers:cloudHeaders(s.access_token,{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify({owner_id:s.user.id,kind:'trip_file',record_id:r.id,payload:{...r,pending:false},is_deleted:Boolean(r.deleted)})})}
+async function syncCloud(){if(cloudBusy||!navigator.onLine||!window.marsCloudUser||typeof ensureCloudSession!=='function')return;cloudBusy=true;try{const s=await ensureCloudSession();if(!s?.user?.id)return;const data=await cloudFetch('/rest/v1/mars_crm_sync_records?select=record_id,payload,is_deleted&kind=eq.trip_file&owner_id=eq.'+encodeURIComponent(s.user.id)+'&limit=1000',{headers:cloudHeaders(s.access_token)});const remote=(Array.isArray(data)?data:[]).map(row=>({...row.payload,deleted:row.is_deleted||row.payload?.deleted})).filter(x=>x.app===MARK && x.id?.startsWith('mh26_'));const remoteIDs=new Set(remote.map(x=>x.id));const pending=records.filter(x=>x.pending);records=uniqById([...records.filter(x=>!remoteIDs.has(x.id)),...remote,...pending]);saveLocal();for(const item of records.filter(x=>x.pending)){try{await pushRecord(item);item.pending=false;saveLocal()}catch(e){console.warn('Ana Sayfa bulut senkronu:',e.message)}}lastRead=Date.now();render();}catch(e){console.warn('Ana Sayfa verileri henüz eşitlenmedi:',e.message)}finally{cloudBusy=false}}
+async function recordChange(data){const date=new Date().toISOString();let r={app:MARK,id:editing||('mh26_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8)),tripId:tripKey(),type:modalMode,updatedAt:date,createdAt:date,pending:true,...data};const prior=records.find(x=>x.id===r.id);if(prior)r.createdAt=prior.createdAt||date;records=uniqById([...records.filter(x=>x.id!==r.id),r]);saveLocal();render();try{await pushRecord(r);r.pending=false;saveLocal();render()}catch(e){alert('Kayıt bu cihazda korundu ancak buluta aktarılmadı: '+e.message+'\nİnternet bağlantısında yeniden denenecek.')}return r}
+function goFair(){window.marsV903GoFair?.();try{window.mars84Tab?.('cards')}catch(e){}}
+function route(action,el){if(action==='tripplan'){window.marsV903GoTripPlan?.();return}if(action==='archive'){window.marsV903GoArchive?.();return}if(action==='receipt'){if(trip && String(trip.from).slice(0,10)<=day && String(trip.to||trip.from).slice(0,10)>=day && typeof window.openReceiptModal==='function')window.openReceiptModal(trip.id);else window.mars80AddReceipt?.();return}if(action==='company'){window.marsV903GoCompanies?.();try{if(typeof openAdd==='function')openAdd()}catch(e){}return}if(action==='fair'){goFair();return}if(action==='map'){const address=el?.dataset.address;if(address)window.open(mapUrl(address),'_blank','noopener');return}if(action==='call'){if(el?.dataset.phone)location.href='tel:'+el.dataset.phone.replace(/[^+\d]/g,'');return}if(action==='suggest'){$('mh26Suggest')?.scrollIntoView({behavior:'smooth',block:'start'});return}if(action==='hotel'||action==='visit'||action==='task'){showModal(action,'',el?.dataset.company||'');return}if(action==='edit'){showModal('visit',el?.dataset.id||'');return}if(action==='complete'){const r=records.find(x=>x.id===el?.dataset.id);if(!r)return;editing=r.id;modalMode=r.type;recordChange({...r,status:'Ziyaret edildi'}).then(()=>render());return}}
+function setup(){if(initDone)return;initDone=true;const root=$('marsHome2026');if(!root)return;root.addEventListener('click',e=>{const el=e.target.closest('[data-mh26-action]');if(el)route(el.dataset.mh26Action,el)});$('mh26Overlay')?.addEventListener('click',e=>{if(e.target.id==='mh26Overlay'||e.target.closest('[data-mh26-close]'))closeModal()});$('mh26Form')?.addEventListener('submit',async e=>{e.preventDefault();if(!trip)return;const btn=$('mh26Save');btn.disabled=true;try{const raw=Object.fromEntries(new FormData(e.target).entries());if(modalMode==='visit'&&!(raw.company||raw.companyId)){alert('Firma seç veya firma adı yaz.');return}if(modalMode==='visit'){const c=allCompanies().find(x=>String(x.id)===String(raw.companyId));if(c){raw.company=raw.company||c.company;raw.city=c.city||'';raw.address=raw.address||c.address||''}}await recordChange(raw);closeModal()}finally{btn.disabled=false}});
+ const oldHome=window.marsV903GoHome;window.marsV903GoHome=function(...args){const r=typeof oldHome==='function'?oldHome.apply(this,args):undefined;document.body.classList.add('m904Home');window.marsV903SetActive?.('menuHomeBtn');render();if(Date.now()-lastRead>15000)syncCloud();return r};
+ window.marsV904Update=render;
+ window.mars80Home=function(){window.marsV903GoHome();window.scrollTo({top:0,behavior:'smooth'})};
+ window.addEventListener('focus',()=>{if(document.body.classList.contains('m904Home'))syncCloud()});window.addEventListener('online',syncCloud);document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncCloud()});
+ window.addEventListener('storage',e=>{if(e.key===HOME_KEY){records=safeLocal();render()}});
+ setTimeout(()=>{render();syncCloud()},700);setInterval(()=>{if(document.body.classList.contains('m904Home')&&!document.hidden&&Date.now()-lastRead>45000)syncCloud()},60000);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
+})();
+</script>
+
+
+<script id="marsVersionDiagnostic9046">
+(function(){
+  var query=new URLSearchParams(location.search);
+  if(!query.has('surumkontrol'))return;
+  function make(){
+    if(document.getElementById('mars9046Diagnostic'))return;
+    var p=document.createElement('div');p.id='mars9046Diagnostic';
+    p.style.cssText='position:fixed;bottom:calc(88px + env(safe-area-inset-bottom));right:10px;z-index:2147483001;background:#fff;color:#163a39;border:1px solid #b5d5d0;border-radius:12px;padding:10px 12px;box-shadow:0 8px 28px #0003;font:13px system-ui;max-width:260px';
+    var label=document.createElement('strong');label.textContent='MARS CRM v90.46';p.appendChild(label);
+    var info=document.createElement('div');info.textContent='Güncel dosya açıldı';info.style.marginTop='5px';p.appendChild(info);
+    var close=document.createElement('button');close.textContent='Kapat';close.type='button';close.style.cssText='margin-top:8px;background:#e6f1ed;border:0;padding:6px 10px;border-radius:8px';
+    close.onclick=function(){p.remove()};p.appendChild(close);document.body.appendChild(p);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',make,{once:true});else make();
+})();
 </script>
 </body>
