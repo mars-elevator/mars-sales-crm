@@ -520,15 +520,10 @@ button.btn:not(.secondary),.m80Primary{background:#196d61!important;border-radiu
     <button class="sideItem sideDirect" id="menuTripPlanBtn" type="button" onclick="marsV903GoTripPlan()"><span class="sideIcon">◇</span><span>Seyahat Planı</span></button>
     <button class="sideItem sideDirect" id="menuArchiveBtn" type="button" onclick="marsV903GoArchive()"><span class="sideIcon">▤</span><span>Seyahat Arşivi</span></button>
     <button class="sideItem sideDirect" id="menuFairBtn" type="button" onclick="marsV903GoFair()"><span class="sideIcon">◇</span><span>Fuar / Kartvizit</span></button>
-    <button class="sideItem sideDirect" id="menuExpenseBtn" type="button" onclick="marsV903GoExpenses()"><span class="sideIcon">□</span><span>Harcamalar</span></button>
-    <button class="sideItem sideDirect" id="menuFilesBtn" type="button" onclick="marsV903GoFiles()"><span class="sideIcon">◈</span><span>Dosyalar</span></button>
     <button class="sideItem sideDirect" id="menuSettingsBtn" type="button" onclick="marsV903GoSettings()"><span class="sideIcon">⚙</span><span>Ayarlar</span></button>
   </div>
 
-  <div class="sideBottom">
-    <div class="sideStatus ok"><span class="statusDot"></span><span>Mobil + Masaüstü</span></div>
-    <div class="sideStatus" id="sideCloudStatus"><span class="statusDot"></span><span>Bulut: Bağlı değil</span></div>
-  </div>
+
 </aside>
 <header><div class="top"><div><div class="brand">MARS ELEVATOR — Global Sales CRM</div><div class="sub">Firma portföyü • satış takibi • ziyaret ve teklif yönetimi • güncel müşteri ana listesi</div></div><div><button class="btn" onclick="openAdd()">+ Firma Ekle</button></div></div></header>
 <main>
@@ -3630,30 +3625,47 @@ function archiveYearList(records,country){
   return [...new Set(records.filter(r=>r.country===country).map(r=>r.year).filter(Boolean))]
     .sort((a,b)=>b.localeCompare(a));
 }
+// v90.40 - Seyahat Arsivi is a normal CRM view, not a full-screen overlay.
+// Close a leftover travel-report modal before opening the archive; otherwise
+// the report can sit over the archive and prevent folder navigation.
 function openTravelArchive(){
-  bootstrapArchiveFromGeneratedPlans();
-  window.archiveNav={country:null,year:null};
+  try{ if(typeof closeReport==='function') closeReport(); }catch(e){ console.warn('Rapor kapatılamadı',e); }
+  const report=document.getElementById('reportBack');
+  if(report) report.style.display='none';
+  const fair=document.getElementById('mars84Back');
+  if(fair){fair.style.display='none';fair.hidden=true;}
+  document.body.classList.remove('m918FairActive');
   const page=document.getElementById('travelArchivePage');
-  if(page){ page.style.display='block'; page.style.visibility='visible'; page.style.opacity='1'; }
+  const main=document.querySelector('body > main');
+  if(!page || !main){console.error('Seyahat arşivi içerik alanı bulunamadı');return;}
+  if(page.parentElement!==main)main.appendChild(page);
+  const previouslyOpen=document.body.classList.contains('m940ArchiveActive');
+  document.body.classList.add('m940ArchiveActive');
+  if(!previouslyOpen)window.archiveNav={country:null,year:null};
+  page.hidden=false;
+  page.style.display='block';
+  page.style.visibility='visible';
+  page.style.opacity='1';
   renderTravelArchive();
+  window.scrollTo({top:0,behavior:'instant'});
   if(window.marsCloudUser){
-    syncArchiveFromCloud().then(()=>renderTravelArchive()).catch(e=>console.warn('Arşiv bulut senkronu başarısız',e));
+    syncArchiveFromCloud().then(()=>{
+      if(document.body.classList.contains('m940ArchiveActive'))renderTravelArchive();
+    }).catch(e=>console.warn('Arşiv bulut senkronu başarısız',e));
   }
 }
 function closeTravelArchive(){
-  // If a receipt window was opened while the archive was visible,
-  // close it first so it cannot appear after returning to CRM.
   try{
     if(typeof window.marsCloseReceiptStandalone==='function'){
       window.marsCloseReceiptStandalone();
     }else{
       const receipt=document.getElementById('receiptBack');
-      if(receipt) receipt.style.display='none';
+      if(receipt){receipt.classList.remove('receiptVisible');receipt.style.display='none';}
     }
-  }catch(e){}
-
+  }catch(e){console.warn('Fiş ekranı kapatılamadı',e);}
+  document.body.classList.remove('m940ArchiveActive');
   const page=document.getElementById('travelArchivePage');
-  if(page){ page.style.display='none'; }
+  if(page){page.style.display='none';page.hidden=true;}
 }
 function archiveGoRoot(){
   window.archiveNav={country:null,year:null};
@@ -5298,7 +5310,7 @@ function forceInitialDataLoad(){
         <h1>Seyahat Arşivi</h1>
         <div class="small">Ülke → Yıl → Seyahat klasörü → Excel dosyaları</div>
       </div>
-      <button class="btn" type="button" onclick="closeTravelArchive()">CRM'e Dön</button>
+      <!-- v90.40: Sol menü ve mobil alt menüyle gezinilir; ayrı geri düğmesi kaldırıldı. -->
     </div>
     <div id="archiveBreadcrumb" class="archiveBreadcrumb"></div>
     <div id="archiveContent"></div>
@@ -6662,7 +6674,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
  <section id="m84Cards" hidden><button type="button" class="m84Btn light" onclick="mars84Tab('archive')">← Fuar Dosyasına Dön</button><div class="m84Info">Kartviziti kamerayla çek veya galeriden seç. Görsel küçültülerek ayrı saklanır; büyük fotoğraf müşteri kaydını engellemez. OCR önerilerini kontrol edip onayla.</div><div class="m84Form"><label>Bağlı Fuar<select id="m84CardFair"></select></label><div class="m84ImageInputField"><strong>Kartvizit fotoğrafı</strong><div class="m84ImageChoices">
 <label for="m84CameraPhoto" class="m84ImageChoice m84ImageChoiceCamera">📷 Fotoğraf Çek<input type="file" id="m84CameraPhoto" accept="image/*" capture="environment" onchange="mars84CardImage(this)"></label>
 <label for="m84Photo" class="m84ImageChoice m84ImageChoiceGallery">🖼️ Galeriden Seç<input type="file" id="m84Photo" accept="image/*" onchange="mars84CardImage(this)"></label>
-</div><span class="m931AutoLang">🌐 Kartvizit dili otomatik algılanır.</span><span id="m84ImagePicked" class="m84ImagePicked" role="status" aria-live="polite">Henüz fotoğraf seçilmedi.</span></div><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Telefon / WhatsApp<input id="m84CardPhone"></label><label>E-posta<input id="m84CardEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta" role="status" aria-live="polite">Kartvizit ekleyin.</div></label><label class="full">OCR tarafından okunan metin (düzeltilebilir)<textarea id="m84OCRRaw" rows="5" spellcheck="false" placeholder="Fotoğraf okunduktan sonra bulunan yazılar burada görünecek. Gerekirse düzeltip yeniden ayırabilirsin."></textarea><button class="m84Btn light" type="button" onclick="mars915ReparseOCR()">↻ Metinden Alanları Yeniden Ayır</button><small style="display:block;margin-top:6px;color:#587077">Eksik firma ve kişi bilgileri için e-posta, ülke için uluslararası telefon kodu yardımcı ipucu olarak kullanılır. Kaydetmeden önce kontrol et.</small></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
+</div><span class="m931AutoLang">Kartvizit OCR v90.38 · Kamera ve galeri aynı yöntemle okunur.</span><span id="m84ImagePicked" class="m84ImagePicked" role="status" aria-live="polite">Henüz fotoğraf seçilmedi.</span></div><label class="full"><button type="button" class="m84Btn" onclick="mars84ReadCard()">📷 Kartviziti Oku (OCR)</button></label><label>Firma<input id="m84CardCompany"></label><label>Yetkili<input id="m84CardPerson"></label><label>Unvan<input id="m84CardTitle"></label><label>Yetkili Telefonu / WhatsApp<input id="m84CardPhone"></label><label>Yetkili E-postası<input id="m84CardEmail" type="email"></label><label>Şirket Telefonu<input id="m84CardCompanyPhone"></label><label>Şirket E-postası<input id="m84CardCompanyEmail" type="email"></label><label>Web Sitesi<input id="m84CardWeb"></label><label>Ülke<input id="m84CardCountry"></label><label>Şehir<input id="m84CardCity"></label><label class="full">Adres<input id="m84CardAddress"></label><label class="full">Görüşme notu<textarea id="m84CardNote"></textarea></label><label class="full">Kartvizit önizlemesi<div><img id="m84PhotoPreview" class="m84Preview" alt="Kartvizit" style="display:none"></div></label><label class="full"><div id="m84OCRStatus" class="m84Meta" role="status" aria-live="polite">Kartvizit ekleyin.</div></label><label class="full">OCR tarafından okunan metin (düzeltilebilir)<textarea id="m84OCRRaw" rows="5" spellcheck="false" placeholder="Fotoğraf okunduktan sonra bulunan yazılar burada görünecek. Gerekirse düzeltip yeniden ayırabilirsin."></textarea><button class="m84Btn light" type="button" onclick="mars915ReparseOCR()">↻ Metinden Alanları Yeniden Ayır</button><small style="display:block;margin-top:6px;color:#587077">Kişi ve şirket bölümleri ayrı okunur. OCR önerilerini fotoğrafla karşılaştırıp kaydet.</small></label><div class="m84Actions"><button class="m84Btn" type="button" onclick="mars84SaveCard()">Kontrol Ettim, Kaydet</button><button type="button" class="m84Btn light" onclick="mars84ClearCard()">Temizle</button></div></div><h3 style="margin-top:26px">Kaydedilen Kartvizitler</h3><div id="m84CardsList" class="m84Rows"></div></section>
 <section id="m84Archive" hidden aria-label="Fuar arşivi"></section>
  </div></div>
 </section>
@@ -6679,6 +6691,8 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
  let cardImageFile=null;
  let cardImageBusy=false;
  let cardOcrBusy=false;
+ let m937CameraFocused=false; // Original camera pixels crop to the card before JPEG compression.
+ let m937LastDetected={}; // Last OCR-generated values: preserve any user-edited fields.
  function options(el,empty='Ülke seçiniz'){if(!el)return;let v=el.value;el.innerHTML='<option value="">'+empty+'</option>'+window.mars84AllCountries.map(x=>'<option value="'+E(x)+'">'+E(x)+'</option>').join('');if(v)el.value=v}
  function fairOptions(){let rows=read(fk).filter(x=>!window.m919IsFairDeleted?.(x.id));for(let id of ['m84CardFair','mars84TripFair']){const el=$(id);if(!el)continue;const v=el.value;const country=$('rCountry')?.value||'';const match=id==='mars84TripFair'?rows.filter(x=>!country||x.country===country):rows;el.innerHTML='<option value="">Fuar seçiniz</option>'+match.map(x=>'<option value="'+E(x.id)+'">'+E(x.name+' — '+x.city+' ('+x.start+')')+'</option>').join('');el.value=v;}}
  window.mars84OpenFair=()=>{if(!window.marsCloudUser){alert('Fuar verileri için önce CRM hesabına giriş yapmalısınız.');return;}$('mars84Back').style.display='block';mars84Tab('calendar')};
@@ -6814,12 +6828,12 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    const ta=tokens(a),tb=tokens(b);
    return ta.length>=2&&tb.length>=2&&ta.every(t=>tb.includes(t));
  }
+
  function normLine(line){return String(window.MarsGlobalReceiptOCR?.d?.(line)||line||'').replace(/[|]+/g,' ').replace(/\s+/g,' ').trim();}
  function looksLikeAddress(v){return /\b(via|viale|piazza|corso|strada|street|st\.?|road|rd\.?|avenue|ave\.?|boulevard|blvd\.?|rruga|rr\.?|ulitsa|ul\.?|sokak|sk\.?|cadde|caddesi|mahalle|mah\.?|no\.?[: ]\d+|floor|kat|apt\.?|building|postcode|postal|zip|address|adres|indirizzo|sede|localit[aà]|zona industriale)\b/i.test(v)||/شارع|طريق|حي |مدينة|العنوان|العنوان البريدي|صندوق بريد|ص\.\s*ب|بناية|مبنى/.test(v)||/\b\d{4,6}\s+[\p{L}]{3,}/iu.test(v);}
  function companyScore(line,pos){let score=pos<3?2:0;
-   const loc=m932Key(line);
-   if((window.mars84AllCountries||[]).some(country=>m932Key(country)===loc)
-      || /^(?:italy|italia|albania|shqiperia|kosovo|kosova|serbia|srbija|germany|deutschland|turkey|türkiye|romania|bosnia|croatia|montenegro|prishtina|tirana|milano|roma|rome|beograd|belgrade|sarajevo|istanbul|ankara)$/i.test(line))score-=16;
+   const parts=line.split(/\s+/);
+   if(parts.length>5 && !/\b(?:shpk|d\.o\.o|ltd|gmbh|inc|a\.ş|llc|company|group|holding|elevator|lift|ascensor|asans[oö]r)\b/i.test(line))score-=8;
    if(/\b(lift|elevator|ascensor|asans[oö]r|d\.o\.o|sh\.?p\.?k|s\.?r\.?l\.?|ltd\.?|gmbh|a\.?ş\.?|s\.?p\.?a\.?|inc\.?|company|group|holding|engineering|technology|industr|elettric|sistemi|solutions|construction|trade)\b/i.test(line))score+=8;
    if(/^[^a-z]{3,}$/u.test(line)&&/[\p{L}]/u.test(line))score+=3;
    if(/شركة|مؤسسة|مصاعد|للمصاعد|للتجارة|الصناعة|مصنع/.test(line))score+=8;
@@ -6836,118 +6850,389 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    return 4+(words.every(w=>w[0]===w[0].toLocaleUpperCase('tr'))?2:0);
  }
  function parseText(text,reason='ocr'){
-   const rows=String(text||'').split(/\r?\n/).map(normLine).filter(Boolean).slice(0,85);
+   const rows=String(text||'').split(/\r?\n/).map(normLine).filter(Boolean).flatMap(row=>{
+     // Tesseract occasionally merges a large printed name and the title below it.
+     const m=row.match(/^([\p{Lu}][\p{L}'’-]+(?:\s+[\p{Lu}][\p{L}'’-]+){1,3})\s+(CEO|CTO|CFO|COO)$/u);
+     return m?[m[1],m[2]]:[row];
+   }).slice(0,85);
    const full=rows.join('\n');
    const emails=[...full.matchAll(/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/gi)].map(m=>m[0]);
    const phones=[...full.matchAll(/(?:\+|00)?\d[\d\s().\-]{7,}\d/g)].map(m=>m[0].trim()).filter(x=>x.replace(/\D/g,'').length>=9);
    const sites=[...full.matchAll(/(?:https?:\/\/)?(?:www\.)?[\w.-]+\.(?:com|net|org|al|de|it|rs|ba|tr|eu|me|co|io|uk|hr|xk|ro)(?:\.[a-z]{2})?/gi)].map(m=>m[0]).filter(x=>!x.includes('@')&&!emails.some(e=>e.includes(x)));
    const companyTag=rows.find(x=>/^(?:اسم الشركة|الشركة|شركة|المؤسسة|company|firma|kompani|societ[aà]|business|azienda)\s*[:\-]\s*\S/i.test(x));
    const personTag=rows.find(x=>/^(?:الاسم|اسم المسؤول|المسؤول|اسم الشخص|name|contact|person|yetkili|isim|ad soyad|nome|kontakt)\s*[:\-]\s*\S/i.test(x));
-   const emailHint=m932EmailFallback(emails[0]||'');
-   const positions=rows.map((v,i)=>({v,i,score:companyScore(v,i)-(emailHint.person&&m932Similarity(v,emailHint.person)?18:0)})).sort((a,b)=>b.score-a.score);
-   const primaryCompany=companyTag?.replace(/^[^:–-]+[:–-]\s*/,'') || (positions[0]?.score>=5?positions[0].v:'');
-   // Distinctive company text on the card wins; email domain is only a fallback.
-   const company=primaryCompany || emailHint.company;
-   const companyByEmail=!!(!primaryCompany&&emailHint.company);
+   // A person name immediately followed by a role (e.g. KRESHNIK USHINA / CEO)
+   // is not a business name, even when printed in bold uppercase on the first line.
+   const roleAnchor=/^(?:ceo|cto|cfo|coo|president|director|owner|founder|managing\s+director|general\s+manager|sales\s+manager|sales\s+director|engineer|administrator|administratore|drejtor|menaxher|y[oö]netici|m[uü]d[uü]r)\b/i;
+   const likelyPersonBeforeRole=new Set();
+   for(let i=1;i<rows.length;i++)if(roleAnchor.test(rows[i])){
+     if(personScore(rows[i-1])>=4)likelyPersonBeforeRole.add(rows[i-1]);
+   }
+   // A row of one/two-letter fragments or OCR symbols isn't a company.
+   // In older builds the first garbled OCR line still received a high score
+   // just because it was near the top of the card.
+   const m938LegibleName=s=>{
+     const v=String(s||'').trim(),tokens=v.split(/\s+/).filter(Boolean);
+     if(!v||/[<>;{}|]/.test(v)||/^[^\p{L}]+$/u.test(v))return false;
+     if(tokens.length>6||tokens.filter(x=>x.replace(/[^\p{L}]/gu,'').length<3).length>Math.floor(tokens.length*.33))return false;
+     return true;
+   };
+   const positions=rows.map((v,i)=>({v,i,score:m938LegibleName(v)?companyScore(v,i)-(likelyPersonBeforeRole.has(v)?15:0):-20})).sort((a,b)=>b.score-a.score);
+   const taggedCompany=companyTag?.replace(/^[^:–-]+[:–-]\s*/,'')||'';
+   const company=m938LegibleName(taggedCompany)?taggedCompany:(positions[0]?.score>=4?positions[0].v:'');
    const clean=rows.filter(x=>x!==company&&!/@|www\.|https?:|\b(?:tel|fax|phone|mobile|gsm|whatsapp|e-?mail)\b/i.test(x));
    const roles=/\b(manager|director|sales|representative|business development|marketing|ceo|owner|founder|engineer|president|general manager|account manager|commercial|administrator|responsabile|direttore|amministratore|y[oö]netici|m[uü]d[uü]r|sat[iı]ş)\b/i;
-   const role=clean.find(x=>roles.test(x)&&x.length<85);
+   const role=clean.find(x=>roles.test(x)&&x.length<60&&x.split(/\s+/).length<=4&&m938LegibleName(x));
    let person=personTag?.replace(/^[^:–-]+[:–-]\s*/,'')||'';
-   let personFromEmail=false;
-   if(!person){
-     const cands=clean.filter(x=>x!==role).map((v,i)=>({v,score:personScore(v),i})).sort((a,b)=>b.score-a.score);
-     const best=cands[0];
-     // Prefer the printed full name when it agrees with a personal email address.
-     // When OCR cannot find one, use john.smith@company.com as a non-verified suggestion.
-     if(best?.score>=5)person=best.v;
-     if(emailHint.person && (!person || (best?.score<6&&!m932Similarity(person,emailHint.person)))){person=emailHint.person;personFromEmail=true;}
-   }
-   const personByEmail=personFromEmail;
+   // Printed role/name adjacency beats first-line, all-caps or email-based guesses.
+   if(!person&&likelyPersonBeforeRole.size){const found=[...likelyPersonBeforeRole].find(m938LegibleName);if(found)person=found;}
+   if(!person){const cands=clean.filter(x=>x!==role).map((v,i)=>({v,score:personScore(v),i})).sort((a,b)=>b.score-a.score);
+     // Without a title or an explicit name label, long random OCR word groups
+     // must not be presented as verified person names.
+     if(cands[0]?.score>=5 && m938LegibleName(cands[0].v) && (cands[0].v.split(/\s+/).length<=3 || cands[0].v.length>=21 && cands[0].score>=7))person=cands[0].v;}
    let addr=rows.find(x=>/^(?:العنوان|عنوان|adres|address|indirizzo|street address)\s*[:\-]/i.test(x));
    if(addr)addr=addr.replace(/^[^:]+:\s*/,'');
    else {const ai=rows.findIndex(x=>looksLikeAddress(x)&&x!==company&&!/@|www\./.test(x));if(ai>=0){addr=rows[ai];
        for(let j=ai+1;j<Math.min(rows.length,ai+3);j++){
          const next=rows[j]||'';
-         if(!next||/@|www\.|https?:|\b(?:tel|fax|phone|mobile|e-?mail|sales|manager|director)\b/i.test(next))break;
+         if(!next||/@|www\.|https?:|\+\s*\d|\b(?:tel|fax|phone|mobile|e-?mail|sales|manager|director)\b/i.test(next))break;
          if(/\d{4,6}|,|ital|alban|kosov|serb|tirana|milano|belgrad|germany|turkey/i.test(next)||looksLikeAddress(next))addr+=' '+next;
          else break;
        }
    }}
-   const val={m84CardCompany:company,m84CardPerson:person,m84CardTitle:role||'',m84CardEmail:emails[0]||'',m84CardPhone:phones[0]||'',m84CardWeb:sites[0]||'',m84CardAddress:addr||''};
-   const countryLine=rows.find(x=>x!==company&&x!==companyTag&&/\b(italy|italia|albania|shqip[eë]ria|kosovo|kosova|serbia|srbija|romania|bosnia|t[uü]rkiye|turkey|germany|deutschland)\b/i.test(x));
-   if(countryLine){const codes=[[/italy|italia/i,'İTALYA'],[/albania|shqip/i,'ARNAVUTLUK'],[/kosov/i,'KOSOVA'],[/serbia|srbija/i,'SIRBISTAN'],[/romania/i,'ROMANYA'],[/bosnia/i,'BOSNA HERSEK'],[/t[uü]rkiye|turkey/i,'TÜRKİYE'],[/germany|deutschland/i,'ALMANYA']];const hit=codes.find(([r])=>r.test(countryLine));if(hit)val.m84CardCountry=(window.mars84AllCountries||[]).find(c=>m932Key(c)===m932Key(hit[1]))||hit[1];}
-   // Phone prefix is a hint only; printed country/address has higher priority.
-   const phoneCountry=m932CountryFromPhone(phones);
-   if(!val.m84CardCountry && phoneCountry)val.m84CardCountry=phoneCountry.country;
-   const cityMatch=full.match(/\b(milano|rome|roma|tirana|tiran[eë]|durres|durr[eë]s|prishtin[aë]|belgrad|beograd|zagreb|sarajevo|bucharest|bucuresti|istanbul|ankara)\b/i);
+   const uniquePhones=[...new Map(phones.map(p=>[p.replace(/\D/g,''),p])).values()];
+   // Prefer a person's email over the shared mailbox (info@, office@, etc.).
+   const genericMailLocal=/^(?:info|sales|office|contact|admin|support|hello|enquiries|service|marketing|reception|export|import)$/i;
+   const isGeneralMail=e=>{const [local,domain='']=e.split('@');return genericMailLocal.test(local)||local.toLowerCase()===domain.split('.')[0]?.toLowerCase();};
+   const personalMail=emails.find(e=>!isGeneralMail(e))||emails[0]||'';
+   const companyMail=emails.find(e=>e!==personalMail)||'';
+   const val={m84CardCompany:company,m84CardPerson:person,m84CardTitle:role||'',m84CardEmail:personalMail,m84CardPhone:uniquePhones[0]||'',m84CardCompanyPhone:uniquePhones.find(p=>p!==uniquePhones[0])||'',m84CardCompanyEmail:companyMail,m84CardWeb:sites[0]||'',m84CardAddress:addr||''};
+   const countryLine=rows.find(x=>/\b(italy|italia|albania|shqip[eë]ri(?:a)?|kosovo|kosova|serbia|srbija|romania|bosnia|t[uü]rkiye|turkey|germany|deutschland)\b/i.test(x));
+   if(countryLine){const codes=[[/italy|italia/i,'İTALYA'],[/albania|shqip/i,'ARNAVUTLUK'],[/kosov/i,'KOSOVA'],[/serbia|srbija/i,'SIRBISTAN'],[/romania/i,'ROMANYA'],[/bosnia/i,'BOSNA HERSEK'],[/t[uü]rkiye|turkey/i,'TÜRKİYE'],[/germany|deutschland/i,'ALMANYA']];const hit=codes.find(([r])=>r.test(countryLine));if(hit)val.m84CardCountry=hit[1];}
+   const cityExpr=/\b(milano|rome|roma|tirana|tiran[eë]|durres|durr[eë]s|prishtin[aë]|belgrad|beograd|zagreb|sarajevo|bucharest|bucuresti|istanbul|ankara)(?=$|[^\p{L}])/giu;
+   const addressCities=[...String(addr||'').matchAll(cityExpr)];
+   const allCities=[...full.matchAll(cityExpr)];
+   const cityMatch=addressCities.at(-1)||allCities[0];
    if(cityMatch)val.m84CardCity=cityMatch[0];
+   // v90.33: Restore v90.31 scoring and ALWAYS keep a printed person/company result.
+   // Hints are allowed only for fields the original recognizer could not fill.
+   const m933Hint=m932EmailFallback(personalMail);
+   const m933Used=[];
+   if(!val.m84CardCompany&&m933Hint.company){val.m84CardCompany=m933Hint.company;m933Used.push('Firma e-posta alan adından');}
+   if(!val.m84CardPerson&&m933Hint.person){val.m84CardPerson=m933Hint.person;m933Used.push('Yetkili e-posta kullanıcı adından');}
+   const m933PhoneCountry=m932CountryFromPhone(phones);
+   if(!val.m84CardCountry&&m933PhoneCountry){val.m84CardCountry=m933PhoneCountry.country;m933Used.push('Ülke '+m933PhoneCountry.code+' telefon kodundan');}
    let filled=0;for(const [id,value] of Object.entries(val)){
      const input=$(id);if(input&&value&&(!input.value.trim()||reason==='reparse')){input.value=value;filled++;}
    }
-   const status=$('m84OCRStatus');if(status)status.textContent='OCR '+(reason==='reparse'?'yeniden değerlendirildi':'tamamlandı')+' · '+filled+' alan önerildi. '
-     +(companyByEmail?'Firma e-posta alan adından önerildi. ':'')
-     +(personByEmail?'Yetkili e-posta kullanıcı adından önerildi. ':'')
-     +(!countryLine&&phoneCountry?'Ülke '+phoneCountry.code+' telefon kodundan önerildi. ':'')
-     +(!company?'⚠️ Firma bulunamadı; elle gir. ':'')+(!person?'⚠️ Yetkili bulunamadı; elle gir. ':'')+(!addr?'⚠️ Adres bulunamadı; elle gir. ':'')
-     +'Önerileri kartvizitle karşılaştır; telefon kodu ve e-posta kesin kimlik kanıtı değildir.';
+   // Remember only machine-filled fields so a later camera shot can clear
+   // stale OCR garbage without wiping anything that the user typed manually.
+   m937LastDetected={};
+   for(const id of Object.keys(val)){
+     const input=$(id);
+     if(input && input.value && input.value===val[id])m937LastDetected[id]=input.value;
+   }
+   const status=$('m84OCRStatus');if(status)status.textContent='OCR '+(reason==='reparse'?'yeniden değerlendirildi':'tamamlandı')+' · '+filled+' alan önerildi. '+(m933Used.length?'Boş alanlar için tahmin: '+m933Used.join(', ')+'. ': '')+(!val.m84CardCompany?'⚠️ Firma bulunamadı; elle gir. ':'')+(!val.m84CardPerson?'⚠️ Yetkili bulunamadı; elle gir. ':'')+(!addr?'⚠️ Adres bulunamadı; elle gir. ':'')+'Fotoğraf net değilse yanlış tahmini kaydetme; OCR metnini kontrol et. Kamera ile galeri aynı yöntemi kullanır.';
    return val;
  }
  window.mars915ReparseOCR=()=>parseText($('m84OCRRaw')?.value||'','reparse');
 
+ // v90.37: Camera captures are often 4:3 portrait frames with a much smaller
+ // horizontal business card. Resizing the full 12MP image to 1900px first
+ // destroys small letters. Detect and crop the card BEFORE JPEG compression.
+ // Gallery uploads keep the proven older path. This does not change cloud sync.
+ async function m937PrepareCameraPhoto(file){
+   let bitmap=null, image=null, url='';
+   try{
+     // On modern iOS Safari createImageBitmap respects the file's EXIF orientation.
+     // The <img> fallback works for browsers without ImageBitmap decoding.
+     if(typeof createImageBitmap==='function'){
+       try{bitmap=await createImageBitmap(file);}catch(e){console.warn('ImageBitmap fallback',e);}
+     }
+     if(!bitmap){
+       url=URL.createObjectURL(file);
+       image=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('Kamera fotoğrafı açılamadı. JPG fotoğrafla yeniden dene.'));im.src=url;});
+     }
+     const pic=bitmap||image;
+     const w=pic.naturalWidth||pic.width,h=pic.naturalHeight||pic.height;
+     if(!w||!h)throw Error('Fotoğraf boyutları okunamadı');
+     // Cap the working canvas for iOS Safari's memory budget, not the final card.
+     const limit=Math.min(1,3200/Math.max(w,h),Math.sqrt(6500000/(w*h)));
+     const frame=document.createElement('canvas');frame.width=Math.max(1,Math.round(w*limit));frame.height=Math.max(1,Math.round(h*limit));
+     const fc=frame.getContext('2d',{alpha:false});if(!fc)throw Error('Fotoğraf işlenemedi');
+     fc.imageSmoothingEnabled=true;fc.imageSmoothingQuality='high';
+     fc.drawImage(pic,0,0,frame.width,frame.height);
+     const box=m935DarkCardBox(frame);
+     let rect={x:0,y:0,w:1,h:1},focused=false;
+     if(box){
+       const aspect=frame.width*box.w/(frame.height*box.h),coverage=box.w*box.h;
+       // Accept only a plausible physical card, to avoid cropping dark clothing
+       // or a random black patch in the photo.
+       if(aspect>=1.25&&aspect<=2.3&&coverage>=.09&&box.w>.4&&box.h>.16){
+         const padx=box.w*.034,pady=box.h*.045;
+         const x=Math.max(0,box.x-padx),y=Math.max(0,box.y-pady);
+         rect={x,y,w:Math.min(1-x,box.w+2*padx),h:Math.min(1-y,box.h+2*pady)};
+         focused=true;
+       }
+     }
+     const sw=frame.width*rect.w,sh=frame.height*rect.h;
+     const scale=Math.min(2.2,focused?2400/Math.max(sw,sh):2500/Math.max(sw,sh));
+     const result=document.createElement('canvas');
+     result.width=Math.max(1,Math.round(sw*scale));result.height=Math.max(1,Math.round(sh*scale));
+     const ctx=result.getContext('2d',{alpha:false});if(!ctx)throw Error('Kamera fotoğrafı dönüştürülemedi');
+     ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+     ctx.drawImage(frame,frame.width*rect.x,frame.height*rect.y,sw,sh,0,0,result.width,result.height);
+     const blob=await new Promise((resolve,reject)=>result.toBlob(b=>b?resolve(b):reject(Error('Fotoğraf JPEG olarak hazırlanamadı')),'image/jpeg',.90));
+     return {blob,focused,sourceWidth:w,sourceHeight:h,resultWidth:result.width,resultHeight:result.height};
+   }finally{try{bitmap?.close?.();}catch(e){} if(url)URL.revokeObjectURL(url);}
+ }
+ window.m937PrepareCameraPhoto=m937PrepareCameraPhoto;
  window.mars84CardImage=async(input)=>{
   const f=input.files?.[0];if(!f)return;
-  const otherId=input.id==='m84Photo'?'m84CameraPhoto':'m84Photo';const other=$(otherId);if(other)other.value='';
-  cardImage='';cardImageFile=null;cardImageBusy=true;
+  const camera=input.id==='m84CameraPhoto';
+  const otherId=camera?'m84Photo':'m84CameraPhoto';const other=$(otherId);if(other)other.value='';
+  cardImage='';cardImageFile=null;cardImageBusy=true;m937CameraFocused=false;
+  // Clear previous automatic suggestions only. Manually corrected inputs stay.
+  for(const [id,last] of Object.entries(m937LastDetected)){
+    const field=$(id);if(field && field.value===last)field.value='';
+  }
+  m937LastDetected={};
+  if($('m84OCRRaw'))$('m84OCRRaw').value='';
   const label=$('m84ImagePicked');if(label)label.textContent='Fotoğraf hazırlanıyor…';
-  try{if(f.size>25*1024*1024)throw Error('25 MB üzerindeki görselleri telefon galerisinden daha küçük seç.');
+  try{
+    if(f.size>25*1024*1024)throw Error('25 MB üzerindeki görselleri daha küçük seç.');
+    // v90.38: Camera and gallery must feed the EXACT SAME pixels/decoder path
+    // to OCR. The v90.37 iPhone-only pre-crop produced false cutouts and
+    // different recognition from a gallery upload of the same card.
+    // Preserve the known-working gallery settings, including iOS EXIF handling
+    // by HTMLImageElement, instead of a createImageBitmap/crop detour.
     const blob=await imgToJpeg(f,1900,.80);
+    m937CameraFocused=false;
     cardImage=await readCardFile(blob);cardImageFile=blob;
     $('m84PhotoPreview').src=cardImage;$('m84PhotoPreview').style.display='block';
-    if(label)label.textContent='Seçildi: '+f.name+' · OCR için '+Math.round(blob.size/1024)+' KB olarak hazırlandı.';
+    if(label)label.textContent='Seçildi: '+f.name+' · OCR için '+Math.round(blob.size/1024)+' KB. '+(camera?'Kamera ve galeri aynı OCR hazırlığını kullanıyor.':'Galeriden görüntü hazırlandı.');
     if($('m84OCRStatus'))$('m84OCRStatus').textContent='Fotoğraf hazır. “Kartviziti Oku” ile bilgileri ayır.';
-  }catch(err){cardImage='';cardImageFile=null;input.value='';if(label)label.textContent='Görsel hazırlanamadı: '+err.message;}
+  }catch(err){cardImage='';cardImageFile=null;m937CameraFocused=false;input.value='';if(label)label.textContent='Görsel hazırlanamadı: '+err.message; if($('m84OCRStatus'))$('m84OCRStatus').textContent='Kamera hatası: '+err.message;}
   finally{cardImageBusy=false;}
  };
+ // v90.35 — Read the actual pixels before trying to infer names from noisy text.
+ // Dark cards (white letters on black) are cropped from a lighter background,
+ // then their identity/contact and company/address regions are OCR'd separately.
+ // No external photo upload: recognition stays in this device's browser.
+ async function m935ImageCanvas(src){
+   const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(Error('Kartvizit görüntüsü açılamadı'));i.src=src;});
+   const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+   const scale=Math.min(1,2200/Math.max(w,h));
+   const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*scale));c.height=Math.max(1,Math.round(h*scale));
+   c.getContext('2d',{alpha:false}).drawImage(img,0,0,c.width,c.height);return c;
+ }
+ function m935DarkCardBox(canvas){
+   // Black/grey cards have low colour saturation; desks generally have warmer
+   // tones even when equally dark. A short 5px rolling window resists text lines.
+   const tw=360,th=Math.max(100,Math.round(canvas.height*tw/canvas.width));
+   const t=document.createElement('canvas');t.width=tw;t.height=th;
+   const ctx=t.getContext('2d',{willReadFrequently:true});ctx.drawImage(canvas,0,0,tw,th);
+   const a=ctx.getImageData(0,0,tw,th).data;
+   const tone=(x,y)=>{const i=(y*tw+x)*4,r=a[i],g=a[i+1],b=a[i+2];
+     const hi=Math.max(r,g,b),lo=Math.min(r,g,b),avg=(r+g+b)/3;
+     return (hi-lo<43 && avg<183)?1:0;
+   };
+   const ratio=(x0,y0,x1,y1,dx,dy)=>{let hit=0,n=0;
+     for(let y=y0;y<y1;y+=dy)for(let x=x0;x<x1;x+=dx){hit+=tone(x,y);n++;}
+     return hit/Math.max(1,n);
+   };
+   const center=ratio(Math.round(tw*.4),Math.round(th*.4),Math.round(tw*.6),Math.round(th*.6),3,3);
+   const corners=(ratio(0,0,Math.round(tw*.14),Math.round(th*.15),2,2)+ratio(Math.round(tw*.86),Math.round(th*.85),tw,th,2,2))/2;
+   if(center<.55||center-corners<.35)return null;
+   const row=y=>ratio(Math.round(tw*.28),Math.max(0,y-2),Math.round(tw*.72),Math.min(th,y+3),3,1);
+   const col=x=>ratio(Math.max(0,x-2),Math.round(th*.27),Math.min(tw,x+3),Math.round(th*.73),1,3);
+   const boundary=.48;
+   let top=Math.floor(th/2),bottom=top,left=Math.floor(tw/2),right=left;
+   while(top>3&&row(top-1)>boundary)top--;
+   while(bottom<th-4&&row(bottom+1)>boundary)bottom++;
+   while(left>3&&col(left-1)>boundary)left--;
+   while(right<tw-4&&col(right+1)>boundary)right++;
+   if(right-left<tw*.47||bottom-top<th*.27)return null;
+   const padX=(right-left)*.018,padY=(bottom-top)*.018;
+   const x0=Math.max(0,left+padX),y0=Math.max(0,top+padY);
+   const x1=Math.min(tw,right-padX),y1=Math.min(th,bottom-padY);
+   if(x1<=x0||y1<=y0)return null;
+   return {x:x0/tw,y:y0/th,w:(x1-x0)/tw,h:(y1-y0)/th};
+ }
+ function m935Crop(canvas,rect,brighten){
+   const sw=canvas.width*rect.w,sh=canvas.height*rect.h;
+   const scale=Math.min(3,Math.max(1,1850/sw));
+   const out=document.createElement('canvas');out.width=Math.max(1,Math.round(sw*scale));out.height=Math.max(1,Math.round(sh*scale));
+   const ctx=out.getContext('2d',{alpha:false});
+   ctx.fillStyle='#fff';ctx.fillRect(0,0,out.width,out.height);
+   ctx.filter=brighten?'grayscale(1) contrast(1.35) brightness(1.10)':'none';
+   ctx.drawImage(canvas,canvas.width*rect.x,canvas.height*rect.y,sw,sh,0,0,out.width,out.height);
+   return out;
+ }
+ // v90.38: Inverted, high-contrast crop for white letters on dark cards.
+ // Tesseract generally recognizes dark ink on a light background more reliably.
+ function m938InvertCrop(source,rect){
+   const base=m935Crop(source,rect,false);
+   const out=document.createElement('canvas');out.width=base.width;out.height=base.height;
+   const ctx=out.getContext('2d',{alpha:false});
+   ctx.filter='grayscale(1) invert(1) contrast(1.45)';
+   ctx.drawImage(base,0,0);return out;
+ }
+ function m938SingleLine(t){
+   const line=String(t||'').split(/\r?\n/).map(x=>x.replace(/[^\p{L}\s'’.-]/gu,' ').replace(/\s+/g,' ').trim()).filter(Boolean)[0]||'';
+   const words=line.split(/\s+/).filter(Boolean);
+   return words.length>=2&&words.length<=4&&words.every(x=>x.replace(/[.'’]/g,'').length>=3)&&line.length>=8?line:'';
+ }
+ function m935NormalizeText(raw){
+   // Keep the top and bottom blocks in reading order, drop exact duplicate lines.
+   const seen=new Set(),rows=[];
+   for(const line of raw.split(/\r?\n/)){
+     const v=line.trim(),key=v.toLocaleLowerCase('tr').replace(/\s+/g,' ');
+     if(v && !seen.has(key)){seen.add(key);rows.push(v);}
+   }
+   return rows.join('\n');
+ }
+ async function m935ReadDarkCard(source,box,progress){
+   const full={x:box.x,y:box.y,w:box.w,h:box.h};
+   const top={x:full.x+.05*full.w,y:full.y+.04*full.h,w:.90*full.w,h:.51*full.h};
+   const bottom={x:full.x+.05*full.w,y:full.y+.51*full.h,w:.90*full.w,h:.45*full.h};
+   let worker=null;
+   try{
+     worker=await window.Tesseract.createWorker('eng',1,{logger:m=>{
+       if(m?.status==='recognizing text')progress?.('Kartvizit okunuyor · %'+Math.round(m.progress*100));
+     }});
+     // On the real Kreshnik Ushina black card the full-page OCR damaged the
+     // name, but single-line OCR of the upper-left name zone read it exactly.
+     // Apply it only if a role/title line is also detected, to avoid treating
+     // an arbitrary two-word company logo as a person's name.
+     const nameZone={x:full.x+.07*full.w,y:full.y+.13*full.h,w:.70*full.w,h:.13*full.h};
+     const roleZone={x:full.x+.07*full.w,y:full.y+.255*full.h,w:.48*full.w,h:.10*full.h};
+     progress?.('İsim satırı ayrı okunuyor…');
+     await worker.setParameters({tessedit_pageseg_mode:'7'});
+     const nameText=(await worker.recognize(m938InvertCrop(source,nameZone)))?.data?.text||'';
+     const nameLine=m938SingleLine(nameText);
+     const roleText=(await worker.recognize(m938InvertCrop(source,roleZone)))?.data?.text||'';
+     const roleLine=/\b(?:CEO|CFO|CTO|COO|DIRECTOR|OWNER|FOUNDER|MANAGER)\b/i.test(roleText)?roleText.trim():'';
+     progress?.('Diğer iletişim satırları okunuyor…');
+     await worker.setParameters({tessedit_pageseg_mode:'11'});
+     const upperSparse=(await worker.recognize(m935Crop(source,top,false)))?.data?.text||'';
+     await worker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});
+     const upperBlock=(await worker.recognize(m935Crop(source,top,false)))?.data?.text||'';
+     progress?.('Firma ve adres okunuyor…');
+     const lowerBase=(await worker.recognize(m935Crop(source,bottom,false)))?.data?.text||'';
+     const lowerInverted=(await worker.recognize(m938InvertCrop(source,bottom)))?.data?.text||'';
+     const lowerEvidence=t=>((String(t).match(/(?:@|\+\d|sh\.?p\.?k|s\.?r\.?l|d\.?o\.?o|street|rruga|adres|address|tirana|shqip)/gi)||[]).length);
+     const lowerBlock=lowerEvidence(lowerInverted)>lowerEvidence(lowerBase)?lowerInverted:lowerBase;
+     // Keep sparse-text first to preserve title/name adjacency; append only
+     // missing contact lines from block OCR, avoiding duplicated noisy guesses.
+     const supplemental=upperBlock.split(/\r?\n/).filter(line=>
+       /(?:\+|00)\s*\d[\d .()-]{7,}|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(line) &&
+       !upperSparse.includes(line.trim()));
+     let best=m935NormalizeText([...(nameLine&&(roleLine||/\b(?:CEO|DIRECTOR|MANAGER)\b/i.test(upperSparse+' '+upperBlock))?[nameLine,roleLine].filter(Boolean):[]),upperSparse,...supplemental,lowerBlock].join('\n'));
+     let score=window.MarsGlobalReceiptOCR.quality(best,'card');
+     // Single-pass, high-contrast OCR is a last fallback, not the default.
+     if(score<17){
+       progress?.('Farklı kontrastla tekrar kontrol ediliyor…');
+       const r=await worker.recognize(m935Crop(source,full,true));
+       const extra=r?.data?.text||'';
+       if(window.MarsGlobalReceiptOCR.quality(extra,'card')>score){best=extra;score=window.MarsGlobalReceiptOCR.quality(best,'card');}
+     }
+     return {text:best,score};
+   }finally{try{await worker?.terminate();}catch(_){}}
+ }
+ // v90.36 — Protect Latin business cards against accidental Arabic/Cyrillic
+ // hallucinations from the multi-script receipt OCR fallback. The receipt OCR
+ // remains unchanged; only business-card candidate selection is restricted.
+ function m936FairCountry(){
+   const selected=$('m84CardFair')?.value||'';
+   const fair=read(fk).find(x=>String(x.id)===String(selected));
+   return String($('m84CardCountry')?.value||fair?.country||'');
+ }
+ function m936CardAlphabet(context,latinText){
+   const c=String(context||'').toLocaleUpperCase('tr');
+   const t=String(latinText||'');
+   // A legible Latin email or Latin-only corporate marker is stronger evidence
+   // than the country of the trade fair (international visitors are common).
+   const latinEvidence=/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}|\b(?:sh\.?p\.?k|d\.?o\.?o|s\.?r\.?l|ltd|gmbh|company)\b/i.test(t);
+   if(latinEvidence||/(?:\+|00)\s*(?:355|383|39|90|49|33|34|44|387|381|389)\b/.test(t))return 'latin';
+   if(/ARAB|SUUDI|SAUDI|IRA[KQ]|MISIR|EGYPT|CEZAY|ALGER|FAS|MOROCC|TUNUS|TUNIS|KATAR|QATAR|KUVEYT|KUWAIT|BAHREYN|BAHRAIN|UMMAN|OMAN|BIRLESIK ARAP|UNITED ARAB|DUBAI|BAE|JORDAN|URDUN|LIBYA|LUBNAN|LEBANON|YEMEN|SURIYE|SYRIA/.test(c))return 'arabic';
+   if(/RUS|BULGAR|SIRB|SERB|MAKED|UKRAY|BELARUS|KAZAK|KIRGIZ/.test(c))return 'cyrillic';
+   if(/YUNAN|GREEC|HELLAS/.test(c))return 'greek';
+   return 'latin';
+ }
+ function m936CardScriptCompatible(text,mode){
+   const t=String(text||'');
+   const arabic=(t.match(/[\u0600-\u06ff]/g)||[]).length;
+   const cyrillic=(t.match(/[\u0400-\u052f]/g)||[]).length;
+   const greek=(t.match(/[\u0370-\u03ff]/g)||[]).length;
+   if(mode==='latin')return arabic<3&&cyrillic<3&&greek<3;
+   if(mode==='arabic')return arabic>=5;
+   if(mode==='cyrillic')return cyrillic>=5;
+   if(mode==='greek')return greek>=5;
+   return true;
+ }
+ window.mars936CardAlphabet=m936CardAlphabet;
+ window.mars935DetectDarkCard=m935DarkCardBox;
  window.mars84ReadCard=async()=>{
-  if(cardImageBusy){$('m84OCRStatus').textContent='Fotoğraf hazırlanıyor; hemen ardından tekrar dene.';return;}
-  if(!cardImage){alert('Önce kartvizit fotoğrafı ekle.');return;}
-  if(cardOcrBusy)return;cardOcrBusy=true;
-  $('m84OCRStatus').textContent='Kartvizit okunuyor…';
-  try{
-    if(!window.Tesseract){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
-    let result;
-    const profile='auto';
-    const decoded=await window.MarsGlobalReceiptOCR.recognize(cardImage,profile,$('m84CardCountry')?.value||'',msg=>{$('m84OCRStatus').textContent=msg;},'card');
-    result={data:{text:decoded.text}};
-    let raw=(result?.data?.text||'').trim();
-    // Low-contrast cards may have separate name/address text blocks. Try sparse text
-    // recognition once if the first pass returns too little; never overwrite handwritten edits.
-    if(raw.replace(/\s/g,'').length<48 || raw.split(/\r?\n/).filter(x=>x.trim()).length<3){
-      try{
-        $('m84OCRStatus').textContent='Kartvizitte ek alanlar kontrol ediliyor…';
-        const mode=(decoded.profile||'latin').split(' ')[0];
-        const second=await window.Tesseract.recognize(cardImage,window.MarsGlobalReceiptOCR.langs(mode,$('m84CardCountry')?.value||'').join('+'),{tessedit_pageseg_mode:'11'});
-        const extra=(second?.data?.text||'').trim();
-        if(window.MarsGlobalReceiptOCR.quality(extra,'card')>window.MarsGlobalReceiptOCR.quality(raw,'card'))raw=extra;
-      }catch(_ignored){}
-    }
-    if($('m84OCRRaw'))$('m84OCRRaw').value=raw;
-    if(raw)parseText(raw);else $('m84OCRStatus').textContent='Yazı okunamadı. Kartviziti daha aydınlık ve düz fotoğraflayarak dene.';
-  }catch(err){$('m84OCRStatus').textContent='OCR çalıştırılamadı: '+err.message+'. Alanları elle doldurabilirsin.';}
-  finally{cardOcrBusy=false;}
+   if(cardImageBusy){$('m84OCRStatus').textContent='Fotoğraf hazırlanıyor. Birazdan tekrar dene.';return;}
+   if(!cardImage){alert('Önce kartvizit fotoğrafı ekle.');return;}
+   if(cardOcrBusy)return;cardOcrBusy=true;
+   const status=$('m84OCRStatus');status.textContent='Görüntü hazırlanıyor…';
+   try{
+     if(!window.Tesseract){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
+     const image=await m935ImageCanvas(cardImage);
+     const darkBox=m935DarkCardBox(image);
+     let raw='',score=0;
+     if(darkBox||m937CameraFocused){
+       try{
+         // A pre-cropped camera image fills the canvas; the desk/background
+         // contrast used by m935DarkCardBox is no longer present.
+         const found=await m935ReadDarkCard(image,m937CameraFocused?{x:0,y:0,w:1,h:1}:darkBox,msg=>status.textContent=msg);
+         raw=found.text.trim();score=found.score;
+       }catch(e){console.warn('Koyu kartvizit okuması atlandı; genel OCR deneniyor',e);}
+     }
+     if(!raw||score<17){
+       const context=m936FairCountry();
+       const alphabet=m936CardAlphabet(context,raw);
+       status.textContent='Kartvizitin yazıları kontrol ediliyor…';
+       // Never use generic 'auto' here: it may compare an Arabic hallucination
+       // on a Latin card against a weak but correct English OCR result.
+       const decoded=await window.MarsGlobalReceiptOCR.recognize(cardImage,alphabet,context,msg=>status.textContent=msg,'card');
+       const candidate=(decoded?.text||'').trim();
+       const candidateScore=window.MarsGlobalReceiptOCR.quality(candidate,'card');
+       if(m936CardScriptCompatible(candidate,alphabet)&&candidateScore>score){
+         raw=candidate;score=candidateScore;
+       }
+       // If language wasn't known, do not switch to Arabic just because its
+       // OCR score was high: a Latin business card can otherwise turn into
+       // plausible-looking Arabic gibberish. Arabic receipts still use auto.
+     }
+     if($('m84OCRRaw'))$('m84OCRRaw').value=raw;
+     if(!raw){status.textContent='Yazı okunamadı. Fotoğrafı yakından, yansıma olmadan çek.';return;}
+     // A long, random-looking text is not a correct business-card parse.
+     // Don't confidently assign personal/company names without any email, phone or title.
+     const hasContact=/[\w.+-]+@[\w.-]+\.[a-z]{2,}|(?:\+|00)\s*\d[\d ()-]{7,}/i.test(raw);
+     if(!hasContact && score<11){
+       status.textContent='⚠️ Kartvizit yeterince net okunamadı; alanları yanlış doldurmamak için boş bıraktım. Fotoğrafı yakından ve yansıma olmadan yeniden çek.';
+       return;
+     }
+     parseText(raw);
+     if(darkBox && status.textContent.startsWith('OCR '))status.textContent+=' · Koyu kartvizit iki bölümde okunup birleştirildi.';
+   }catch(err){status.textContent='OCR çalıştırılamadı: '+err.message+'. Alanları elle doldurabilirsin.';}
+   finally{cardOcrBusy=false;}
  };
  window.mars84ClearCard=()=>{
-   for(const id of ['m84CardCompany','m84CardPerson','m84CardTitle','m84CardPhone','m84CardEmail','m84CardWeb','m84CardCountry','m84CardCity','m84CardAddress','m84CardNote','m84OCRRaw'])if($(id))$(id).value='';
+   for(const id of ['m84CardCompany','m84CardPerson','m84CardTitle','m84CardPhone','m84CardEmail','m84CardCompanyPhone','m84CardCompanyEmail','m84CardWeb','m84CardCountry','m84CardCity','m84CardAddress','m84CardNote','m84OCRRaw'])if($(id))$(id).value='';
    $('m84Photo').value='';$('m84CameraPhoto').value='';$('m84PhotoPreview').style.display='none';
    const picked=$('m84ImagePicked');if(picked)picked.textContent='Henüz fotoğraf seçilmedi.';
-   cardImage='';cardImageFile=null;cardImageBusy=false;
+   cardImage='';cardImageFile=null;cardImageBusy=false;m937CameraFocused=false;m937LastDetected={};
  };
  window.mars84SaveCard=async()=>{
    const f=$('m84CardFair').value,company=$('m84CardCompany').value.trim();
    if(!company){alert('Firma adı girilmeli.');return false;}
    if(cardImageBusy){alert('Fotoğraf hazırlanırken kaydetme.');return false;}
    const x={id:'card_'+Date.now()+'_'+Math.random().toString(16).slice(2,7),fairId:f,createdAt:new Date().toISOString()};
-   for(const [k,id] of Object.entries({company:'m84CardCompany',person:'m84CardPerson',title:'m84CardTitle',phone:'m84CardPhone',email:'m84CardEmail',website:'m84CardWeb',country:'m84CardCountry',city:'m84CardCity',address:'m84CardAddress',note:'m84CardNote'}))x[k]=$(id).value.trim();
+   for(const [k,id] of Object.entries({company:'m84CardCompany',person:'m84CardPerson',title:'m84CardTitle',phone:'m84CardPhone',email:'m84CardEmail',companyPhone:'m84CardCompanyPhone',companyEmail:'m84CardCompanyEmail',website:'m84CardWeb',country:'m84CardCountry',city:'m84CardCity',address:'m84CardAddress',note:'m84CardNote'}))x[k]=$(id).value.trim();
    // Avoid multi-MB Base64 photos in localStorage; save only compact metadata.
    let storedLocally=false,storedInCloud=false,photoIssue='';
    if(cardImageFile){
@@ -6970,7 +7255,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
    alert('Kartvizit cihazda kaydedildi. Bulut Yedekleme ekranını ve diğer cihazda fotoğrafı doğrulamadan aslı atmayın. '+status+(photoIssue?' Ayrıntı: '+photoIssue:''));
    return true;
  };
- window.mars84RenderCards=()=>{let fairMap=Object.fromEntries(read(fk).map(x=>[x.id,x.name]));$('m84CardsList').innerHTML=read(ck).slice().reverse().map(x=>'<div class="m84Card"><strong>'+E(x.company)+'</strong><div class="m84Meta">'+E(fairMap[x.fairId]||'Fuar seçilmedi')+' · '+E(x.person)+' · '+E(x.phone)+'</div><div>'+E(x.email)+'</div><div class="m84Actions">'+((x.photo||x.photoLocalId||x.photoPath)?'<button type="button" class="m84Btn light" onclick="mars915ShowCardPhoto(\''+E(x.id)+'\')">📷 Fotoğrafı Gör</button>':'')+'<button class="m84Btn light" onclick="mars84DeleteCard(\''+E(x.id)+'\')">Sil</button></div></div>').join('')||'<div class="m84Empty">Henüz kartvizit eklenmedi.</div>'};
+ window.mars84RenderCards=()=>{let fairMap=Object.fromEntries(read(fk).map(x=>[x.id,x.name]));$('m84CardsList').innerHTML=read(ck).filter(x=>!x.deletedAt).slice().reverse().map(x=>'<div class="m84Card"><strong>'+E(x.company)+'</strong><div class="m84Meta">'+E(fairMap[x.fairId]||'Fuar seçilmedi')+' · '+E(x.person)+' · '+E(x.phone)+'</div><div>'+E(x.email)+'</div><div class="m84Meta">'+[x.companyPhone&&('Şirket tel: '+x.companyPhone),x.companyEmail&&('Şirket e-posta: '+x.companyEmail)].filter(Boolean).map(E).join(' · ')+'</div><div class="m84Actions">'+((x.photo||x.photoLocalId||x.photoPath)?'<button type="button" class="m84Btn light" onclick="mars915ShowCardPhoto(\''+E(x.id)+'\')">📷 Fotoğrafı Gör</button>':'')+'<button class="m84Btn light" onclick="mars84DeleteCard(\''+E(x.id)+'\')">Sil</button></div></div>').join('')||'<div class="m84Empty">Henüz kartvizit eklenmedi.</div>'};
  window.mars84DeleteCard=id=>{if(!confirm('Kartvizit silinsin mi?'))return;write(ck,read(ck).filter(x=>x.id!==id));mars84RenderCards()};
  function boot(){options($('m84Country'),'Tüm Ülkeler');options($('m84AddCountry'));fairOptions();const r=$('rCountry');r?.addEventListener('change',()=>setTimeout(()=>fairOptions(),0));}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{boot();setTimeout(()=>migrateLegacyCardPhotos().catch(console.warn),2000)});else{boot();setTimeout(()=>migrateLegacyCardPhotos().catch(console.warn),2000)}
@@ -6987,7 +7272,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
   let active=null;
   function info(message, bad){
     const el=document.getElementById('mars85SyncStatus');
-    if(el){el.hidden=false;el.textContent=message;el.style.borderColor=bad?'#e7a3a3':'#bedad7';el.style.color=bad?'#9a2323':'#285348';}
+    if(el){el.hidden=!bad;el.textContent=message;el.style.borderColor=bad?'#e7a3a3':'#bedad7';el.style.color=bad?'#9a2323':'#285348';}
   }
   window.mars88CloudDetails=async function(){
     try{
@@ -7348,7 +7633,10 @@ function cardQuality(text){
  const phone=(t.match(/\+?\d[\d\s().-]{6,}\d/g)||[]).length;
  const letters=(t.match(/[A-Za-zÀ-ž\u0400-\u052f\u0600-\u06ff\u0370-\u03ff]/g)||[]).length;
  const scripts=(t.match(/[\u0600-\u06ff\u0400-\u052f\u0370-\u03ff]/g)||[]).length;
- return Math.min(20,Math.min(mail,2)*6+Math.min(web,2)*3+Math.min(phone,2)*2+Math.min(lines.length,6)*.6+Math.min(letters,60)*.045+(scripts>=6?3:0));
+ const namedRole=lines.some((line,i)=>i>0 && /^(?:CEO|CTO|CFO|COO|director|owner|managing director|general manager|drejtor|menaxher)\b/i.test(line.trim()) && /^[\p{L}\s'’.-]{5,60}$/u.test(lines[i-1]));
+ const organization=lines.some(line=>/\b(?:sh\.?p\.?k\.?|d\.?o\.?o\.?|ltd\.?|s\.?r\.?l\.?|gmbh|ascensor|asansor|lift|elevator)\b/i.test(line));
+ const address=lines.some(line=>/\b(?:rruga|street|road|via|viale|cadde|adres|address|shqip[eë]ri)\b/i.test(line));
+ return Math.min(32,Math.min(mail,2)*5+Math.min(web,2)*2+Math.min(phone,2)*2+Math.min(lines.length,7)*.5+Math.min(letters,60)*.03+(scripts>=6?2:0)+(namedRole?5:0)+(organization?5:0)+(address?3:0));
 }
 function quality(text,purpose='receipt'){
  if(purpose==='card')return cardQuality(text);
@@ -7388,7 +7676,7 @@ async function recognize(image,mode='auto',context='',progress,purpose='receipt'
  for(let j=0;j<candidates.length;j++){
   // Fast path for clear Western or regional receipts/cards. For unclear text,
   // automatically try another writing system. No language selector is required.
-  const confidenceTarget=purpose==='card'?11:12;
+  const confidenceTarget=purpose==='card'?21:12;
   if(j>0&&best.score>=confidenceTarget)break;
   // Avoid excessive language-model downloads when there are no legible words.
   if(j>2 && (!best.text || best.score<3))break;
@@ -7458,7 +7746,7 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
 
   function setStatus(str) {
     lastStatus = str;
-    const el=$('m90FairSyncStatus'); if(el) el.textContent=str;
+    const el=$('m90FairSyncStatus'); if(el){ el.textContent=str; el.hidden=!/(?:hata|başarısız|reddedil|erişilem|oturum|engell|yüklenemedi|aktarım hatası|⚠|⛔)/i.test(str); }
   }
   function saveEvents(events) {
     localStorage.setItem(KEY, JSON.stringify(events));
@@ -7483,7 +7771,7 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
   function fairById(id) { return readArray(FAIR_KEY).find(f=>f.id===id); }
   function deletedFairIds(){return new Set(readArray(KEY).filter(e=>e?.app===MARK && e.type==='fair_deleted').map(e=>e.fairId));}
   function isFairDeleted(fairId){return deletedFairIds().has(fairId);}
-  function cards(fairId) { return readArray(CARD_KEY).filter(c=>c.fairId===fairId); }
+  function cards(fairId) { return readArray(CARD_KEY).filter(c=>c.fairId===fairId && !c.deletedAt); }
   function fairs() {const gone=deletedFairIds();return readArray(FAIR_KEY).filter(f=>validFair(f)&&!gone.has(f.id)).sort((a,b)=>text(b.start).localeCompare(text(a.start)));}
   function deleteFair(fairId){
     const fair=fairById(fairId);if(!fair)return;
@@ -7499,7 +7787,7 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
     alert('Fuar arşivden kaldırıldı. Silme bilgisi buluta eşitlenmeye çalışılıyor. Belgeler/yedekler korunuyor.');
   }
   window.mars84DeleteFair=deleteFair;window.m919IsFairDeleted=isFairDeleted;
-  function statusInfo() { return '<p id="m90FairSyncStatus" class="m90Sync">'+escape(lastStatus)+'</p>'; }
+  function statusInfo() { const show=/(?:hata|başarısız|reddedil|erişilem|oturum|engell|yüklenemedi|aktarım hatası|⚠|⛔)/i.test(lastStatus); return '<p id="m90FairSyncStatus" class="m90Sync"'+(show?'':' hidden')+'>'+escape(lastStatus)+'</p>'; }
   function countSummary(fair) {
     const id=fair.id;
     return {cards:cards(id).length, hotels:visibleEvents(id,'hotel').length,
@@ -7632,10 +7920,12 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
   }
   function cardReportRows(f){
     const list=cards(f.id);
-    if(!list.length)return '<div class="m90Empty">Henüz kartvizit yok. Kartvizit Ekle ile kaydettiğinde görüşme raporuna otomatik düşecek. Firma önceden seçilmeyecek.</div>';
-    return '<div class="m917Horizontal"><table class="m917Table"><thead><tr><th>Firma</th><th>Yetkili / Unvan</th><th>Telefon / E-posta</th><th>Potansiyel</th><th>Görüşme ve Sonraki Aksiyon</th></tr></thead><tbody>'+list.map(c=>{
+    if(!list.length)return '<div class="m90Empty">Henüz kartvizit yok. Kartvizit Ekle ile kaydettiğinde görüşme raporuna otomatik düşecek.</div>';
+    return '<div class="m917Horizontal"><table class="m917Table m942CardsTable"><thead><tr><th>Firma</th><th>Yetkili / Unvan</th><th>Telefon / E-posta</th><th>Potansiyel</th><th>Görüşme ve Sonraki Aksiyon</th><th>İşlemler</th></tr></thead><tbody>'+list.map(c=>{
       const a=assessmentFor(f.id,c.id);
-      return '<tr><td><strong>'+escape(c.company||'—')+'</strong><small>'+escape(c.city||c.country||'')+'</small></td><td>'+escape(c.person||'—')+'<small>'+escape(c.title||'')+'</small></td><td>'+escape(c.phone||'')+'<small>'+escape(c.email||'')+'</small></td><td>'+escape(a.potential||'Değerlendirilmedi')+'</td><td>'+escape(a.meeting||c.note||'—')+'<small>'+escape(a.action||'')+'</small></td></tr>';
+      return '<tr><td><strong>'+escape(c.company||'—')+'</strong><small>'+escape(c.city||c.country||'')+'</small></td><td>'+escape(c.person||'—')+'<small>'+escape(c.title||'')+'</small></td><td>'+escape(c.phone||'')+'<small>'+escape(c.email||'')+'</small></td><td>'+escape(a.potential||'Değerlendirilmedi')+'</td><td>'+escape(a.meeting||c.note||'—')+'<small>'+escape(a.action||'')+'</small></td><td class="m942Actions">'+
+      button('✎ Düzelt','data-m942-edit-card="'+escape(c.id)+'"','m942Edit')+
+      button('Sil','data-m942-delete-card="'+escape(c.id)+'"','m942Delete')+'</td></tr>';
     }).join('')+'</tbody></table></div>';
   }
   function receiptReportRows(f){
@@ -8001,8 +8291,7 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
       '<aside class="m918EventInfo"><div class="m918EventDate">'+escape(dateLabel(f.start))+' – '+escape(dateLabel(f.end))+' <span class="m918Planned">Fuar</span></div>'+
       '<h3>'+escape(f.name)+'</h3><p>📍 '+escape(f.country||'Ülke yok')+' / '+escape(f.city||'Şehir yok')+'</p>'+
       (f.venue?'<p>🏢 '+escape(f.venue)+'</p>':'')+(f.address?'<p>🧭 '+escape(f.address)+'</p>':'')+
-      '<hr><div class="m918InfoStat"><span>🪪 Kartvizitler</span><b>'+n.cards+'</b></div><div class="m918InfoStat"><span>🧾 Harcamalar</span><b>'+n.expenses+'</b></div><div class="m918InfoStat"><span>📎 Belgeler</span><b>'+n.files+'</b></div>'+
-      (amountText?'<div class="m918Sum">Toplam harcama: <b>'+escape(amountText)+'</b></div>':'')+
+      '<hr>'+
       button('Fuar Bilgilerini Düzenle','data-edit-fair="'+escape(f.id)+'"','m84Btn light')+button('🗑 Fuarı Sil','data-delete-fair="'+escape(f.id)+'"','m84Btn light m919DeleteFair')+'</aside>'+
       '<div class="m918EventMain"><div class="m918Overline">FUAR İŞLEMLERİ</div>'+
       '<div class="m918ActionsGrid">'+
@@ -8016,7 +8305,7 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
       '<div class="m918ExtraActions">'+button('🗓️ Fuar Öncesi Plan','data-open-section="plan"')+
       button('📄 Fuar Sonrası Rapor / Notlar','data-open-section="report"')+
       button('📝 Fuar Notları','data-open-section="notes"')+'</div></div></div>'+
-      '<section id="m919Workspace" class="m919Workspace" hidden><div class="m919WorkspaceHeader"><strong id="m919WorkspaceTitle">İşlem</strong>'+button('✕ Kapat','data-close-workspace','m84Btn light')+'</div><div class="m918ExpandableSections">'+reportPlan(f)+reportPost(f)+cardsPanel(f)+expensePanel(f)+hotelPanel(f)+carPanel(f)+notesPanel(f)+'</div></section>'+expenseOverview(f);
+      '<section id="m919Workspace" class="m919Workspace" hidden><div class="m919WorkspaceHeader"><strong id="m919WorkspaceTitle">İşlem</strong>'+button('✕ Kapat','data-close-workspace','m84Btn light')+'</div><div class="m918ExpandableSections">'+reportPlan(f)+reportPost(f)+cardsPanel(f)+expensePanel(f)+hotelPanel(f)+carPanel(f)+notesPanel(f)+'</div></section>';
   }
   function render() {
     const root=$('m84Archive');if(!root||root.hidden) return;
@@ -8359,9 +8648,104 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
     }catch(err){win.document.body.textContent='PDF oluşturulamadı: '+err.message;alert('Fiş PDF oluşturulamadı: '+err.message);}
   }
 
+  // v90.42: edit/report card metadata without touching its photo or regenerating its ID.
+  // Soft deletion is pushed to the same owner-scoped cloud record before hiding locally.
+  function m942CardById(id){return readArray(CARD_KEY).find(c=>c.id===id && !c.deletedAt);}
+  function m942RefreshReport(){
+    const active=$('m919Workspace');
+    // Edit/Delete originate from the report table: keep that panel open even if emit() rerenders it.
+    const show=true;
+    const reportOpen=true;
+    const y=window.scrollY;
+    render();
+    if(show && reportOpen){
+      const workspace=$('m919Workspace');
+      if(workspace)workspace.hidden=false;
+      const sec=$('m916Section_report');if(sec)sec.open=true;
+      const label=$('m919WorkspaceTitle');if(label)label.textContent='Fuar Sonrası Rapor';
+    }
+    window.scrollTo(0,y);
+  }
+  async function m942PushCard(card){
+    if(!navigator.onLine)throw new Error('İnternet yok. İki cihazda aynı kayıt kalması için internete bağlan.');
+    if(typeof ensureCloudSession!=='function'||typeof cloudFetch!=='function')throw new Error('Bulut bağlantısı hazır değil.');
+    const s=await ensureCloudSession();
+    if(!s?.user?.id || !s.access_token)throw new Error('Bulut oturumun açık değil.');
+    await cloudFetch('/rest/v1/mars_crm_sync_records?on_conflict=owner_id,kind,record_id',{
+      method:'POST',headers:cloudHeaders(s.access_token,{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
+      body:JSON.stringify({owner_id:s.user.id,kind:'fair_cards',record_id:String(card.id),payload:card,is_deleted:false})
+    });
+  }
+  function m942Editor(){
+    let overlay=$('m942CardEditor');if(overlay)return overlay;
+    overlay=document.createElement('div');overlay.id='m942CardEditor';overlay.className='m942Overlay';overlay.hidden=true;
+    overlay.innerHTML=`<div class="m942Dialog" role="dialog" aria-modal="true" aria-labelledby="m942Title">
+      <div class="m942DialogHead"><h3 id="m942Title">Kartviziti Düzelt</h3><button type="button" data-m942-close class="m84Btn light">✕ Kapat</button></div>
+      <p class="m942Sub">Kaydı ve bağlı fotoğrafı korur. Değişiklik iki cihazın ortak bulut kaydına yazılır.</p>
+      <form id="m942CardEditForm"><div class="m942Fields">
+       <label>Firma<input name="company" required></label><label>Yetkili<input name="person"></label>
+       <label>Unvan<input name="title"></label><label>Yetkili Telefonu<input name="phone"></label>
+       <label>Yetkili E-postası<input name="email" type="email"></label><label>Şirket Telefonu<input name="companyPhone"></label>
+       <label>Şirket E-postası<input name="companyEmail" type="email"></label><label>Web Sitesi<input name="website"></label>
+       <label>Ülke<input name="country"></label><label>Şehir<input name="city"></label>
+       <label class="m942Full">Adres<input name="address"></label>
+       <label class="m942Full">Kartvizit Notu<textarea name="note" rows="2"></textarea></label>
+       <label>Potansiyel<select name="potential"><option>Değerlendirilmedi</option><option>A+</option><option>A</option><option>B</option><option>C</option><option>Takip edilecek</option></select></label><span></span>
+       <label class="m942Full">Görüşme Özeti<textarea name="meeting" rows="2"></textarea></label>
+       <label class="m942Full">Sonraki Aksiyon<input name="action"></label>
+      </div><div class="m942Footer"><span id="m942SaveStatus" role="status"></span><button type="submit" class="m84Btn">Değişiklikleri Kaydet</button></div></form>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click',e=>{if(e.target===overlay||e.target.closest('[data-m942-close]'))overlay.hidden=true;});
+    overlay.querySelector('form').addEventListener('submit',m942SaveCard);
+    return overlay;
+  }
+  function m942EditCard(id){
+    const card=m942CardById(id);if(!card)return alert('Kartvizit kaydı bulunamadı.');
+    const overlay=m942Editor(),form=overlay.querySelector('form');
+    const assessment=assessmentFor(card.fairId,id);
+    for(const k of ['company','person','title','phone','email','companyPhone','companyEmail','website','country','city','address','note'])form.elements.namedItem(k).value=card[k]||'';
+    for(const k of ['potential','meeting','action'])form.elements.namedItem(k).value=assessment[k]|| (k==='potential'?'Değerlendirilmedi':'');
+    form.dataset.cardId=id;
+    $('m942SaveStatus').textContent='';overlay.hidden=false;
+    form.elements.namedItem('company').focus();
+  }
+  async function m942SaveCard(e){
+    e.preventDefault();const form=e.currentTarget,id=form.dataset.cardId,prev=m942CardById(id);if(!prev)return;
+    const btn=form.querySelector('[type="submit"]'),status=$('m942SaveStatus');
+    const updated={...prev,updatedAt:new Date().toISOString()};
+    for(const k of ['company','person','title','phone','email','companyPhone','companyEmail','website','country','city','address','note'])updated[k]=String(form.elements.namedItem(k).value||'').trim();
+    if(!updated.company){status.textContent='Firma adı boş olamaz.';return;}
+    btn.disabled=true;status.textContent='Buluta kaydediliyor…';
+    try{
+      // Only acknowledge success once the owner-specific cloud record was updated.
+      await m942PushCard(updated);
+      const rows=readArray(CARD_KEY),i=rows.findIndex(c=>c.id===id);if(i<0)throw new Error('Cihazdaki kart kaydı bulunamadı.');
+      rows[i]=updated;localStorage.setItem(CARD_KEY,JSON.stringify(rows));
+      const a=assessmentFor(updated.fairId,id),val=k=>String(form.elements.namedItem(k).value||'').trim();
+      if(['potential','meeting','action'].some(k=>val(k)!==String(a[k]||(k==='potential'?'Değerlendirilmedi':'')))){
+        emit(updated.fairId,'card_assessment',{cardId:id,potential:val('potential'),meeting:val('meeting'),action:val('action')});
+      }
+      $('m942CardEditor').hidden=true;m942RefreshReport();
+      window.mars84RenderCards?.();
+    }catch(err){status.textContent='Kaydedilemedi: '+err.message;alert('Kartvizit düzenlemesi iki cihazda doğrulanamadı: '+err.message);}
+    finally{btn.disabled=false;}
+  }
+  async function m942DeleteCard(id){
+    const card=m942CardById(id);if(!card)return alert('Kartvizit bulunamadı.');
+    if(!confirm('“'+(card.company||'Kartvizit')+'” kaydı bu fuardan kaldırılsın mı?\nFotoğraf güvenlik için bulut deposunda korunacak.'))return;
+    const tombstone={...card,deletedAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+    try{
+      await m942PushCard(tombstone);
+      const rows=readArray(CARD_KEY),i=rows.findIndex(c=>c.id===id);if(i>=0){rows[i]=tombstone;localStorage.setItem(CARD_KEY,JSON.stringify(rows));}
+      m942RefreshReport();window.mars84RenderCards?.();
+    }catch(err){alert('Kartvizit silme işlemi buluta yazılamadı; kayıt korunuyor. Hata: '+err.message);}
+  }
   const docRoot=$('m84Archive');
   docRoot?.addEventListener('click',async e=>{
     const btn=e.target.closest('button');if(!btn) return;
+    if(btn.hasAttribute('data-m942-edit-card')){m942EditCard(btn.dataset.m942EditCard);return;}
+    if(btn.hasAttribute('data-m942-delete-card')){await m942DeleteCard(btn.dataset.m942DeleteCard);return;}
     if(btn.hasAttribute('data-fair-receipt-open')){openFairReceipt();return;}
     if(btn.hasAttribute('data-fair-receipt-manager')){openFairExpenseManager();return;}
     if(btn.hasAttribute('data-edit-fair')){window.mars84EditFair?.(btn.dataset.editFair);return;}
@@ -9294,4 +9678,128 @@ window.mars9028Sync=run;
 })();
 
 </script>
+
+<!-- MARS CRM v90.40: Seyahat Arşivi, CRM içinde erişilebilir bir sayfa olarak çalışır. -->
+<style id="marsV940ArchiveNavFix">
+#travelArchivePage{position:relative!important;inset:auto!important;z-index:auto!important;overflow:visible!important;min-height:60vh!important;background:#f6f8fb!important}
+#travelArchivePage .archiveShell{max-width:none!important;margin:0!important;padding:4px 0 28px!important}
+#travelArchivePage .archiveHeader{position:relative!important;top:auto!important;z-index:auto!important}
+body.m940ArchiveActive>header{display:none!important}
+body.m940ArchiveActive main>:not(#travelArchivePage):not(#mars84Back){display:none!important}
+body.m940ArchiveActive #travelArchivePage{display:block!important}
+@media(max-width:760px){
+  body.m940ArchiveActive #travelArchivePage{padding:12px 12px calc(85px + env(safe-area-inset-bottom))!important;min-height:calc(100dvh - 90px)!important}
+  body.m940ArchiveActive .m80BottomBar{display:grid!important;z-index:10030!important}
+}
+</style>
+<script id="marsV940ArchiveNavLogic">
+(function(){
+ 'use strict';
+ // Any other sidebar view should close the archive BEFORE its own click handler runs.
+ document.addEventListener('click',function(e){
+   if(!document.body.classList.contains('m940ArchiveActive'))return;
+   const side=e.target.closest?.('.sideItem.sideDirect');
+   const mobile=e.target.closest?.('.m80BottomBar button');
+   if(side && side.id!=='menuArchiveBtn' && typeof closeTravelArchive==='function')closeTravelArchive();
+   if(mobile && !/mars80OpenArchive|marsV903GoArchive/.test(mobile.getAttribute('onclick')||'')){
+     if(typeof closeTravelArchive==='function')closeTravelArchive();
+   }
+ },true);
+ // Prevent an old report window from becoming visible when switching to the archive.
+ const originalOpenReport=window.openReport;
+ if(typeof originalOpenReport==='function')window.openReport=function(...args){
+   if(document.body.classList.contains('m940ArchiveActive'))closeTravelArchive();
+   return originalOpenReport.apply(this,args);
+ };
+ // When returning to the home dashboard via a programmatic menu action, close archive.
+ for(const name of ['marsV903GoHome','marsV903GoCompanies']){
+   const original=window[name];
+   if(typeof original==='function')window[name]=function(...args){
+     if(document.body.classList.contains('m940ArchiveActive'))closeTravelArchive();
+     return original.apply(this,args);
+   };
+ }
+})();
+</script>
+
+<!-- MARS CRM v90.41: sade menu. Bulut senkronizasyon kodu korunur. -->
+<style id="marsV941CleanUi">
+/* These are legacy utility/debug controls, not user-facing CRM sections. */
+html body #menuExpenseBtn,
+html body #menuFilesBtn,
+html body #mars9026AuditButton,
+html body #mars9027Button,
+html body #mars9028OpenBtn,
+html body #mars9027MobileButton,
+html body .crmSideNav .sideBottom,
+html body #sideCloudStatus,
+html body #cloudStatus { display:none!important; }
+/* Routine green synchronization toasts and explanatory banners are removed.
+   True failures are still shown via the existing error notifications. */
+html body #mars85SyncStatus:not(.mars941Error),
+html body #m90FairSyncStatus[hidden],
+html body #mars84Back .m918AutoNote { display:none!important; }
+</style>
+<script id="marsV941OnlySyncErrors">
+/* Legacy cloud-sync-v89.js updates this element every 25 seconds.
+   Suppress its successful/technical status messages, not meaningful errors. */
+(function(){
+  function watch(){
+    const node=document.getElementById('mars85SyncStatus');
+    if(!node) return;
+    const update=function(){
+      const msg=node.textContent||'';
+      const isError=/(?:hata|başarısız|reddedil|erişilem|oturum aç|aktarılmadı|depolama dolu|⚠|⛔)/i.test(msg);
+      node.classList.toggle('mars941Error',isError);
+      if(isError)node.hidden=false;
+    };
+    update();
+    new MutationObserver(update).observe(node,{childList:true,characterData:true,subtree:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watch,{once:true});else watch();
+})();
+</script>
+
+<style id="m942ApprovedCompactFairStyle">
+/* Desktop: four fair actions side-by-side, not 3+1. Tablet: 2 columns. */
+#mars84Back .m918ActionsGrid {display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important;margin-bottom:16px!important}
+#mars84Back .m918ActionsGrid .m918Action {min-width:0!important;min-height:72px!important;padding:11px 12px!important;gap:4px!important;border-radius:10px!important;font-size:12px!important}
+#mars84Back .m918ActionsGrid .m918Action strong{font-size:12px!important;line-height:1.22}
+#mars84Back .m918ActionsGrid .m918Action small{font-size:10px!important;line-height:1.25}
+#mars84Back .m918Overline{margin:10px 0 8px!important;font-size:11px!important}
+/* Compact post-fair table and note editor */
+#mars84Back .m917SectionTitle{font-size:13px!important;margin:14px 0 7px!important;padding-bottom:6px!important}
+#mars84Back .m917Horizontal{overflow-x:auto;max-width:100%}
+#mars84Back .m917Table{min-width:800px;font-size:11.5px!important;table-layout:fixed}
+#mars84Back .m942CardsTable th:nth-child(1){width:20%}#mars84Back .m942CardsTable th:nth-child(2){width:17%}
+#mars84Back .m942CardsTable th:nth-child(3){width:21%}#mars84Back .m942CardsTable th:nth-child(4){width:12%}
+#mars84Back .m942CardsTable th:nth-child(5){width:20%}#mars84Back .m942CardsTable th:nth-child(6){width:10%}
+#mars84Back .m917Table td,#mars84Back .m917Table th{padding:6px 7px!important;line-height:1.4!important}
+#mars84Back .m917Table td small{font-size:10px!important;margin-top:2px!important;line-height:1.3!important}
+#mars84Back .m942Actions{white-space:nowrap;text-align:right}
+#mars84Back .m942Actions button{cursor:pointer;border-radius:6px;min-height:28px;padding:5px 7px;font-size:10px;font-weight:750;border:1px solid #cfe1dd}
+#mars84Back .m942Actions .m942Edit{background:#e7f3ef;color:#146355}
+#mars84Back .m942Actions .m942Delete{background:#fff0ef;color:#ae3434;border-color:#f2cfca;margin-left:3px}
+#mars84Back .m917Assessments{margin-top:11px;padding:10px}
+#mars84Back .m917CardForm{gap:7px;margin-top:8px;padding-top:8px}
+#mars84Back .m917CardForm label{font-size:11px}
+#mars84Back .m917CardForm input,#mars84Back .m917CardForm select,#mars84Back .m917CardForm textarea{padding:7px;font-size:11px;min-height:32px}
+/* Card editor is intentionally a modal to avoid scrolling or breaking report navigation. */
+#m942CardEditor[hidden]{display:none!important}
+#m942CardEditor{position:fixed;z-index:31000;inset:0;background:#0a2431b0;display:flex;align-items:center;justify-content:center;padding:13px;overflow:auto}
+#m942CardEditor .m942Dialog{width:min(760px,100%);max-height:94dvh;overflow:auto;background:#fff;border-radius:15px;padding:19px 21px;color:#1c3b45;box-shadow:0 20px 65px #051d2770}
+#m942CardEditor .m942DialogHead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#m942CardEditor h3{margin:0;font-size:20px}
+#m942CardEditor .m942Sub{font-size:12px;color:#607783;margin:7px 0 14px}
+#m942CardEditor .m942Fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px 15px}
+#m942CardEditor label{font-size:12px;font-weight:700;display:flex;flex-direction:column;gap:5px}
+#m942CardEditor input,#m942CardEditor select,#m942CardEditor textarea{font:inherit;font-weight:400;min-width:0;border:1px solid #d2e1e5;border-radius:8px;padding:9px;color:#193e45;background:white}
+#m942CardEditor .m942Full{grid-column:1/-1}
+#m942CardEditor .m942Footer{display:flex;justify-content:flex-end;align-items:center;gap:13px;margin-top:14px}
+#m942SaveStatus{font-size:12px;color:#b1462c;flex:1}
+@media(max-width:1170px){#mars84Back .m918ActionsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:760px){#mars84Back .m918ActionsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#mars84Back .m918Action{min-height:65px!important}}
+@media(max-width:420px){#mars84Back .m918ActionsGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}#mars84Back .m918ActionsGrid .m918Action{padding:9px!important}#mars84Back .m942Actions button{font-size:11px}}
+@media(max-width:580px){#m942CardEditor .m942Fields{grid-template-columns:1fr}#m942CardEditor .m942Dialog{padding:14px}#m942CardEditor .m942Full{grid-column:auto}}
+</style>
 </body>
