@@ -1,5 +1,5 @@
-/* MARS CRM v90.46 — network-first only for the app HTML. CRM customer records and files are NEVER cached by this worker. */
-const SHELL_CACHE = 'mars-crm-html-network-first-v9046';
+/* MARS CRM v90.48 — network-first only for the app HTML. CRM customer records and files are NEVER cached by this worker. */
+const SHELL_CACHE = 'mars-crm-html-network-first-v9048';
 const APP_ROOT = new URL('./', self.location.href);
 const APP_INDEX = new URL('./index.html', self.location.href);
 self.addEventListener('install', function(event){ event.waitUntil(self.skipWaiting()); });
