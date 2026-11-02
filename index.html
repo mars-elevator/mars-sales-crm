@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="mars-crm-version" content="90.48"/>
-<script>window.MARS_CRM_VERSION="90.48";</script>
+<meta name="mars-crm-version" content="90.53"/>
+<script>window.MARS_CRM_VERSION="90.53";</script>
 <meta name="theme-color" content="#0d3b31"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -2928,7 +2928,7 @@ async function exportTripReceiptsPdf(tripId){
 @media(max-width:650px){#m84Cards #m84PhotoPreview{max-width:100%;max-height:200px;width:auto;height:auto;object-fit:contain;border-radius:8px;border:1px solid #d3e0db}
 #m84Cards .m947Intro{font-size:12px}#m84Cards .m947Confirm{font-size:12px}}
 </style>
-<!-- MARS CRM v90.48 - Persistent cross-device trip deletion markers. -->
+<!-- MARS CRM v90.49 - Persistent cross-device trip deletion markers. -->
 </body></html>`;
 
   if(win && !win.closed){
@@ -3546,15 +3546,20 @@ async function syncCloudTripDeletions(existingSession){
   const s=existingSession||await ensureCloudSession();
   if(!s?.user?.id || !s.access_token) throw new Error('Bulut oturumu yok; seyahat silme eşitlemesi bekliyor.');
   const base='/rest/v1/mars_crm_sync_records';
-  const query=base+'?select=record_id,payload,is_deleted&kind=eq.trip_delete&owner_id=eq.'+encodeURIComponent(s.user.id)+'&limit=1000';
+  // v90.49: DB kind_check already permits trip_file, but NOT trip_delete.
+  // Store deletion markers as trip_file rows with a reserved ID/type. No schema migration.
+  // Filter by record_id prefix so normal trip PDF and metadata rows are not downloaded here.
+  const markerPrefix='tripdelete:';
+  const query=base+'?select=record_id,payload,is_deleted&kind=eq.trip_file&record_id=like.tripdelete:*&owner_id=eq.'+encodeURIComponent(s.user.id)+'&limit=1000';
   const remote=await cloudFetch(query,{headers:cloudHeaders(s.access_token)});
   if(!Array.isArray(remote)) throw new Error('Seyahat silme kayıtları buluttan okunamadı.');
   if(remote.length>=1000) throw new Error('Silinen seyahat sayısı kontrol sınırında; otomatik eşitleme durdu.');
   const ids=new Set(readDeletedTripIds().map(String));
   const inCloud=new Set();
   for(const r of remote){
-    if(r?.is_deleted) continue;
-    const id=String(r?.payload?.tripId||r?.record_id||'');
+    if(r?.is_deleted || !String(r?.record_id||'').startsWith(markerPrefix)) continue;
+    if(r.payload?.type!=='trip_delete') continue;
+    const id=String(r.payload.tripId||String(r.record_id).slice(markerPrefix.length));
     if(!id) continue;
     inCloud.add(id);
     ids.add(id);
@@ -3564,7 +3569,7 @@ async function syncCloudTripDeletions(existingSession){
     await cloudFetch(base+'?on_conflict=owner_id,kind,record_id',{
       method:'POST',
       headers:cloudHeaders(s.access_token,{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'}),
-      body:JSON.stringify({owner_id:s.user.id,kind:'trip_delete',record_id:id,payload:{tripId:id,deletedAt:new Date().toISOString()},is_deleted:false})
+      body:JSON.stringify({owner_id:s.user.id,kind:'trip_file',record_id:markerPrefix+id,payload:{type:'trip_delete',tripId:id,deletedAt:new Date().toISOString()},is_deleted:false})
     });
   }
   localStorage.setItem(deletedTripIdsKey(),JSON.stringify([...ids]));
@@ -6718,7 +6723,9 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout
 </style>
 
 <section id="mars84Back" class="m84Back" aria-label="Fuar Arşivi" hidden>
- <div class="m84App"><div class="m84Header"><div><h2>Fuar Arşivi</h2><div class="m918HeaderHint">Ülke → Yıl → Fuar klasörü → Excel, rapor, kartvizit ve fişler</div></div><div class="m918TopActions"><button type="button" class="m84Btn" data-fair-root-only onclick="mars918NewFair()">+ Yeni Fuar Ekle</button><button type="button" class="m84Btn light" data-fair-root-only onclick="mars918ImportFromTrip()">Seyahatten Ekle</button></div></div>
+  <button id="m9053MobileHome" type="button" aria-label="Fuar Arşivinden Ana Sayfaya Dön" onclick="window.m9053GoHome()">⌂ Ana Sayfaya Dön</button>
+ <button id="m9050FairBottomHome" class="m9050FairBottomHome" type="button" onclick="window.m9053GoHome()" aria-label="Fuar Arşivinden Ana Sayfaya Dön">⌂ Ana Sayfaya Dön</button>
+ <div class="m84App"><div class="m84Header"><div><h2>Fuar Arşivi</h2><div class="m918HeaderHint">Ülke → Yıl → Fuar klasörü → Excel, rapor, kartvizit ve fişler</div></div><button id="m9050FairTopHome" class="m9050FairTopHome" type="button" onclick="window.m9053GoHome()" aria-label="Ana Menüye Dön">← Ana Menü</button><div class="m918TopActions"><button type="button" class="m84Btn" data-fair-root-only onclick="mars918NewFair()">+ Yeni Fuar Ekle</button><button type="button" class="m84Btn light" data-fair-root-only onclick="mars918ImportFromTrip()">Seyahatten Ekle</button></div></div>
  <div class="m84Body"><div class="m84Tabs"><button id="m84TabCalendar" class="m84Tab is-on" onclick="mars84Tab('calendar')">Fuar Takvimi</button><button id="m84TabAdd" class="m84Tab" onclick="mars84Tab('add')">+ Fuar Ekle</button><button id="m84TabCards" class="m84Tab" onclick="mars84Tab('cards')">Kartvizitler</button><button id="m84TabArchive" class="m84Tab" onclick="mars84Tab('archive')">📁 Fuar Arşivi</button></div>
  <section id="m84Calendar"><div class="m84Info">Fuarların tam adresi ve tarihleri doğrulanmadan kesin kayıt olarak gösterilmez. Yeni fuarları ekleyebilir, daha sonra doğrulayabilirsin. Google Maps butonu yalnızca kayıtlı adrese yönlendirir.</div><div class="m84Toolbar"><input id="m84Search" placeholder="Fuar adı, şehir, ülke ara…" oninput="mars84RenderFairs()"><select id="m84Country" onchange="mars84RenderFairs()"><option value="">Tüm Ülkeler</option></select><button class="m84Btn" onclick="mars84Tab('add')">+ Fuar Ekle</button></div><div id="m84Fairs" class="m84Rows"></div></section>
  <section id="m84Add" hidden><form id="m84FairForm" class="m84Form" onsubmit="mars84SaveFair(event)"><input type="hidden" id="m84EditId"><label>Fuar adı *<input id="m84Name" required></label><label>Ülke *<select id="m84AddCountry" required></select></label><label>Şehir *<input id="m84City" required></label><label>Fuar merkezi / salon<input id="m84Venue"></label><label>Başlangıç tarihi *<input type="date" id="m84Start" required></label><label>Bitiş tarihi *<input type="date" id="m84End" required></label><label class="full">Tam adres (biliniyorsa)<input id="m84Address"></label><label>Resmî fuar sitesi<input type="url" id="m84Website" placeholder="https://..."></label><label>Adres doğrulama<select id="m84Verified"><option value="no">Doğrulanmadı</option><option value="yes">Resmî kaynaktan doğrulandı</option></select></label><label class="full">Not / salon-giriş bilgisi<textarea id="m84Note"></textarea></label><div class="m84Actions"><button type="submit" class="m84Btn">Fuarı Kaydet</button><button type="button" class="m84Btn light" onclick="mars84Tab('archive')">Vazgeç</button></div></form></section>
@@ -10353,15 +10360,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 
 
-<script id="marsVersionDiagnostic9048">
+<script id="marsVersionDiagnostic9049">
 (function(){
   var query=new URLSearchParams(location.search);
   if(!query.has('surumkontrol'))return;
   function make(){
-    if(document.getElementById('mars9048Diagnostic'))return;
-    var p=document.createElement('div');p.id='mars9048Diagnostic';
+    if(document.getElementById('mars9049Diagnostic'))return;
+    var p=document.createElement('div');p.id='mars9049Diagnostic';
     p.style.cssText='position:fixed;bottom:calc(88px + env(safe-area-inset-bottom));right:10px;z-index:2147483001;background:#fff;color:#163a39;border:1px solid #b5d5d0;border-radius:12px;padding:10px 12px;box-shadow:0 8px 28px #0003;font:13px system-ui;max-width:260px';
-    var label=document.createElement('strong');label.textContent='MARS CRM v90.48';p.appendChild(label);
+    var label=document.createElement('strong');label.textContent='MARS CRM v90.49';p.appendChild(label);
     var info=document.createElement('div');info.textContent='Güncel dosya açıldı';info.style.marginTop='5px';p.appendChild(info);
     var close=document.createElement('button');close.textContent='Kapat';close.type='button';close.style.cssText='margin-top:8px;background:#e6f1ed;border:0;padding:6px 10px;border-radius:8px';
     close.onclick=function(){p.remove()};p.appendChild(close);document.body.appendChild(p);
@@ -10369,4 +10376,105 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',make,{once:true});else make();
 })();
 </script>
+
+<!-- v90.50: Fuar Arşivi / mobil geri navigasyon; kayıt ve Supabase fonksiyonlarına müdahale edilmedi. -->
+<style id="m9050FairReturnStyle">
+/* Her fuar klasörü ekranında menüye dönüş görünsün. Kök dizinde gizlenen .m918TopActions içinde değildir. */
+body.m918FairActive #mars84Back .m9050FairTopHome{
+  display:inline-flex!important;align-items:center;justify-content:center;gap:7px;
+  flex-shrink:0;min-height:44px;padding:11px 15px;
+  font:700 13px/1.2 inherit;color:#124c43;background:#fff;
+  border:1px solid #a8cdc4;border-radius:11px;cursor:pointer;
+  box-shadow:0 2px 8px rgba(16,63,58,.08);
+}
+body.m918FairActive #mars84Back .m9050FairTopHome:focus-visible,
+body.m918FairActive #mars84Back .m9050FairBottomHome:focus-visible{
+  outline:3px solid #248f76;outline-offset:2px;
+}
+body.m918FairActive #mars84Back .m9050FairBottomHome{display:none!important}
+@media(max-width:768px){
+  body.m918FairActive #mars84Back .m84Header{
+    position:sticky!important;top:0!important;z-index:50!important;
+    background:#f3f6fa!important;padding:12px 9px!important;
+    gap:8px!important;margin:0 -9px 4px!important;
+  }
+  body.m918FairActive #mars84Back .m84Header h2{font-size:21px!important}
+  body.m918FairActive #mars84Back .m918HeaderHint{font-size:11px!important}
+  body.m918FairActive #mars84Back .m9050FairTopHome{padding:10px 12px;font-size:13px}
+  body.m918FairActive #mars84Back .m9050FairBottomHome{
+    display:flex!important;position:fixed!important;
+    z-index:100100!important;left:50%;transform:translateX(-50%);
+    bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    align-items:center;justify-content:center;
+    width:min(360px,calc(100vw - 30px));min-height:50px;
+    padding:11px 18px;background:#0d6152;color:#fff;
+    border:1px solid #0d6152;border-radius:14px;
+    box-shadow:0 7px 22px rgba(8,47,44,.30);
+    font-size:15px;font-weight:750;cursor:pointer;
+  }
+  body.m918FairActive #mars84Back .m84Body{padding-bottom:115px!important}
+}
+</style>
+
+<!-- v90.53 – iPhone/Safari Fuar Arşivi görünür ana menüye dönüş. -->
+<style id="m9053FairMobileNavigation">
+#mars84Back .m9050FairTopHome {
+  display:inline-flex!important;visibility:visible!important;opacity:1!important;
+  align-items:center!important;justify-content:center!important;flex-shrink:0!important;
+  min-height:43px!important;padding:10px 14px!important;
+  border:1px solid #a6cbbf!important;border-radius:11px!important;
+  background:#e6f3ed!important;color:#155a4c!important;
+  font:750 13px/1.25 system-ui,-apple-system,sans-serif!important;
+  white-space:nowrap;cursor:pointer!important;
+}
+#mars84Back #m9053MobileHome {display:none!important}
+@media (max-width:800px){
+  #mars84Back .m84Header {
+    display:flex!important;flex-wrap:wrap!important;align-items:center!important;
+    gap:8px!important;justify-content:flex-start!important;
+    position:sticky!important;top:0!important;z-index:60!important;
+    background:#f3f6fa!important;
+    padding:9px 10px 12px!important;
+    margin:0 -10px 12px!important;
+  }
+  #mars84Back .m84Header > div:first-child {order:0!important;min-width:0!important;flex:1 1 170px!important}
+  #mars84Back .m9050FairTopHome{order:-1!important;flex:0 0 100%!important;width:max-content!important;max-width:100%!important;align-self:flex-start!important;justify-content:flex-start!important}
+  #mars84Back .m918TopActions{order:2!important;flex:1 1 100%!important;width:100%!important}
+  #mars84Back #m9053MobileHome {
+    display:flex!important;visibility:visible!important;opacity:1!important;
+    position:fixed!important;left:50%!important;
+    bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;
+    transform:translateX(-50%)!important;
+    z-index:2147482000!important;align-items:center!important;justify-content:center!important;
+    width:calc(100vw - 32px)!important;max-width:390px!important;
+    min-height:52px!important;padding:12px 15px!important;
+    border:1px solid #126454!important;border-radius:14px!important;
+    background:#146654!important;color:white!important;
+    box-shadow:0 9px 23px rgba(7,46,37,.28)!important;
+    font:800 15px/1.3 system-ui,-apple-system,sans-serif!important;
+    cursor:pointer!important;touch-action:manipulation!important;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* The old v90.50 bottom button is replaced by an independent fixed action. */
+  #mars84Back #m9050FairBottomHome{display:none!important}
+  #mars84Back .m84Body{padding-bottom:max(115px,calc(115px + env(safe-area-inset-bottom,0px)))!important}
+}
+</style>
+<script id="m9053FairMobileNavigationScript">
+(function(){
+  'use strict';
+  window.m9053GoHome=function(){
+    var page=document.getElementById('mars84Back');
+    try{if(typeof window.mars84CloseFair==='function') window.mars84CloseFair();}
+    catch(e){console.warn('Fuar sayfası kapatma:',e)}
+    if(page){page.hidden=true;page.style.setProperty('display','none','important')}
+    document.body.classList.remove('m918FairActive');
+    try{if(typeof window.marsV903GoHome==='function')window.marsV903GoHome();
+      else document.body.classList.add('m904Home')}
+    catch(e){document.body.classList.add('m904Home');console.warn('Ana sayfa:',e)}
+    window.scrollTo(0,0);
+  };
+})();
+</script>
+
 </body>
