@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="mars-crm-version" content="90.53"/>
-<script>window.MARS_CRM_VERSION="90.53";</script>
+<meta name="mars-crm-version" content="90.54"/>
+<script>window.MARS_CRM_VERSION="90.54";</script>
 <meta name="theme-color" content="#0d3b31"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -5441,11 +5441,12 @@ function forceInitialDataLoad(){
       <label class="full">Not<br><input id="expenseNote"></label>
       <div class="full receiptUploadBox">
         <b>Fiş Fotoğrafı / Otomatik OCR</b><br>
-        <div class="m931AutoLang" role="note">🌐 Fişin dili otomatik algılanır; dil seçmen gerekmez.</div>
+        <div class="m931AutoLang" role="note">🌐 Dil otomatik tanınır. 📷 Fişi düz zeminde, gölgesiz ve mümkünse tepeden çek. Tutar bulanıksa yeniden çek.</div>
 
         <input id="receiptImage" type="file" accept="image/*" capture="environment" onchange="previewReceiptImage(this)">
         <div class="small" style="margin-top:6px">Fotoğraf seçildiğinde sistem tarih, tutar, para birimi, fiş/fatura no ve ödeme şeklini otomatik okumaya çalışır. Kartla ödeme varsa kartın adını/bankasını ve yalnızca son 4 hanesini kontrol et. Tam kart numarası/CVV kaydetme. Açıklamayı sen seçebilirsin.</div>
         <div class="m929Review">Muhasebe için: genel toplam, para birimi, ödeme şekli ve kart adını kontrol edip kaydet.</div>
+        <div id="m9054ReceiptReview" class="m9054Review" role="group" aria-label="OCR toplam tutar seçenekleri" style="display:none"></div>
         <div id="receiptOcrStatus" style="margin-top:8px;padding:8px 10px;border-radius:9px;background:#f8fafc;border:1px solid #e5e7eb;font-size:12px;color:#64748b">
           Fotoğrafı yükle; CRM dili, tarihi, genel toplamı, fiş numarasını ve ödemeyi otomatik okuyacak. Sonucu kontrol et.
         </div>
@@ -5601,6 +5602,7 @@ function forceInitialDataLoad(){
     if(file) file.value='';
     if(preview){ preview.style.display='none'; preview.removeAttribute('src'); }
     setOcrRawText('');
+    const oldReview=document.getElementById('m9054ReceiptReview');if(oldReview){oldReview.replaceChildren();oldReview.style.display='none';}
     setOcrStatus('Fiş fotoğrafı seçildiğinde otomatik okuma başlayacak.','info');
 
     modal.style.display='flex';
@@ -5621,9 +5623,8 @@ function forceInitialDataLoad(){
       const tripId=document.getElementById('receiptTripId')?.value||'';
       if(!tripId) throw new Error('Seyahat kaydı bulunamadı.');
 
-      const raw=String(document.getElementById('expenseAmount')?.value||'')
-        .trim().replace(/\s/g,'').replace(/\./g,'').replace(',','.');
-      const amount=Number(raw);
+      const inputAmount=document.getElementById('expenseAmount')?.value||'';
+      const amount=window.MarsOCR9054?.amountNumber(inputAmount);
       if(!Number.isFinite(amount)) throw new Error('Geçerli bir tutar girin.');
 
       if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='Kaydediliyor...'; }
@@ -6100,8 +6101,13 @@ function forceInitialDataLoad(){
       if(meta.currency)ensureCurrencyOption(meta.currency);
       const p=document.getElementById('expensePaymentType');if(p)p.value=meta.payment==='Belirsiz'?'':meta.payment;
       if(meta.last4)document.getElementById('expenseCardLast4').value=meta.last4;
+      const review=document.getElementById('m9054ReceiptReview');
+      if(review && window.MarsOCR9054){
+        review.style.display='block';
+        window.MarsOCR9054.reviewOptions(review,meta,document.getElementById('expenseAmount'),document.getElementById('expenseCurrency'));
+      }
       window.m929TravelCardFields?.();
-      const ok=[meta.amount!=null&&!meta.ambiguous?'Tutar '+meta.amount+' '+(meta.currency||''):'',meta.date?'Tarih '+meta.date:'',meta.receiptNo?'Fiş No '+meta.receiptNo:'',meta.payment!=='Belirsiz'?'Ödeme '+meta.payment:''].filter(Boolean);
+      const ok=[meta.amount!=null&&!meta.ambiguous?'Tutar '+meta.amount+' '+(meta.currency||''):'',meta.date?'Tarih '+meta.date:'',meta.receiptNo?'Fiş No '+meta.receiptNo:'',meta.payment!=='Belirsiz'?'Ödeme '+meta.payment:'',meta.last4?'Kart •••• '+meta.last4:''].filter(Boolean);
       const missing=[meta.amount==null||meta.ambiguous?'toplam':'',!meta.date?'tarih':'',!meta.receiptNo?'fiş no':'',meta.payment==='Belirsiz'?'ödeme şekli':''].filter(Boolean);
       setOcrStatus((missing.length?'⚠️ Kısmen okundu':'Okundu')+' · '+ok.join(' · ')+(missing.length?' | Kontrol et: '+missing.join(', '):'')+' · '+result.profile,'warn');
     }catch(err){setOcrStatus('OCR okunamadı: '+err.message+'. Alanları elle doldurabilirsin.','error');}
@@ -8667,6 +8673,12 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
       const suggested=check.amount!=null?check:result;
       const payment=window.MarsReceiptAccuracy.paymentInfo(result.rawText||'');
       const payInput=form.elements.namedItem('receiptPayment'),lastInput=form.elements.namedItem('receiptCardLast4');
+      if(window.MarsOCR9054){
+        let review=form.querySelector('[data-m9054-doc-review]');
+        if(!review){review=document.createElement('div');review.className='m9054Review';review.dataset.m9054DocReview='1';
+          (status?.parentElement||form).appendChild(review);}
+        window.MarsOCR9054.reviewOptions(review,check,amount,currency);
+      }
       if(payInput)payInput.value=payment.method;
       if(lastInput)lastInput.value=payment.last4;
       if(suggested.amount && Number.isFinite(Number(suggested.amount)) && !check.ambiguous){
@@ -8755,7 +8767,7 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
       <strong>Fiş Fotoğrafı / PDF</strong><span class="m931AutoLang">🌐 Fiş dili otomatik algılanır (Arapça dahil).</span><label class="m924File">📎 Dosya / Galeriden Seç<input name="uploadFile" type="file" accept="image/*,.pdf,application/pdf"></label>
       <label class="m924File">📷 Fotoğraf Çek<input name="cameraFile" type="file" accept="image/*" capture="environment"></label>
       <p class="m924Hint">OCR yalnızca tutar önerir; fişteki <b>ödenecek toplam</b> ve para birimini kontrol et. Kartın ait olduğu bankayı/adı sen seç; yalnızca son 4 haneyi sakla. Tam kart numarası/CVV yazma.</p>
-      <div class="m924Status" role="status">Belge seçildiğinde otomatik okuma başlayacak.</div><details class="m930OCRDetails"><summary>Okunan fiş metnini göster</summary><pre data-m930-raw style="white-space:pre-wrap;max-height:180px;overflow:auto;font-size:11px"></pre></details></div>
+      <div class="m924Status" role="status">Belge seçildiğinde otomatik okuma başlayacak.</div><div class="m9054Review" data-m9054-fair-review style="display:none"></div><details class="m930OCRDetails"><summary>Okunan fiş metnini göster</summary><pre data-m930-raw style="white-space:pre-wrap;max-height:180px;overflow:auto;font-size:11px"></pre></details></div>
       <div class="m924Buttons"><button type="button" data-m924-close class="m84Btn light">Kapat</button><button type="submit" class="m84Btn" data-m924-save>Kaydet</button></div></form></div>`;
     document.body.appendChild(back);
     back.addEventListener('click',e=>{if(e.target===back||e.target.closest('[data-m924-close]'))closeFairReceipt();});
@@ -8773,6 +8785,7 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
     const back=fairReceiptUi(), form=back.querySelector('form');form.reset();form.__ocrTask=null;
     form.elements.namedItem('receiptDate').value=new Date().toISOString().slice(0,10);
     back.querySelector('.m924Status').textContent='Fiş fotoğrafını/PDF dosyanı seç, OCR alanları önerecek.';
+    const review=form.querySelector('[data-m9054-fair-review]');if(review){review.replaceChildren();review.style.display='none';}
     updateFairCardFields(form);
     back.hidden=false;document.body.classList.add('m924ModalVisible');
   }
@@ -8802,6 +8815,8 @@ if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;wi
       if(meta.payment.method!=='Belirsiz')form.elements.namedItem('receiptPayment').value=meta.payment.method;
       const suffix=form.elements.namedItem('receiptCardLast4');if(meta.payment.last4)suffix.value=meta.payment.last4;
       updateFairCardFields(form);
+      const review=form.querySelector('[data-m9054-fair-review]');
+      if(review&&window.MarsOCR9054){review.style.display='block';window.MarsOCR9054.reviewOptions(review,check,amt,curr);}
       status.textContent=check.ambiguous?'⚠️ Birden fazla olası toplam var. Fişteki ÖDENECEK TUTAR’ı elle doğrula.':
         amountResult.amount!=null?'OCR önerisi: '+money(amountResult.amount,curr.value)+' ('+(check.reason||found.reason||'tahmini')+'). Kart adı ve toplamı kontrol et.':
         '⚠️ Tutar bulunamadı. Ödenecek toplamı elle gir; yanlış tahmin kaydedilmeyecek.';
@@ -10477,4 +10492,221 @@ body.m918FairActive #mars84Back .m9050FairBottomHome{display:none!important}
 })();
 </script>
 
+<style id="m9054OCRStyle">
+.m9054Review{padding:12px;margin:10px 0;border:1px solid #cadfd6;border-radius:12px;background:#f4faf7;color:#234e43;font:13px/1.5 system-ui,-apple-system,sans-serif;}
+.m9054Review strong{display:block;margin-bottom:8px}.m9054Choices{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.m9054Candidate{border:1px solid #a4cabb;background:white;color:#155447;border-radius:9px;padding:9px 12px;min-height:41px;font:700 13px system-ui,-apple-system,sans-serif;cursor:pointer}
+.m9054Candidate.picked{background:#146854;color:#fff;border-color:#146854}
+.m9054Review small{display:block;color:#526d62;font-size:11px}
+@media(max-width:650px){.m9054Choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.m9054Candidate{font-size:12px}}
+</style>
+<script id="marsOCR9054">
+/* MARS CRM v90.54 — Fiş OCR accuracy, card suffix and review.
+ * Works on device. No card PAN/CVV is retained or sent to a new service.
+ */
+(function(){
+'use strict';
+const previous=window.MarsGlobalReceiptOCR;
+if(!previous || window.MarsOCR9054)return;
+const originalPayment=previous.payment.bind(previous);
+const originalParse=previous.parse.bind(previous);
+const map={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
+const plain=s=>String(s||'').replace(/[٠-٩۰-۹]/g,ch=>map[ch]).replace(/[\u200e\u200f\u061c]/g,'').replace(/\u00a0/g,' ');
+const norm=s=>plain(s).toLocaleUpperCase('tr-TR').replace(/İ/g,'I').replace(/ı/g,'I').replace(/Ş/g,'S').replace(/Ğ/g,'G').replace(/Ü/g,'U').replace(/Ö/g,'O').replace(/Ç/g,'C').replace(/[ًٌٍَُِّْـ]/g,'');
+const C=[['EUR',/(?:€|\bEUR\b|\bEURO\b|يورو)/i],['TRY',/(?:₺|\bTL\b|\bTRY\b)/i],['USD',/(?:\bUSD\b|\bUS\$\b|\$)/i],['GBP',/(?:£|\bGBP\b)/i],['ALL',/(?:\bALL\b|\bLEK\b)/i],['BAM',/(?:\bBAM\b|\bKM\b)/i],['RSD',/(?:\bRSD\b|\bRSD\b|\bDIN\b)/i],['MKD',/\bMKD\b/i],['BGN',/\bBGN\b/i],['RON',/(?:\bRON\b|\bLEI\b)/i],['CHF',/\bCHF\b/i],['SAR',/\bSAR\b/i],['AED',/\bAED\b/i],['PLN',/(?:\bPLN\b|ZŁ)/i],['CZK',/\bCZK\b/i],['HUF',/\bHUF\b/i],['CAD',/\bCAD\b/i]];
+function moneyCode(text){const t=norm(text);return C.find(p=>p[1].test(t))?.[0]||'';}
+const payRx=/(?:ODENECEK|ÖDENECEK|ODENEN|ÖDENEN|TAHSIL\s*EDILEN|TAHSİL\s*EDİLEN|GRAND\s*TOTAL|TOTAL\s*(?:AMOUNT|DUE|PAID|PAYABLE)|AMOUNT\s*(?:PAID|CHARGED|DUE)|PAID\s*AMOUNT|TOTAL\s*A\s*PAGAR|IMPORTO\s*PAGATO|TOTALE\s*DA\s*PAGARE|TOTAL\s*TTC|GESAMTBETRAG|NET\s*PAYABLE|\bBALANCE\s*DUE\b|المبلغ\s*(?:الاجمالي|المدفوع|المستحق)|اجمالي\s*المبلغ)/i;
+const totalRx=/(?:\bGENEL\s*TOPLAM\b|\bTOPLAM\s*TUTAR\b|\bTOTAL\b|\bTOTALE\b|\bTOPLAM\b|\bGESAMT\b|\bSUMME\b|\bUKUPNO\b|\bTOTALI\b|\bSUMA\b|\bИТОГО\b|\bВСЕГО\b|\bΣΥΝΟΛΟ\b|الاجمالي|اجمالي|المجموع)/i;
+const priceRx=/(?:\bFIYAT\b|\bPRICE\b|\bAMOUNT\b|\bIMPORTE\b|\bMONTANT\b|\bBEDEL\b)/i;
+const excludedRx=/(?:\bSUB\s*TOTAL\b|\bARA\s*TOPLAM\b|\bTOPLAM\s*PRIM\b|\bTOTAL\s*PREMIUM\b|\bTOTAL\s*TAX\b|\bKDV\b|\bVAT\b|\bIVA\b|\bPDV\b|\bTAX(?:ES)?\b|\bSURCHARGES?\b|\bDISCOUNT\b|\bINDIRIM\b|\bCHANGE\b|\bPARA\s*USTU\b|\bRESTO\b|\bBAHŞİŞ\b|\bTIP\b|\bSERVICE\s*FEE\b|\bNET\s*WITHOUT\b|\bCOMMISSION\b|\bFEE\b)/i;
+const inclusiveRx=/(?:\bKDV\s*DAHIL\b|\bVAT\s*INCLUDED\b|\bINCL\.?\s*VAT\b|\bINCLUDING\s*TAX\b)/i;
+function amountNumber(raw){
+ let s=plain(raw).replace(/(?<=\d)[Oo](?=[\d.,]|$)/g,'0').replace(/(?<=[.,])[Oo](?=\d|$)/g,'0').replace(/[\s'’]/g,'').replace(/[^\d.,]/g,'');
+ if(!s)return null;
+ const c=s.lastIndexOf(','),d=s.lastIndexOf('.');
+ if(c>=0&&d>=0)s=c>d?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');
+ else if(c>=0){const n=s.length-c-1;s=n===3&&s.indexOf(',')===c?s.replace(/,/g,''):s.replace(',','.');}
+ else if(d>=0){const n=s.length-d-1;if(n===3&&s.indexOf('.')===d)s=s.replace(/\./g,'');else if(s.split('.').length>2)s=s.slice(0,d).replace(/\./g,'')+s.slice(d);}
+ const v=Number(s);return Number.isFinite(v)&&v>0&&v<1e8?v:null;
+}
+const amountRx=/\d{1,3}(?:[.,'’\s]\d{3})+(?:[.,]\d{1,2})?|\d{1,8}(?:[.,][\dOo]{1,2})?/g;
+function getNumbers(row){
+ const text=plain(row).replace(/(?<!\d)(?:19|20)\d{2}[-/.]\d{1,2}[-/.]\d{1,2}(?!\d)/g,' ')
+ .replace(/(?<!\d)\d{1,2}[-/.]\d{1,2}[-/.](?:19|20)?\d{2}(?!\d)/g,' ')
+ .replace(/\b\d{1,2}:\d{2}(?::\d{2})?\b/g,' ')
+ .replace(/\b\d{1,2}\s*%/g,' ');
+ const out=[];
+ for(const m of text.matchAll(amountRx)){
+  const raw=m[0];const v=amountNumber(raw);
+  if(v===null || (/^\d{7,}$/.test(raw.replace(/\s/g,''))) || (/^(?:19|20)\d{2}$/.test(raw)&&!moneyCode(text)))continue;
+  out.push({value:v,raw,index:m.index});
+ }
+ return out;
+}
+function classify(row){
+ const s=norm(row),pay=payRx.test(s),total=totalRx.test(s),price=priceRx.test(s);
+ const bad=excludedRx.test(s)&&!(inclusiveRx.test(s)&&(pay||total));
+ return {pay,total,price,bad};
+}
+function readTotal(text){
+ const lines=plain(text).split(/\r?\n/).map(r=>r.trim()).filter(Boolean),picks=[];
+ const globalCurrency=moneyCode(text);
+ function push(v,rawLine,i,base,label,nearCurrency,context){
+   let score=base+(nearCurrency?17:0)+(i>=lines.length*.5?2:0);
+   if(!/[,.]/.test(v.raw) && !nearCurrency)score-=8;
+   picks.push({amount:v.value,currency:nearCurrency||globalCurrency||'',score,reason:label,evidence:context||rawLine,index:i});
+ }
+ lines.forEach((raw,i)=>{
+   const typ=classify(raw),numbers=getNumbers(raw),ownCurrency=moneyCode(raw),nearCurrency=ownCurrency||moneyCode(lines[i-1]||'')||moneyCode(lines[i+1]||'');
+   if(typ.bad && !typ.pay)return;
+   for(const number of numbers){
+     if(/^\s*(?:ODA|ADET|PCS|PIECES|ITEMS?|KISI|KİŞİ|PERSONS?|GUESTS?|NIGHTS?|GECE)\b/i.test(norm(raw.slice(number.index+number.raw.length))))continue;
+     if(typ.pay)push(number,raw,i,185,'Ödenen toplam',nearCurrency);
+     else if(typ.total)push(number,raw,i,165,'Genel toplam',nearCurrency);
+     else if(typ.price && ownCurrency)push(number,raw,i,120,'Fiyat',ownCurrency);
+     else if(ownCurrency && !typ.bad && /[.,]/.test(number.raw)|| (ownCurrency && !typ.bad && !/^\d{4,}$/.test(number.raw)))push(number,raw,i,55,'Para birimli tutar',ownCurrency);
+   }
+   if((typ.pay||typ.total||typ.price)&&numbers.length===0&&!typ.bad){
+     for(let offset=1;offset<=2;offset++){
+       const next=lines[i+offset];if(!next)break;
+       const t=classify(next);if(t.bad)continue;
+       const n=getNumbers(next),cc=moneyCode(next)||moneyCode(raw);
+       if(n.length>2)continue;
+       for(const x of n){
+         if(/^\s*(?:ODA|ADET|PCS|PIECES|ITEMS?|KISI|KİŞİ|PERSONS?|GUESTS?|NIGHTS?|GECE)\b/i.test(norm(next.slice(x.index+x.raw.length))))continue;
+         if(!/[.,]/.test(x.raw)&&!cc)continue;
+         push(x,next,i+offset,(typ.pay?171:typ.total?151:101)-offset*3,'Toplamın alt satırındaki tutar',cc,raw+' / '+next);
+       }
+     }
+   }
+ });
+ // Fallback when the receipt omits a total label: highest valid currency-paired value.
+ const paired=picks.filter(x=>x.score<100);
+ if(paired.length && !picks.some(x=>x.score>=100)){
+   const max=Math.max(...paired.map(x=>x.amount));
+   for(const x of paired)if(x.amount===max)x.score+=15;
+ }
+ picks.sort((a,b)=>b.score-a.score||b.amount-a.amount||b.index-a.index);
+ const distinct=[];
+ for(const p of picks){if(!distinct.some(x=>x.amount===p.amount&&x.currency===p.currency))distinct.push(p);}
+ const best=picks[0]||null;
+ if(!best)return {amount:null,currency:globalCurrency,confidence:'low',ambiguous:false,reason:'Toplam güvenilir şekilde okunamadı',candidates:[]};
+ const ambiguous=picks.some(p=>p!==best&&p.score>=best.score-3&&Math.abs(p.amount-best.amount)>0.009);
+ return {...best,confidence:ambiguous?'low':best.score>=165?'high':'medium',ambiguous,reason:best.reason,candidates:distinct.slice(0,4).map(x=>({amount:x.amount,currency:x.currency,reason:x.reason,evidence:x.evidence,score:x.score}))};
+}
+const cardRx=/(?:\bCREDIT\s*CARD\b|\bDEBIT\s*CARD\b|\bCARD\b|\bKART(?:I|LA|\s*ILE)?\b|\bKREDI\s*KART\b|\bVISA\b|\bMASTER\s*CARD\b|\bMASTERCARD\b|\bMAESTRO\b|\bAMEX\b|\bPOS\s*(?:SALE|PAYMENT|SATIS)?\b|\bBANCOMAT\b|\bCARTA\b|\bTARJETA\b|\bCARTE\b|\bKARTE\b|\bКАРТА\b|\bبطاقه\b)/i;
+const cashRx=/(?:\bNAKIT\b|\bCASH\b|\bCONTANTI\b|\bBARGELD\b|\bGOTOVINA\b|\bEFECTIVO\b|\bESP[EÈ]CES\b|\bنقدا\b)/i;
+function card4(text){
+ const lines=plain(text).split(/\r?\n/).map(x=>norm(x));
+ const patterns=[
+  /(?:\b(?:SON|LAST)\s*(?:4|DORT|FOUR)\s*(?:HANE|DIGITS?)?\b|\b(?:ENDING|ENDS?|FINAL)\s*(?:IN|WITH)?\b)\s*[:#-]?\s*(\d{4})(?!\d)/i,
+  /(?:[X*•#]{2,}\s*[-\s]*){1,4}(\d{4})(?!\d)/i,
+  /(?:\b(?:KART|CARD|VISA|MASTER\s*CARD|MASTERCARD|MAESTRO)\s*(?:NO|NUMBER|NUM|NR|#|:\s*|\s+))\s*[:#-]?\s*(\d{4})(?!\d)/i
+ ];
+ for(let i=0;i<lines.length;i++){
+   const line=lines[i],near=[lines[i-1]||'',line,lines[i+1]||''].join(' ');
+   if(!cardRx.test(near)&&!/(?:[X*•#]{2,}\s*[-\s]*){1,4}\d{4}/.test(line))continue;
+   for(const rx of patterns){const m=line.match(rx);if(m){
+     // Never read from a full PAN: require clear last-four notation, a masked PAN or a 4-digit card label.
+     if(/\b\d{4}(?:[ -]?\d{4}){2,3}\b/.test(line) && !/[X*•#]{2,}/.test(line))continue;
+     return m[1];
+   }}
+   if(cardRx.test(line))for(const rx of patterns.slice(0,2)){const m=(lines[i+1]||'').match(rx);if(m)return m[1];}
+ }
+ return '';
+}
+function payment(text){
+ const original=originalPayment(text),last4=card4(text);
+ let method=original?.method||'Belirsiz';
+ if(last4)method='Kredi kartı';
+ return {method,last4,confidence:last4?8:original?.confidence||0};
+}
+function parse(text){
+ const r=readTotal(text),p=payment(text);
+ const old=originalParse(text);
+ return {...old,amount:r.amount,currency:r.currency||old.currency,date:old.date,receiptNo:old.receiptNo,payment:p.method,last4:p.last4,confidence:r.confidence,ambiguous:r.ambiguous,reason:r.reason,amountEvidence:r.evidence||'',candidates:r.candidates};
+}
+async function croppedCanvas(blob,bottom=0.62,threshold=false){
+ let bm=null;let tmpUrl=null;
+ try{
+  if(typeof createImageBitmap==='function')bm=await createImageBitmap(blob);
+  if(!bm){tmpUrl=URL.createObjectURL(blob);bm=await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=tmpUrl;});}
+  const w=bm.width||bm.naturalWidth,h=bm.height||bm.naturalHeight;
+  // The bottom of a receipt is where totals and card suffixes usually appear.
+  const y=Math.floor(h*(1-bottom)),hh=h-y,scale=Math.min(2.2,Math.max(.7,2100/Math.max(w,hh)));
+  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(w*scale));canvas.height=Math.max(1,Math.round(hh*scale));
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.filter='grayscale(1) contrast(1.7) brightness(1.08)';ctx.drawImage(bm,0,y,w,hh,0,0,canvas.width,canvas.height);
+  if(threshold){const im=ctx.getImageData(0,0,canvas.width,canvas.height),d=im.data;
+   // Otsu threshold from grayscale histogram, more robust than one fixed threshold.
+   const hist=new Uint32Array(256);let sum=0,n=0;
+   for(let i=0;i<d.length;i+=4){const v=d[i];hist[v]++;sum+=v;n++;}
+   let wB=0,sumB=0,best=-1,t=150;
+   for(let i=0;i<256;i++){wB+=hist[i];if(!wB)continue;const wF=n-wB;if(!wF)break;sumB+=i*hist[i];const b=(sumB/wB-(sum-sumB)/wF);const s=wB*wF*b*b;if(s>best){best=s;t=i;}}
+   for(let i=0;i<d.length;i+=4){const v=d[i]>t?255:0;d[i]=d[i+1]=d[i+2]=v;}
+   ctx.putImageData(im,0,0);
+  }
+  return canvas;
+ }catch(_){return null;}finally{if(tmpUrl)URL.revokeObjectURL(tmpUrl);try{bm?.close?.();}catch(_){}}
+}
+async function recognize(image,mode='auto',context='',progress,purpose='receipt'){
+ const r=await originalRecognize(image,mode,context,progress,purpose);
+ if(purpose!=='receipt')return r;
+ const main=parse(r.text||'');let meta=main,text=r.text||'',profile=r.profile||'otomatik';
+ if((main.amount===null||main.ambiguous||(main.payment==='Kredi kartı'&&!main.last4)) && image instanceof Blob && window.Tesseract?.createWorker){
+  let worker=null;
+  try{
+   progress?.('Toplam ve kart haneleri için fişin alt kısmı yeniden okunuyor…');
+   const codes=/ARAP|SUUDI|SAUDI|KATAR|DUBAI|MISIR|EGYPT|IRA[KQ]/i.test(context)?['eng','ara']:['eng','tur'];
+   worker=await window.Tesseract.createWorker(codes,1);
+   await worker.setParameters({tessedit_pageseg_mode:window.Tesseract.PSM?.SINGLE_BLOCK||'6',preserve_interword_spaces:'1'});
+   const canvas=await croppedCanvas(image,.65,true);
+   if(canvas){const alternate=(await worker.recognize(canvas))?.data?.text||'';
+     if(alternate.trim()){
+       const candidate=parse(alternate);
+       // An explicit payable total in the focused crop beats a weak first-page guess.
+       const prefer=(candidate.amount!=null&&!candidate.ambiguous&&(
+         main.amount===null||main.ambiguous||(candidate.confidence==='high'&&main.confidence!=='high')));
+       if(prefer)meta={...main,...candidate,date:main.date||candidate.date,receiptNo:main.receiptNo||candidate.receiptNo,payment:main.payment!=='Belirsiz'?main.payment:candidate.payment,last4:main.last4||candidate.last4};
+       else if(!meta.last4&&candidate.last4)meta={...meta,last4:candidate.last4,payment:'Kredi kartı'};
+       text += '\n'+alternate;
+       profile+=' + alt bölge';
+     }
+   }
+  }catch(err){console.warn('OCR alt bölge denemesi:',err?.message||err);}finally{try{await worker?.terminate();}catch(_){}}
+ }
+ // Keep metadata coherent with text for all consumers, including fair-file OCR.
+ const combined=parse(text);
+ if(meta.amount!=null&&!meta.ambiguous && (combined.amount==null||combined.ambiguous||meta.confidence==='high'&&combined.confidence!=='high'))
+   meta={...combined,...meta,candidates:[...meta.candidates||[],...combined.candidates||[]].slice(0,4)};
+ else meta=combined;
+ return {...r,text,profile,meta};
+}
+const originalRecognize=previous.recognize.bind(previous);
+Object.assign(previous,{readTotal,payment,parse,recognize});
+if(window.MarsReceiptAccuracy){window.MarsReceiptAccuracy.readTotal=readTotal;window.MarsReceiptAccuracy.paymentInfo=payment;}
+function reviewOptions(host,result,amount,currency){
+ if(!host)return;
+ let container=host.classList?.contains('m9054Review')?host:host.querySelector('.m9054Review');if(!container){container=document.createElement('div');container.className='m9054Review';host.appendChild(container);}
+ container.replaceChildren();
+ const candidates=(result?.candidates||[]).filter(x=>Number.isFinite(x.amount)).slice(0,3);
+ if(!candidates.length){container.textContent='⚠️ Toplam net okunamadı. Fişteki ödenen tutarı elle girip kontrol et.';return;}
+ const heading=document.createElement('strong');heading.textContent='Toplam tutar önerileri – fişle karşılaştır';container.appendChild(heading);
+ const row=document.createElement('div');row.className='m9054Choices';container.appendChild(row);
+ for(const c of candidates){
+  const btn=document.createElement('button');btn.type='button';btn.className='m9054Candidate';
+  btn.textContent=Number(c.amount).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+(c.currency||result.currency||'');
+  btn.title=c.reason||'OCR önerisi';
+  btn.addEventListener('click',()=>{
+   if(amount)amount.value=Number(c.amount).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+   if(currency && c.currency){if(!Array.from(currency.options).some(o=>o.value===c.currency)){const o=document.createElement('option');o.value=o.textContent=c.currency;currency.appendChild(o);}currency.value=c.currency;}
+   row.querySelectorAll('button').forEach(b=>b.classList.toggle('picked',b===btn));
+  });row.appendChild(btn);
+ }
+ const caution=document.createElement('small');caution.textContent='Bunlar OCR önerileridir. Kaydetmeden önce genel toplamı, para birimini ve kartın son 4 hanesini doğrula.';container.appendChild(caution);
+}
+window.MarsOCR9054={readTotal,payment,parse,reviewOptions,card4,amountNumber};
+})();
+
+</script>
 </body>
